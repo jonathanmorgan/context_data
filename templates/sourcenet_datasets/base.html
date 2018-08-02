@@ -1,0 +1,57 @@
+{% load staticfiles %}
+<html>
+
+    <head>
+        <title>{% block title %}Datasets{% endblock %}</title>
+        <link rel="stylesheet" type="text/css" href="{% static "sourcenet/sourcenet.css" %}" />
+        {% if base_include_django_ajax_selects %}
+            <link href="{% static "ajax_select/css/ajax_select.css" %}" type="text/css" media="all" rel="stylesheet">
+            <script type="text/javascript" src="{% static "ajax_select/js/bootstrap.js" %}"></script>
+            <script type="text/javascript" src="{% static "ajax_select/js/ajax_select.js" %}"></script>
+        {% endif %}
+        {%block inside-head %}{% endblock %}
+    </head>
+
+    <body>
+
+        <div name="body_wrapper" id="body_wrapper" class="bodyWrapper">
+
+            {% if base_hide_navigation %}
+
+                <!-- No navigation to see here. -->
+            
+            {% else %}
+        
+                {% if base_simple_navigation %}
+            
+                <header>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp;User: {{ request.user.username }}&nbsp;&nbsp;|&nbsp;&nbsp;<a href="{% url 'sourcenet-logout' %}{% if base_post_login_redirect %}?post_logout_redirect={{ base_post_login_redirect }}{% endif %}">Logout</a></p>
+                </header>
+            
+                {% else %}
+
+                <header>
+                    <h3>Datasets</h3>
+                    <p><strong>User:</strong> {{ request.user.username }}&nbsp;&nbsp;|&nbsp;&nbsp;<a href="/">Home</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="{% url 'sourcenet-logout' %}{% if base_post_login_redirect %}?post_logout_redirect={{ base_post_login_redirect }}{% endif %}">Logout</a></p>
+                    <ul>
+                        <li>
+                            Detecting data set mentions: <a href="{% url 'sourcenet_datasets-dataset_code_mentions' %}">Code an article-dataset pair</a> | <a href="{% url 'sourcenet_datasets-dataset_mention_coding_list' %}">Data set coding List</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'sourcenet_datasets-index' %}">Datasets</a> | <a href="{% url 'sourcenet-index' %}">Sourcenet</a>
+                        </li>
+                    </ul>
+                    <hr />
+                </header>
+            
+                {% endif %}    
+
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        
+        </div>
+
+    </body>
+
+</html>
