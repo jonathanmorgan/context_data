@@ -1,0 +1,12 @@
+django
+nameparser
+bleach
+beautifulsoup4
+django-ajax-selects
+ipython
+psycopg2
+requests
+django-taggit
+regex
+six
+ipykernel
