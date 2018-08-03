@@ -35,7 +35,7 @@
                     <p><strong>User:</strong> {{ request.user.username }}&nbsp;&nbsp;|&nbsp;&nbsp;<a href="/">Home</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="{% url 'sourcenet-logout' %}{% if base_post_login_redirect %}?post_logout_redirect={{ base_post_login_redirect }}{% endif %}">Logout</a></p>
                     <ul>
                         <li>
-                            Detecting data set mentions: <a href="{% url 'sourcenet_datasets-dataset_code_mentions' %}">Code an article-dataset pair</a> | <a href="{% url 'sourcenet_datasets-dataset_mention_coding_list' %}">Data set coding List</a>
+                            Detecting data set mentions: <a href="{% url 'sourcenet_datasets-dataset_mention_coding_list' %}">Data set coding List</a> | <a href="{% url 'sourcenet_datasets-dataset_code_mentions' %}">Code an article-dataset pair</a>
                         </li>
                         <li>
                             <a href="{% url 'sourcenet_datasets-index' %}">Datasets</a> | <a href="{% url 'sourcenet-index' %}">Sourcenet</a>

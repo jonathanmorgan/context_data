@@ -6,8 +6,8 @@
 {% block inside-head %}
 <script src="http://code.jquery.com/jquery-latest.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.selection/1.0.1/jquery.selection.min.js"></script>
-<link rel="stylesheet" type="text/css" href="{% static "sourcenet/css/article-coding/article-coding.css" %}" />
-<script src="{% static "sourcenet/js/article-coding/article-coding.js" %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static "sourcenet_datasets/css/mention-coding/mention-coding.css" %}" />
+<script src="{% static "sourcenet_datasets/js/mention-coding/mention-coding.js" %}"></script>
 {% if existing_data_store_json %}<script>SOURCENET.data_store_json = '{{ existing_data_store_json }}';</script>{% endif %}
 {% endblock %}
 
@@ -77,7 +77,7 @@
                             <td>{{ citation_details.index }}</td>
                             <td>{{ citation_details.citation_instance }}</td>
                             <td>{{ citation_details.citation_status }}</td>
-                            <td><a href="{% url 'sourcenet_datasets-dataset_code_mentions' %}?citation_id={{ citation_details.citation_instance.id }}&source=dataset-mentions-code-list&tags_in_list={{ tags_in_list }}">{% if citation_details.article_data %}Edit Coding: {{ article_details.article_data }}{% else %}Begin Coding{% endif %}</a></td>
+                            <td><a href="{% url 'sourcenet_datasets-dataset_code_mentions' %}?data_set_citation_id={{ citation_details.citation_instance.id }}&source=dataset-mentions-code-list&tags_in_list={{ tags_in_list }}">{% if citation_details.article_data %}Edit Coding: {{ article_details.article_data }}{% else %}Begin Coding{% endif %}</a></td>
                         </tr>
     
                     {% empty %}

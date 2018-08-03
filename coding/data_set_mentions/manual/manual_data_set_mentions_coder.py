@@ -98,23 +98,10 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
     # STATUS_ERROR_PREFIX = "Error: "
     
     # logging
-    LOGGER_NAME = "sourcenet.article_coding.manual_coding.manual_article_coder"
+    LOGGER_NAME = "sourcenet_datasets.coding.data_set_mentions.manual.manual_data_set_mentions_coder"
     
     # config application
-    CONFIG_APPLICATION = "Manual_Coding"
-
-    '''
-    # ==> Moved to Article_Coder class.
-    # person types
-    PERSON_TYPE_SUBJECT = "subject"
-    PERSON_TYPE_SOURCE = "source"
-    PERSON_TYPE_AUTHOR = "author"
-
-    # subject_type to person type dictionary
-    SUBJECT_TYPE_TO_PERSON_TYPE_MAP = {}
-    SUBJECT_TYPE_TO_PERSON_TYPE_MAP[ Article_Subject.SUBJECT_TYPE_MENTIONED ] = PERSON_TYPE_SUBJECT
-    SUBJECT_TYPE_TO_PERSON_TYPE_MAP[ Article_Subject.SUBJECT_TYPE_QUOTED ] = PERSON_TYPE_SOURCE    
-    '''
+    CONFIG_APPLICATION = "Manual_Data_Set_Mentions_Coding"
 
     # kwarg parameter names
     KWARG_DATA_STORE_JSON_STRING = "data_store_json_string_IN"
@@ -123,39 +110,32 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
     KWARG_RESPONSE_DICTIONARY = "response_dictionary_IN"
 
     # person store JSON property names
-    DATA_STORE_PROP_PERSON_ARRAY = "person_array"
-    DATA_STORE_PROP_PERSON_TYPE = ArticleCoder.PARAM_PERSON_TYPE # "person_type"
-    DATA_STORE_PROP_ORIGINAL_PERSON_TYPE = ArticleCoder.PARAM_ORIGINAL_PERSON_TYPE # "original_person_type"
-    DATA_STORE_PROP_ARTICLE_PERSON_ID = ArticleCoder.PARAM_ARTICLE_PERSON_ID # article_person_id
-    DATA_STORE_PROP_PERSON_NAME = ArticleCoder.PARAM_PERSON_NAME # "person_name"
-    DATA_STORE_PROP_FIXED_PERSON_NAME = ArticleCoder.PARAM_FIXED_PERSON_NAME # "fixed_person_name"
-    DATA_STORE_PROP_TITLE = ArticleCoder.PARAM_TITLE             # "title"
-    DATA_STORE_PROP_PERSON_ORGANIZATION = ArticleCoder.PARAM_PERSON_ORGANIZATION # "person_organization"
-    DATA_STORE_PROP_QUOTE_TEXT = ArticleCoder.PARAM_QUOTE_TEXT   # "quote_text"
-    DATA_STORE_PROP_PERSON_ID = ArticleCoder.PARAM_PERSON_ID     # "person_id"
-    DATA_STORE_PROP_PERSON_INDEX = "person_index"
-    DATA_STORE_PROP_NEXT_PERSON_INDEX = "next_person_index"
-    DATA_STORE_PROP_NAME_TO_PERSON_INDEX_MAP = "name_to_person_index_map"
-    DATA_STORE_PROP_ID_TO_PERSON_INDEX_MAP = "id_to_person_index_map"
+    DATA_STORE_PROP_MENTION_ARRAY = "mention_array"
+    DATA_STORE_PROP_MENTION_TEXT = "mention_text"
+    DATA_STORE_PROP_FIXED_MENTION_TEXT = "fixed-mention-text"
+    DATA_STORE_PROP_MENTION_TYPE = "mention_type"
+    DATA_STORE_PROP_ORIGINAL_MENTION_TYPE = "original_mention_type"
+    DATA_STORE_PROP_DATA_STORE_MENTION_ID = "data_store_mention_id"
+    DATA_STORE_PROP_MENTION_INDEX = "mention_index"
+    DATA_STORE_PROP_NEXT_MENTION_INDEX = "next_mention_index"
     DATA_STORE_PROP_STATUS_MESSAGE_ARRAY = "status_message_array"
-    DATA_STORE_PROP_LATEST_PERSON_INDEX = "latest_person_index"
+    DATA_STORE_PROP_LATEST_MENTION_INDEX = "latest_mention_index"
+    
+    # mention types
+    MENTION_TYPE_CITED = "cited"
+    MENTION_TYPE_ANALYZED = "analyzed"
     
     #--------------------------------------------------------------------------#
     # HTML element IDs
     #--------------------------------------------------------------------------#
 
-    DIV_ID_PERSON_CODING = "person-coding"
-    INPUT_ID_MATCHED_PERSON_ID = "matched-person-id"
-    INPUT_ID_ARTICLE_PERSON_ID = "article-person-id"
-    INPUT_ID_ORIGINAL_PERSON_TYPE = "original-person-type"
-    INPUT_ID_DATA_STORE_PERSON_INDEX = "data-store-person-index"
-    INPUT_ID_PERSON_NAME = "person-name"
-    INPUT_ID_FIXED_PERSON_NAME = "fixed-person-name"
-    INPUT_ID_PERSON_TYPE = "person-type"
-    INPUT_ID_PERSON_TITLE = "person-title"
-    INPUT_ID_PERSON_ORGANIZATION = "person-organization"
-    INPUT_ID_SOURCE_QUOTE_TEXT = "source-quote-text"
-    DIV_ID_LOOKUP_PERSON_EXISTING_ID = "lookup-person-existing-id"
+    DIV_ID_MENTION_CODING = "mention-coding"
+    INPUT_ID_MENTION_TEXT = "mention-text"
+    INPUT_ID_MENTION_TYPE = "mention-type"
+    INPUT_ID_FIXED_MENTION_TEXT = "fixed-mention-text"
+    INPUT_ID_DATA_SET_MENTION_ID = "data-set-mention-id"
+    INPUT_ID_ORIGINAL_MENTION_TYPE = "original-mention-type"
+    INPUT_ID_DATA_STORE_MENTION_INDEX = "data-store-mention-index"
     
     # HTML elements - form submission
     INPUT_ID_SUBMIT_ARTICLE_CODING = "input-submit-article-coding";
@@ -191,7 +171,7 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
     def __init__( self ):
 
         # call parent's __init__() - I think...
-        super( ManualArticleCoder, self ).__init__()
+        super( ManualDataSetMentionsCoder, self ).__init__()
         
         # declare variables
         

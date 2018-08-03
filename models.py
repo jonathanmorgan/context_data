@@ -201,7 +201,7 @@ class DataSetCitation( models.Model ):
         
         if ( self.article is not None ):
         
-            string_OUT += " - article: ".format( self.article.id )
+            string_OUT += " - article: {}".format( self.article.id )
         
         else:
         
@@ -211,7 +211,7 @@ class DataSetCitation( models.Model ):
         
         if ( self.data_set is not None ):
         
-            string_OUT += " - data set: ".format( self.data_set.id )
+            string_OUT += " - data set: {}".format( self.data_set.id )
         
         else:
         

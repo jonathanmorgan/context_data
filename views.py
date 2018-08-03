@@ -29,6 +29,9 @@ import json
 #import pickle
 import sys
 
+# BeautifulSoup!
+from bs4 import BeautifulSoup
+
 from django.shortcuts import render
 
 # import django authentication code.
@@ -59,6 +62,7 @@ from sourcenet.models import Article_Data
 # python_utilities imports
 from python_utilities.django_utils.django_view_helper import DjangoViewHelper
 from python_utilities.lists.list_helper import ListHelper
+from python_utilities.strings.string_helper import StringHelper
 
 
 #================================================================================
@@ -70,7 +74,7 @@ from python_utilities.lists.list_helper import ListHelper
 CONFIG_APPLICATION_DATA_SET_MENTIONS_CODE = "sourcenet_datasets-UI-data_set_mentions-code"
 
 # form input names
-INPUT_NAME_CITATION_ID = "citation_id"
+INPUT_NAME_CITATION_ID = "data_set_citation_id"
 INPUT_NAME_SOURCE = "source"
 INPUT_NAME_TAGS_IN_LIST = "tags_in_list"
 
@@ -245,6 +249,10 @@ def dataset_code_mentions( request_IN ):
     response_dictionary[ 'existing_data_store_json' ] = ""
     response_dictionary[ 'page_status_message_list' ] = page_status_message_list
     
+    # create manual coder and place in response so we can access constants-ish.
+    manual_coder = ManualDataSetMentionsCoder()
+    response_dictionary[ 'manual_coder' ] = manual_coder
+    
     # set my default rendering template
     default_template = 'sourcenet_datasets/data_sets/data_set-mentions-code.html'
 
@@ -252,12 +260,44 @@ def dataset_code_mentions( request_IN ):
     # start with it being OK to process coding.
     is_ok_to_process_coding = True
     
+    # ! ---- process input parameters
+    
     # do we have input parameters?
     request_data = get_request_data( request_IN )
     if ( request_data is not None ):
 
         # get information needed from request, add to response dictionary.
 
+        # ==> citation_id (passed by article_code_list).
+        citation_id = int( request_data.get( INPUT_NAME_CITATION_ID, -1 ) )
+        response_dictionary[ INPUT_NAME_CITATION_ID ] = citation_id
+
+        # check to see if ""
+        if ( citation_id == "" ):
+        
+            citation_id = -1
+            
+        #-- END check to see if citation_id = "" --#
+        
+        # see if citation_id is set
+        if ( citation_id > 0 ):
+    
+            # retrieve QuerySet that contains that citation.
+            citation_qs = DataSetCitation.objects.filter( pk = citation_id )
+        
+            # get count of citations
+            citation_count = citation_qs.count()
+        
+            # should only be one.
+            if ( citation_count == 1 ):
+            
+                # get citation instance
+                citation_instance = citation_qs.get()
+        
+            #-- END check if single citation. --#
+            
+        #-- END check to see if citation ID set --#
+    
         # ==> source (passed by article_code_list).
         source = request_data.get( INPUT_NAME_SOURCE, "" )
         response_dictionary[ INPUT_NAME_SOURCE ] = source
@@ -279,29 +319,24 @@ def dataset_code_mentions( request_IN ):
     # make instance of DataSetCitationLookupForm
     data_set_citation_lookup_form = DataSetCitationLookupForm( request_data )
 
-    # store the citation ID if passed in.
-    citation_id = request_data.get( INPUT_NAME_CITATION_ID, -1 )
+    # see if citation_id is set
+    if ( ( citation_id is not None ) and ( citation_id > 0 ) ):
 
-    # check to see if ""
-    if ( citation_id == "" ):
+        # retrieve QuerySet that contains that citation.
+        citation_qs = DataSetCitation.objects.filter( pk = citation_id )
     
-        citation_id = -1
+        # get count of citations
+        citation_count = citation_qs.count()
+    
+        # should only be one.
+        if ( citation_count == 1 ):
         
-    #-- END check to see if citation_id = "" --#
-
-    # retrieve QuerySet that contains that citation.
-    citation_qs = DataSetCitation.objects.filter( pk = citation_id )
-
-    # get count of citations
-    citation_count = citation_qs.count()
-
-    # should only be one.
-    if ( citation_count == 1 ):
+            # get citation instance
+            citation_instance = citation_qs.get()
     
-        # get citation instance
-        citation_instance = citation_qs.get()
-
-    #-- END check if single citation. --#
+        #-- END check if single citation. --#
+        
+    #-- END check to see if citation ID set --#
 
     # get current user.
     current_user = request_IN.user
@@ -320,13 +355,28 @@ def dataset_code_mentions( request_IN ):
         article_instance = citation_instance.article
         article_id = article_instance.id
         
-    #-- END citation_instance --#
+        # look up coding in database for this article by current user.
+        article_data_qs = Article_Data.objects.filter( coder = current_user )
+        article_data_qs = article_data_qs.filter( article = article_instance )
+        
+        # how many matches?
+        article_data_count = article_data_qs.count()
+
+    else:
     
-    article_data_qs = Article_Data.objects.filter( coder = current_user )
-    article_data_qs = article_data_qs.filter( article = article_instance )
+        # no citation instance, so error - but, also, no article_data matches.
+        article_instance = None
+        article_id = -1
+        article_data_count = -1
+
+    #-- END check for citation_instance --#
     
-    # how many matches?
-    article_data_count = article_data_qs.count()
+    # DEBUG
+    if ( DEBUG == True ):
+        page_status_message = "data_set_citation_id {}; Citation instance {}; Article {}; article ID: {};  user {}".format( citation_id, citation_instance, article_instance, article_id, current_user )
+        page_status_message_list.append( page_status_message )
+    #-- END DEBUG --#
+        
     if ( article_data_count == 1 ):
 
         # found one.  Get ID so we can update it.
@@ -378,10 +428,10 @@ def dataset_code_mentions( request_IN ):
 
     #-- END dealing with either 0 or > 1 Article_Data --#
 
-    # form ready?
+    # ! ---- Do we have form inputs?
     if ( is_form_ready == True ):
     
-        # ! ---- process coding submission
+        # ! ------> yes - process coding submission?
         if ( coding_submit_form.is_valid() == True ):
 
             # it is valid - retrieve data_store_json and article_data_id
@@ -474,11 +524,12 @@ def dataset_code_mentions( request_IN ):
 
             #-- END check to see if OK to process coding. --#
             
-        #-- END check to see if coding form is valid. --#
+        #-- END check to see if coding form is valid (do we process a coding submission?). --#
 
-        # ! ---- figure out if and which data store JSON we return
+        # ! ---- figure out if there is coding data to provide to page.
+        #            ...if and which data store JSON we return.
 
-        # check to see if exception.
+        # check to see if error processing data (exception).
         if ( is_exception == True ):
         
             # yes, exception.  In "existing_data_store_json", override to pass
@@ -527,7 +578,7 @@ def dataset_code_mentions( request_IN ):
             # got article_data?
             if ( article_data_instance is not None ):
     
-                # convert to JSON and store in response dictionary
+                # convert to JSON and store in response dictionary - so data is displayed.
                 new_data_store_json = ManualDataSetMentionsCoder.convert_article_data_to_data_store_json( article_data_instance )
                 new_data_store_json_string = json.dumps( new_data_store_json )
                 #output_debug( "\n\nnew_data_store_json_string : \n\n" + new_data_store_json_string, me )
@@ -541,8 +592,7 @@ def dataset_code_mentions( request_IN ):
                 
         #-- END check to see if exception --#
         
-
-        # process DataSetCitation lookup?
+        # ! ---- process DataSetCitation lookup?
         if ( data_set_citation_lookup_form.is_valid() == True ):
 
             # retrieve DataSetCitation specified by the input parameter, then
