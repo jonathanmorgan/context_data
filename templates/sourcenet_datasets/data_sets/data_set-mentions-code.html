@@ -7,6 +7,7 @@
 <script src="https://code.jquery.com/jquery-latest.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.selection/1.0.1/jquery.selection.min.js"></script>
 <link rel="stylesheet" type="text/css" href="{% static "sourcenet_datasets/css/mention-coding/mention-coding.css" %}" />
+<script src="{% static "sourcenet/js/sourcenet.js" %}"></script>
 <script src="{% static "sourcenet_datasets/js/mention-coding/mention-coding.js" %}"></script>
 {% if existing_data_store_json %}<script>SOURCENET.data_store_json = '{{ existing_data_store_json }}';</script>{% endif %}
 {% endblock %}

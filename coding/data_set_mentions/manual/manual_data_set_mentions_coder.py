@@ -54,24 +54,16 @@ from python_utilities.strings.string_helper import StringHelper
 # sourcenet classes
 
 # models
-from sourcenet.models import Alternate_Subject_Match
-from sourcenet.models import Article_Author
 from sourcenet.models import Article_Data
 from sourcenet.models import Article_Data_Notes
-from sourcenet.models import Article_Subject
-from sourcenet.models import Article_Subject_Mention
-from sourcenet.models import Article_Subject_Quotation
 from sourcenet.models import Article_Text
-from sourcenet.models import Person
-
-# person details
-from sourcenet.shared.person_details import PersonDetails
 
 # parent abstract class.
 from sourcenet.article_coding.article_coder import ArticleCoder
 
-# class to help with parsing and processing OpenCalaisApiResponse.
-from sourcenet.article_coding.open_calais_v1.open_calais_api_response import OpenCalaisApiResponse
+# sourcenet_datasets classes
+from sourcenet_datasets.models import DataSetMention
+
 
 #================================================================================
 # Package constants-ish
@@ -109,18 +101,20 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
     KWARG_REQUEST = "request_IN"
     KWARG_RESPONSE_DICTIONARY = "response_dictionary_IN"
 
-    # person store JSON property names
+    # data store JSON property names (corresponds to "DataStore" javascript class in mention-coding.js)
     DATA_STORE_PROP_MENTION_ARRAY = "mention_array"
-    DATA_STORE_PROP_MENTION_TEXT = "mention_text"
-    DATA_STORE_PROP_FIXED_MENTION_TEXT = "fixed-mention-text"
-    DATA_STORE_PROP_MENTION_TYPE = "mention_type"
-    DATA_STORE_PROP_ORIGINAL_MENTION_TYPE = "original_mention_type"
-    DATA_STORE_PROP_DATA_STORE_MENTION_ID = "data_store_mention_id"
-    DATA_STORE_PROP_MENTION_INDEX = "mention_index"
     DATA_STORE_PROP_NEXT_MENTION_INDEX = "next_mention_index"
     DATA_STORE_PROP_STATUS_MESSAGE_ARRAY = "status_message_array"
     DATA_STORE_PROP_LATEST_MENTION_INDEX = "latest_mention_index"
     
+    # mention JSON property names (corresponds to "Mention" javascript class in mention-coding.js)
+    DATA_STORE_PROP_MENTION_TEXT = "mention_text"
+    DATA_STORE_PROP_FIXED_MENTION_TEXT = "fixed_mention_text"
+    DATA_STORE_PROP_MENTION_TYPE = "mention_type"
+    DATA_STORE_PROP_MENTION_INDEX = "mention_index"
+    DATA_STORE_PROP_ORIGINAL_MENTION_TYPE = "original_mention_type"
+    DATA_STORE_PROP_DATA_SET_MENTION_ID = "data_set_mention_id"    
+        
     # mention types
     MENTION_TYPE_CITED = "cited"
     MENTION_TYPE_ANALYZED = "analyzed"
@@ -197,15 +191,16 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
 
 
     @classmethod
-    def convert_article_data_to_data_store_json( cls, article_data_IN, return_string_IN = False ):
+    def convert_article_data_to_data_store_json( cls, article_data_IN, citation_instance_IN, return_string_IN = False ):
 
         '''
-        Accepts Article_Data instance we want to convert to data store JSON.
-           Retrieves authors and sources and uses them to create data store
-           JSON representation of Article_Data.
+        Accepts Article_Data instance we want to convert to data store JSON and
+            the citation that will tell us which data set we want mentions of.
+            Retrieves DataSetMentions for data set referenced by citation 
+            instance and makes JSON out of them.
 
-        Returns Article_Data in JSON format, either in dictionaries and lists
-           (object format), or string JSON.
+        Returns Article_Data citation mention information in JSON format, either
+            in dictionaries and lists (object format), or string JSON.
         '''
 
         # return reference
@@ -215,34 +210,14 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
         me = "convert_article_data_to_data_store_json"
         local_debug_flag = False
         debug_message = ""
+        mention_array_list = []
+        text_to_mention_index_dict = {}
         data_store_dict = None
-        article_author_qs = None
-        article_subject_qs = None
-        person_list = None
-        current_index = -1
-        next_index = -1
-        name_to_person_index_dict = None
-        id_to_person_index_dict = None
-
-        # declare variables - processing Article_Data's child records.
-        current_author = None
-        current_subject = None
-        current_article_person_id = -1
-        current_person = None
-        current_person_type = ""
-        current_person_name = ""
-        current_person_verbatim_name = ""
-        current_person_lookup_name = ""
-        current_organization_string = ""
-        current_title = ""
-        current_quote_text = ""
-        current_person_id = ""
-        current_person_dict = {}
-
-        # declare variables - processing Article_Subject
-        current_subject_type = ""
-        current_quote_qs = None
-        quote_count = -1
+        data_set_mention_qs = None
+        current_data_set_mention = None
+        current_mention_text = ""
+        current_mention_dict = None
+        mention_index = -1
         
         # declare variables - logging
         my_resource_string = ""
@@ -257,218 +232,67 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
             
         #-- END check to see if local debug on. --#
 
+        # init data_store_dict.
+        data_store_dict = {}
+
         # first, make sure we have something in article_data_IN.
         if ( ( article_data_IN is not None ) and ( article_data_IN != "" ) ):
-
-            # initialize person list variables.
-            person_list = []
-            current_index = -1
-            next_index = 0
-            name_to_person_index_dict = {}
-            id_to_person_index_dict = {}
-
-            # we do.  First get list of Article_Authors.
-            article_author_qs = article_data_IN.article_author_set.all()
-
-            # ! author loop
-            for current_author in article_author_qs:
+        
+            # we have Article_Data - do we have a citation instance?
+            if ( citation_instance_IN is not None ):
             
-                debug_message = "author: " + str( current_author )
-                LoggingHelper.output_debug( debug_message, me, indent_with_IN = "====>", logger_name_IN = cls.LOGGER_NAME, resource_string_IN = my_resource_string )
+                # we have Article_Data - First get list of DataSetMentions.
+                data_set_mention_qs = article_data_IN.datasetmention_set.all()
 
-                # init - increment index values
-                current_index += 1
-                next_index += 1
+                # filter mentions down to just those for citation.
+                data_set_mention_qs = data_set_mention_qs.filter( data_set_citation = citation_instance_IN )
                 
-                # init - create person dictionary
-                current_person_dict = {}
+                # loop over mentions.
+                for current_data_set_mention in data_set_mention_qs:
                 
-                # retrieve Article_Author ID:
-                current_article_person_id = int( current_author.id )
-
-                # get current person
-                current_person = current_author.person
-
-                debug_message = "author person: " + str( current_person )
-                LoggingHelper.output_debug( debug_message, me, indent_with_IN = "========>", logger_name_IN = cls.LOGGER_NAME, resource_string_IN = my_resource_string )
-
-                # set values for person from instance.
-
-                # ==> person_type
-                current_person_type = cls.PERSON_TYPE_AUTHOR
-                
-                # ==> person_name and fixed_person_name
-                current_person_name = JSONHelper.escape_json_value( current_author.name )
-                current_person_verbatim_name = JSONHelper.escape_json_value( current_author.verbatim_name )
-                current_person_lookup_name = JSONHelper.escape_json_value( current_author.lookup_name )
-                
-                # ==> organization_string
-                current_organization_string = JSONHelper.escape_json_value( current_author.organization_string )
-                
-                # ==> title
-                current_title = JSONHelper.escape_json_value( current_author.title )
-                
-                # ==> quote_text
-                current_quote_text = ""
-                
-                # ==> person_id
-                current_person_id = int( current_person.id )
-
-                # store person type.
-                current_person_dict[ cls.DATA_STORE_PROP_PERSON_TYPE ] = current_person_type
-                current_person_dict[ cls.DATA_STORE_PROP_ORIGINAL_PERSON_TYPE ] = current_person_type
-                
-                # add article_person_id
-                current_person_dict[ cls.DATA_STORE_PROP_ARTICLE_PERSON_ID ] = current_article_person_id
-                
-                # is lookup name different from verbatim name?
-                if ( ( ( current_person_verbatim_name is not None ) and ( current_person_verbatim_name != "" ) )
-                    and ( ( current_person_lookup_name is not None ) and ( current_person_lookup_name != "" ) )
-                    and ( current_person_verbatim_name != current_person_lookup_name ) ):
+                    # increment index
+                    mention_index += 1
                     
-                    # there was a correction of the verbatim name text.
-                    #     "person_name" is the "verbatim_name",
-                    #     "fixed_person_name" is the "lookup_name".
-                    current_person_dict[ cls.DATA_STORE_PROP_PERSON_NAME ] = current_person_verbatim_name
-                    current_person_dict[ cls.DATA_STORE_PROP_FIXED_PERSON_NAME ] = current_person_lookup_name
-
-                else:
+                    # get values
+                    current_mention_text = JSONHelper.escape_json_value( current_data_set_mention.value )
                 
-                    # no fix to name.  Just pass it as we used to. 
-                    current_person_dict[ cls.DATA_STORE_PROP_PERSON_NAME ] = current_person_name
-                    current_person_dict[ cls.DATA_STORE_PROP_FIXED_PERSON_NAME ] = ""
+                    # init mention dict
+                    current_mention_dict = {}
+                    current_mention_dict[ cls.DATA_STORE_PROP_MENTION_TEXT ] = current_mention_text
+                    current_mention_dict[ cls.DATA_STORE_PROP_FIXED_MENTION_TEXT ] = ""
+                    current_mention_dict[ cls.DATA_STORE_PROP_MENTION_TYPE ] = ""
+                    current_mention_dict[ cls.DATA_STORE_PROP_MENTION_INDEX ] = mention_index
+                    current_mention_dict[ cls.DATA_STORE_PROP_ORIGINAL_MENTION_TYPE ] = ""
+                    current_mention_dict[ cls.DATA_STORE_PROP_DATA_SET_MENTION_ID ] = int( current_data_set_mention.id )
                     
-                #-- END check to see if fixed name. --#    
+                    # add to mention array list.
+                    mention_array_list.append( current_mention_dict )
+                    text_to_mention_index_dict[ current_mention_text ] = mention_index
+                    
+                #-- END loop over data set mentions --#
                 
-                current_person_dict[ cls.DATA_STORE_PROP_PERSON_ORGANIZATION ] = current_organization_string
-                current_person_dict[ cls.DATA_STORE_PROP_TITLE ] = current_title
-                current_person_dict[ cls.DATA_STORE_PROP_QUOTE_TEXT ] = current_quote_text
-                current_person_dict[ cls.DATA_STORE_PROP_PERSON_ID ] = current_person_id
-                current_person_dict[ cls.DATA_STORE_PROP_PERSON_INDEX ] = current_index                
+                # put it all together.
+                data_store_dict[ cls.DATA_STORE_PROP_MENTION_ARRAY ] = mention_array_list
+                data_store_dict[ cls.DATA_STORE_PROP_NEXT_MENTION_INDEX ] = mention_index + 1
+                data_store_dict[ cls.DATA_STORE_PROP_STATUS_MESSAGE_ARRAY ] = []
+                data_store_dict[ cls.DATA_STORE_PROP_LATEST_MENTION_INDEX ] = mention_index
+                data_store_dict[ 'article_data_id' ] = article_data_IN.id
+                data_store_dict[ 'citation_id' ] = citation_instance_IN.id
 
-                # add to lists and dicts.
-                person_list.append( current_person_dict )
-                name_to_person_index_dict[ current_person_name ] = current_index
-                id_to_person_index_dict[ current_person_id ] = current_index
+            else:
+            
+                # Error.  Need a citation.
+                status_message = "ERROR - No citation passed in, can't filter mentions to particular data set."
+                status_message_list.append( status_message )
+            
+            # END check to see if citation present. --#
 
-            #-- END loop over authors --#
-
-            # then get list of Article_Subjects.
-            article_subject_qs = article_data_IN.article_subject_set.all()
-
-            # ! subject loop
-            for current_subject in article_subject_qs:
-
-                debug_message = "subject: " + str( current_subject )
-                LoggingHelper.output_debug( debug_message, me, indent_with_IN = "====>", logger_name_IN = cls.LOGGER_NAME, resource_string_IN = my_resource_string )
-
-                # ==> article_person_id - retrieve Article_Subject ID:
-                current_article_person_id = current_subject.id
-
-                # ==> get current person
-                current_person = current_subject.person
-                
-                # got a person?  Could be court records, etc.
-                if ( current_person is not None ):
-
-                    debug_message = "subject " + str( current_article_person_id ) + " person: " + str( current_person )
-                    LoggingHelper.output_debug( debug_message, me, indent_with_IN = "========>", logger_name_IN = cls.LOGGER_NAME, resource_string_IN = my_resource_string )
-
-                    # init - increment index values
-                    current_index += 1
-                    next_index += 1
-    
-                    # init - create fresh person dictionary
-                    current_person_dict = {}
-                    
-                    # set values for person from instance.
-    
-                    # ==> person_type
-                    current_subject_type = current_subject.subject_type
-                    current_person_type = cls.SUBJECT_TYPE_TO_PERSON_TYPE_MAP[ current_subject_type ]
-                    
-                    # ==> person_name and fixed_person_name
-                    current_person_name = JSONHelper.escape_json_value( current_subject.name )
-                    current_person_verbatim_name = JSONHelper.escape_json_value( current_subject.verbatim_name )
-                    current_person_lookup_name = JSONHelper.escape_json_value( current_subject.lookup_name )
-                    
-                    # ==> organization_string
-                    current_organization_string = JSONHelper.escape_json_value( current_subject.organization_string )
-                    
-                    # ==> title
-                    current_title = JSONHelper.escape_json_value( current_subject.title )
-    
-                    # ==> person ID                
-                    current_person_id = current_person.id
-    
-                    # ==> quote text
-                    current_quote_text = ""
-    
-                    # retrieve all quotations
-                    current_quote_qs = current_subject.article_subject_quotation_set.all()
-    
-                    # got any?
-                    quote_count = current_quote_qs.count()
-                    if ( quote_count > 0 ):
-    
-                        # yes - get quote string from 1st.
-                        first_quote = current_quote_qs[ 0 ]
-                        #current_quote_text = JSONHelper.escape_json_value( first_quote.value, compact_white_space_IN = True )
-                        current_quote_text = JSONHelper.escape_json_value( first_quote.value )
-    
-                    #-- END check to see if quotes present. --#
-    
-                    # person type
-                    current_person_dict[ cls.DATA_STORE_PROP_PERSON_TYPE ] = current_person_type
-                    current_person_dict[ cls.DATA_STORE_PROP_ORIGINAL_PERSON_TYPE ] = current_person_type
-
-                    # add article_person_id
-                    current_person_dict[ cls.DATA_STORE_PROP_ARTICLE_PERSON_ID ] = current_article_person_id
-                        
-                    # is lookup name different from verbatim name?
-                    if ( ( ( current_person_verbatim_name is not None ) and ( current_person_verbatim_name != "" ) )
-                        and ( ( current_person_lookup_name is not None ) and ( current_person_lookup_name != "" ) )
-                        and ( current_person_verbatim_name != current_person_lookup_name ) ):
-                        
-                        # there was a correction of the verbatim name text.
-                        #     "person_name" is the "verbatim_name",
-                        #     "fixed_person_name" is the "lookup_name".
-                        current_person_dict[ cls.DATA_STORE_PROP_PERSON_NAME ] = current_person_verbatim_name
-                        current_person_dict[ cls.DATA_STORE_PROP_FIXED_PERSON_NAME ] = current_person_lookup_name
-    
-                    else:
-                    
-                        # no fix to name.  Just pass it as we used to. 
-                        current_person_dict[ cls.DATA_STORE_PROP_PERSON_NAME ] = current_person_name
-                        current_person_dict[ cls.DATA_STORE_PROP_FIXED_PERSON_NAME ] = ""
-                        
-                    #-- END check to see if fixed name. --#    
-                                    
-                    current_person_dict[ cls.DATA_STORE_PROP_PERSON_ORGANIZATION ] = current_organization_string
-                    current_person_dict[ cls.DATA_STORE_PROP_TITLE ] = current_title
-                    current_person_dict[ cls.DATA_STORE_PROP_PERSON_ID ] = current_person_id
-                    current_person_dict[ cls.DATA_STORE_PROP_QUOTE_TEXT ] = current_quote_text
-                    current_person_dict[ cls.DATA_STORE_PROP_PERSON_INDEX ] = current_index                
-    
-                    # add to lists and dicts.
-                    person_list.append( current_person_dict )
-                    name_to_person_index_dict[ current_person_name ] = current_index
-                    id_to_person_index_dict[ current_person_id ] = current_index
-
-                #-- END check to see if person present. --#
-
-            #-- END loop over subjects --#
-
-            # put it all together.
-            data_store_dict = {}
-            data_store_dict[ cls.DATA_STORE_PROP_PERSON_ARRAY ] = person_list
-            data_store_dict[ cls.DATA_STORE_PROP_NEXT_PERSON_INDEX ] = next_index
-            data_store_dict[ cls.DATA_STORE_PROP_NAME_TO_PERSON_INDEX_MAP ] = name_to_person_index_dict
-            data_store_dict[ cls.DATA_STORE_PROP_ID_TO_PERSON_INDEX_MAP ] = id_to_person_index_dict
-            data_store_dict[ cls.DATA_STORE_PROP_STATUS_MESSAGE_ARRAY ] = []
-            data_store_dict[ cls.DATA_STORE_PROP_LATEST_PERSON_INDEX ] = current_index
-            data_store_dict[ 'article_data_id' ] = article_data_IN.id
-
+        else:
+        
+            # Error.  Need a citation.
+            status_message = "ERROR - No article data passed in, what do you want me to do here?"
+            status_message_list.append( status_message )
+        
         #-- END check to see if we have Article_Data instance. --#
 
         # return string or objects?
@@ -599,12 +423,15 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
         
         # get exception_helper
         my_exception_helper = self.get_exception_helper()
-        
+
+        '''        
         # get parameters for calling process_data_store_json()
         data_store_json_string = kwargs[ self.KWARG_DATA_STORE_JSON_STRING ]
         article_data_id = kwargs[ self.KWARG_ARTICLE_DATA_ID ]
         request = kwargs[ self.KWARG_REQUEST ]
         response_dictionary = kwargs[ KWARG_RESPONSE_DICTIONARY ]
+        
+        # try to retrieve citation from mentions.
         
         # call process_data_store_json()
         article_data = self.process_data_store_json( article_IN,
@@ -635,6 +462,7 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
             status_OUT = self.STATUS_ERROR_PREFIX + "In " + me + "(): ERROR - call to process_data_store_json() did not return Article_Data."
 
         #-- END check to see if we got anything back. --#
+        '''
         
         return status_OUT
 
@@ -642,7 +470,7 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
     
 
     def process_data_store_json( self,
-                                 article_IN,
+                                 citation_instance_IN,
                                  coder_user_IN,
                                  data_store_json_string_IN,
                                  article_data_id_IN = None,
@@ -652,7 +480,7 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
     
         '''
         Accepts:
-        - article_IN - article instance for which we have coding data.
+        - citation_instance_IN - citation for which we have mention coding data.
         - coder_user_IN - user instance for coder.
         - data_store_json_string_IN - JSON string that contains coding for article we are processing.
         - article_data_id_IN - optional - ID of article data for this coder's coding on this article, if we are updating, not creating new.
@@ -661,29 +489,22 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
 
         Purpose:
            This method accepts the above parameters.  It checks to make sure
-           that there is an article, a coder user, and JSON.  It tries to find
-           an existing Article_Data record for the current article and coder.
+           that there is acitation, a coder user, and JSON.  It tries to find
+           an existing Article_Data record for the current citation and coder.
            If it finds 1, it updates it.  If it finds 0, it creates one.  If it
-           finds more than 1, it returns an error message.  For each person,
-           this method checks the type of person (author or subject/source).
-           Regardless, it checks to see if there is a person ID.  If yes, it
-           creates an Article_Person child appropriate to the person type
-           (Article_Subject for subjects and sources, Article_Author for
-           authors) and populates the instance from information in the person's
-           JSON.  If source, looks up quotation in article and stores quote
-           along with detailed information on where the quotation is located.
-           Returns the Article_Data for the article with all coding saved and
-           referenced from within.
+           finds more than 1, it returns an error message.  For each mention,
+           this method looks for a record of that mention.  If present, does
+           nothing.  If not, adds it.
 
         Preconditions:
-           Must already have looked up and loaded the article and coder user
-           into instance variables.  Should have person store JSON to process,
+           Must already have looked up and loaded the citation and coder user
+           into instance variables.  Should have data store JSON to process,
            as well.
 
         Postconditions:
            Returns Article_Data instance.  If successful, it will be a
-           fully-populated Article_Data instance that contains references to
-           the people stored in the JSON passed in.  If error, will be an empty
+           fully-populated Article_Data instance that includes references to
+           the mentions stored in JSON passed in.  If error, will be an empty
            Article_Data instance with no primary key, and error messages will
            be stored in the 'status_messages' field, with multiple messages
            separated by semi-colons.
@@ -693,7 +514,7 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
         # return reference
         article_data_OUT = None
     
-        # declare variables
+        # ! declare variables
         me = "process_data_store_json"
         
         # declare variables - coding submission.
@@ -703,6 +524,10 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
         coder_user = None
         data_store_json_string = ""
         data_store_json = None
+
+        # declare variables - references to article and data set from citation.
+        related_article = None
+        related_data_set = None
 
         # declare variables - look for existing Article_Data
         lookup_result = None
@@ -714,75 +539,47 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
         # declare variables - make new Article_Data if needed.
         current_article = None
         current_person = None
+        
+        # declare variables - remove obsolete - lists of IDs of DataSetMention
+        #     childre that we started with (original), and then that were
+        #     looked up in processing (processed), so we can remove any we
+        #     started with that weren't referenced in the current run.
+        data_set_mention_qs = None
+        original_data_set_mention_id_list = []
+        processed_data_set_mention_id_list = []
+        deleted_data_set_mention_list = []
 
         # declare variables - store off JSON in a note.
         json_article_data_note = None
         
-        # declare variables - loop over person list in JSON.
-        person_list = []
-        person_count = -1
-        person_counter = -1
+        # declare variables - loop over mention list in JSON.
+        mention_list = []
+        mention_count = -1
+        mention_counter = -1
+                
+        # declare variables - get current mention's information.
+        mention_text = ""
+        mention_capture_method = ""
         
-        # declare variables - OLD - structures to help check for removal.
-        article_author_set_qs = None
-        person_id_to_article_author_map = {}
-        person_name_to_article_author_map = {}
-        current_author_id = -1
-        article_subject_set_qs = None
-        person_name_to_article_subject_map = {}
-        current_subject_id = -1
-        current_person_instance = None
-        current_person_id = -1
-        
-        # declare variables - remove obsolete - NEW - lists of IDs of Article_Person children
-        #     (Authors and Subjects) that we started with, and then that were
-        #     looked up in processing, so we can remove any we started with that
-        #     weren't referenced in the current run.
-        original_article_author_id_list = []
-        processed_article_author_id_list = []
-        deleted_article_author_list = []
-        original_article_subject_id_list = []
-        processed_article_subject_id_list = []
-        deleted_article_subject_list = []
-        
-        # declare variables - remove obsolete - OLD - maps of ids and names to
-        #     their corresponding Article_Person instances.  Didn't work.
-        #.    Keeping them around since they might be interesting.
-        person_id_to_article_author_map = {}
-        person_name_to_article_author_map = {}
-        person_id_to_article_subject_map = {}
-        person_name_to_article_subject_map = {}
-
-        # declare variables - get current person's information.
-        person_type = ""
-        original_person_type = ""
-        person_name = ""
-        fixed_person_name = ""
-        title = ""
-        person_organization = ""
-        quote_text = ""
-        person_id = -1
-        article_person_id = -1
-        subject_person_type_list = []
-        
-        # declare variables - for processing person.
-        current_article_subject = None
-        current_article_subject_mention = None
-        current_article_subject_quotation = None
-        current_article_author = None
-        current_article_person = None
-        current_person_status = ""
-        current_full_name = ""
+        # declare variables - for processing mention.
+        processing_qs = None
+        processing_count = -1
+        current_data_set_mention = None
+        current_data_set_mention_id = -1
         
         # start with is_ok_to_process = True and an empty status_message_list
         is_ok_to_process = True
         status_message = ""
         status_message_list = []
     
-        # got an article?
-        if ( article_IN is not None ):
+        # got a citation?
+        if ( citation_instance_IN is not None ):
         
-            # yes, we have an article.  Got a coder user?
+            # yes, we have a citation.  Get nested article and data set.
+            related_article = citation_instance_IN.article
+            related_data_set = citation_instance_IN.data_set
+            
+            # Got a coder user?
             coder_user = coder_user_IN
             if ( coder_user is None ):
 
@@ -802,13 +599,14 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
                 data_store_json_string = data_store_json_string_IN
                 if ( ( data_store_json_string is not None ) and ( data_store_json_string != "" ) ):
                 
-                    self.output_debug( data_store_json_string, me, "====> Person Store JSON\n\n" )
+                    self.output_debug( data_store_json_string, me, "====> Data Store JSON\n\n" )
+                    #status_message_list.append( data_store_json_string )
 
                     # got a JSON string, convert to Python objects.
                     data_store_json = json.loads( data_store_json_string )
 
-                    # !lookup Article_Data
-                    lookup_result = self.lookup_article_data( article_IN, coder_user, article_data_id_IN )
+                    # ! lookup Article_Data
+                    lookup_result = self.lookup_article_data( related_article, coder_user, article_data_id_IN )
                     
                     # what have we got?
                     if ( lookup_result is not None ):
@@ -895,14 +693,16 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
                         # got article data?
                         if ( current_article_data is not None ):
                         
-                            # make list of Article_Subject and Article_Author
-                            #     instances associated before processing.
-                            article_author_set_qs = current_article_data.article_author_set.all()
-                            original_article_author_id_list = list( article_author_set_qs.values_list( "id", flat = True ).order_by( "id" ) )
-                            article_subject_set_qs = current_article_data.article_subject_set.all()
-                            original_article_subject_id_list = list( article_subject_set_qs.values_list( "id", flat = True ).order_by( "id" ) )
+                            # make list of DataSetMentions for this citation
+                            # before parsing.
+                            data_set_mention_qs = current_article_data.datasetmention_set.all()
+                            data_set_mention_qs = data_set_mention_qs.filter( data_set_citation = citation_instance_IN )
+                            original_data_set_mention_id_list = list( data_set_mention_qs.values_list( "id", flat = True ).order_by( "id" ) )
+                            
+                            # initialize other processing tracking lists.
+                            processed_data_set_mention_id_list = []                            
                         
-                            debug_message = "original_article_author_id_list = " + str( original_article_author_id_list ) + "; original_article_subject_id_list = " + str( original_article_subject_id_list )
+                            debug_message = "original_data_set_mention_id_list = {}".format( original_data_set_mention_id_list )
                             self.output_debug( debug_message, me, "@@@@@@@@>" )                                        
         
                             # yes - store JSON in an Article_Data_Note.
@@ -911,332 +711,113 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
                             json_article_data_note.content_type = Article_Data_Notes.CONTENT_TYPE_JSON
                             json_article_data_note.content = data_store_json_string
                             json_article_data_note.source = self.coder_type + " - user " + str( coder_user )
-                            json_article_data_note.content_description = "Person Store JSON (likely from manual coding via article-code view)."
+                            json_article_data_note.content_description = "Data Store JSON (likely from manual coding of mentions via data_set-mentions-code view)."
                             json_article_data_note.save()
     
                             # store current_article_data in article_data_OUT.
                             article_data_OUT = current_article_data
     
-                            # get list of people.
-                            person_list = data_store_json[ self.DATA_STORE_PROP_PERSON_ARRAY ]
+                            # get list of mentions.
+                            mention_list = data_store_json[ self.DATA_STORE_PROP_MENTION_ARRAY ]
                             
-                            # get count of persons
-                            person_count = len( person_list )
+                            # get count of mentions
+                            mention_count = len( mention_list )
                             
-                            # got one or more people?
-                            if ( person_count > 0 ):
+                            # got one or more mentions?
+                            if ( mention_count > 0 ):
                                                     
-                                # !loop over persons
-                                person_counter = 0
-                                for current_person in person_list:
+                                # !loop over mentions
+                                mention_counter = 0
+                                for current_mention in mention_list:
     
                                     # increment counter
-                                    person_counter += 1
+                                    mention_counter += 1
                                 
                                     # check to see if it is an empty entry (happens
-                                    #    when a person is removed during coding).
-                                    if ( current_person is not None ):
+                                    #    when a mention is removed during coding).
+                                    if ( current_mention is not None ):
                                 
-                                        # set up person details
-                                        person_details = PersonDetails()
+                                        # get mention text.
+                                        mention_text = current_mention.get( self.DATA_STORE_PROP_MENTION_TEXT, None )
                                         
-                                        # store all fields from current_person.
-                                        person_details.update( current_person )
+                                        # set capture method.
+                                        mention_capture_method = "manual_coding"
                                         
-                                        # set capture method to "manual_coding".
-                                        person_details[ self.PARAM_CAPTURE_METHOD ] = self.coder_type
+                                        # look up mention with this text.
+                                        processing_qs = data_set_mention_qs.filter( value = mention_text )
                                         
-                                        # ! ==> retrieve person information.
-                                        person_type = person_details.get( self.DATA_STORE_PROP_PERSON_TYPE )
-                                        original_person_type = person_details.get( self.DATA_STORE_PROP_ORIGINAL_PERSON_TYPE )
-
-                                        # person_name
-                                        person_name = person_details.get( self.DATA_STORE_PROP_PERSON_NAME )
-                                        if ( compact_white_space_IN == True ):
-
-                                            person_name = StringHelper.replace_white_space( string_IN = person_name,
-                                                                                            replace_with_IN = " ",
-                                                                                            use_regex_IN = True )
-                                                                                       
-                                        #-- END check to see if we are compacting white space --#
-
-                                        fixed_person_name = person_details.get( self.DATA_STORE_PROP_FIXED_PERSON_NAME )
-                                        title = person_details.get( self.DATA_STORE_PROP_TITLE )
-
-                                        # person_organization
-                                        person_organization = person_details.get( self.DATA_STORE_PROP_PERSON_ORGANIZATION )
-                                        if ( compact_white_space_IN == True ):
-
-                                            person_organization = StringHelper.replace_white_space( string_IN = person_organization,
-                                                                                                    replace_with_IN = " ",
-                                                                                                    use_regex_IN = True )
-
-                                        #-- END check to see if we are compacting white space --#
-
-                                        # quote text - replace more than one
-                                        #     contiguous internal white space
-                                        #     character with a single space.
-                                        quote_text = person_details.get( self.DATA_STORE_PROP_QUOTE_TEXT )
-                                        if ( compact_white_space_IN == True ):
+                                        # how many?
+                                        processing_count = processing_qs.count()
+                                        if ( processing_count == 1 ):
                                         
-                                            quote_text = StringHelper.replace_white_space( string_IN = quote_text,
-                                                                                           replace_with_IN = " ",
-                                                                                           use_regex_IN = True )
-                                        
-                                        #-- END check to see if we are compacting white space --#
-                                        
-                                        person_id = person_details.get( self.DATA_STORE_PROP_PERSON_ID )
-                                        article_person_id = person_details.get( self.DATA_STORE_PROP_ARTICLE_PERSON_ID )
-        
-                                        #debug_message = "article_person_id = " + str( article_person_id )
-                                        #self.output_debug( debug_message, me, "@@@@@@@@>" )                                        
-        
-                                        # also add in the article's newspaper.
-                                        person_details[ self.PARAM_NEWSPAPER_INSTANCE ] = article_IN.newspaper
-                                        
-                                        # check person type to see what type we are processing.
-                                        if ( ( person_type == self.PERSON_TYPE_SUBJECT )
-                                             or ( person_type == self.PERSON_TYPE_SOURCE ) ):
-        
-                                            # check to see if original person
-                                            #     type was author.
-                                            if ( ( original_person_type is not None )
-                                                and ( original_person_type != "" )
-                                                and ( original_person_type == self.PERSON_TYPE_AUTHOR ) ):
+                                            # got a match.  Add id to processed list and move on.
+                                            current_data_set_mention = processing_qs.get()
+                                            current_data_set_mention_id = current_data_set_mention.id
                                             
-                                                # we have switched from subject
-                                                #     to author.  if article
-                                                #     person ID, remove it.
-                                                if ( ( article_person_id is not None ) 
-                                                    and ( article_person_id != "" )
-                                                    and ( int( article_person_id ) > 0 ) ):
-                                                    
-                                                    # there is an Article_Subject instance
-                                                    #     associated with this person.
-                                                    #     Remove the ID from PersonDetails
-                                                    #     so we don't try to use the
-                                                    #     Article_Author ID in the
-                                                    #     Article_Subject table.
-                                                    person_details[ self.DATA_STORE_PROP_ARTICLE_PERSON_ID ] = None
-                                                    
-                                                #-- END check to see if we need to clear article person id --#
+                                            # check to see if ID already in list
+                                            if ( current_data_set_mention_id not in processed_data_set_mention_id_list ):
                                             
-                                            #-- END check to see if we've changed person type --#
-
-                                            # translate the person_type value into 
-                                            #    subject_type, store in details.
-                                            if ( person_type == self.PERSON_TYPE_SUBJECT ):
-                                            
-                                                # subject, so not quoted - "mentioned".
-                                                person_details[ self.PARAM_SUBJECT_TYPE ] = Article_Subject.SUBJECT_TYPE_MENTIONED
+                                                # not there - add it.
+                                                processed_data_set_mention_id_list.append( current_data_set_mention_id )
                                                 
-                                            elif ( person_type == self.PERSON_TYPE_SOURCE ):
+                                            #-- END check to see if mention ID already in list. --#
                                             
-                                                # source - so "quoted".
-                                                person_details[ self.PARAM_SUBJECT_TYPE ] = Article_Subject.SUBJECT_TYPE_QUOTED
+                                        elif ( processing_count == 0 ):
+                                        
+                                            # new match - create new record.
+                                            current_data_set_mention = DataSetMention()
+                                            current_data_set_mention.value = mention_text
+                                            current_data_set_mention.capture_method = mention_capture_method
+                                            current_data_set_mention.data_set_citation = citation_instance_IN
+                                            current_data_set_mention.article_data = article_data_OUT
+                                            current_data_set_mention.save()
+                                            
+                                            # check to see if ID alread in the
+                                            #     processed list (better not be
+                                            #     there).
+                                            current_data_set_mention_id = current_data_set_mention.id
+                                            if ( current_data_set_mention_id not in processed_data_set_mention_id_list ):
+                                            
+                                                # not there (and better not be
+                                                #     there) - add it.
+                                                processed_data_set_mention_id_list.append( current_data_set_mention_id )
                                                 
-                                            #-- END check of person_type, for translation to subject_type. --#
+                                            #-- END check to see if mention ID already in list. --#
                                         
-                                            # ! Article_Subject
-                                            # - includes creating mention for name.
-                                            current_article_subject = self.process_subject_name( current_article_data,
-                                                                                                 person_name,
-                                                                                                 person_details_IN = person_details )
-        
-                                            # check to see if source
-                                            current_article_subject.subject_type = Article_Subject.SUBJECT_TYPE_MENTIONED
-                                            if ( person_type == self.PERSON_TYPE_SOURCE ):
-        
-                                                # set subject_type.
-                                                current_article_subject.subject_type = Article_Subject.SUBJECT_TYPE_QUOTED
-        
-                                                # save source updates
-                                                current_article_subject.save()
-        
-                                                # see if there is quote text.
-                                                if ( ( quote_text is not None ) and ( quote_text != "" ) ):
-        
-                                                    # add quote to Article_Subject.
-                                                    current_article_subject_quotation = self.process_quotation( article_IN,
-                                                                                                                current_article_subject,
-                                                                                                                quote_text,
-                                                                                                                do_try_compact_IN = True )
-        
-                                                    # error?
-                                                    if ( current_article_subject_quotation is None ):
-        
-                                                        # yup - output debug message.
-                                                        debug_message = "Article_Coder.process_quotation() returned None - problem processing quote \"" + quote_text + "\".  See log for more details."
-                                                        status_message_list.append( debug_message )
-                                                        debug_message = "ERROR: " + debug_message
-                                                        self.output_debug( debug_message, me )
-        
-                                                    #-- END check to see if error processing quotation --#
-        
-                                                #-- END check to see if quote text --#
-        
-                                            #-- END check to see if source --#
-        
-                                            # save source updates - should not need save.
-                                            current_article_subject.save()
-                                            
-                                            # ! update subject data for removal processing.
-                                            current_person_instance = current_article_subject.person
-                                            current_person_id = current_person_instance.id
-                                            person_id_to_article_subject_map[ current_person_id ] = current_article_subject
-                                            person_name_to_article_subject_map[ person_name ] = current_article_subject
-        
-                                            # Add ID of this Article_Subject to the processed list.
-                                            processed_article_subject_id_list.append( current_article_subject.id )
-                                                    
-                                            # store Article_Subject instance in Article_Person reference.
-                                            current_article_person = current_article_subject
-                                            
-                                        elif ( person_type == self.PERSON_TYPE_AUTHOR ):
+                                        else:
                                         
-                                            # check to see if original person
-                                            #     type was subject.
-                                            subject_person_type_list = [ self.PERSON_TYPE_SOURCE, self.PERSON_TYPE_SUBJECT ]
-                                            if ( ( original_person_type is not None )
-                                                and ( original_person_type != "" )
-                                                and ( original_person_type in subject_person_type_list ) ):
+                                            # error.  Multiple matches.  output
+                                            #     message and move on.
+                                            debug_message = "ERROR: mention_list item {}, mention_text {}, has multiple matches.  Moving on.".format( mention_counter, mention_text )
+                                            status_message_list.append( debug_message )
+                                            self.output_debug( debug_message, me )
                                             
-                                                # we have switched from subject
-                                                #     to author.  if article
-                                                #     person ID, remove it.
-                                                if ( ( article_person_id is not None ) 
-                                                    and ( article_person_id != "" )
-                                                    and ( int( article_person_id ) > 0 ) ):
-                                                    
-                                                    # there is an Article_Subject instance
-                                                    #     associated with this person.
-                                                    #     Remove the ID from PersonDetails
-                                                    #     so we don't try to use the
-                                                    #     Article_Subject ID in the
-                                                    #     Article_Author table.
-                                                    person_details[ self.DATA_STORE_PROP_ARTICLE_PERSON_ID ] = None
-                                                    
-                                                #-- END check to see if we need to clear article person id --#
-                                            
-                                            #-- END check to see if we've changed person type --#
-
-                                            # ! Article_Author
-                                            current_article_author = self.process_author_name( current_article_data,
-                                                                                               person_name,
-                                                                                               person_details_IN = person_details )
-                            
-                                            # ! update author data for removal processing.
-                                            current_person_instance = current_article_author.person
-                                            current_person_id = current_person_instance.id
-                                            person_id_to_article_author_map[ current_person_id ] = current_article_author
-                                            person_name_to_article_author_map[ person_name ] = current_article_author
-    
-                                            # Add ID of this Article_Author to the processed list.
-                                            processed_article_author_id_list.append( current_article_author.id )
-                                                    
-                                            # store Article_Author instance in Article_Person reference.
-                                            current_article_person = current_article_author
-        
-                                        #-- END check to see person type --#
-        
-                                        # set name
-                                        current_article_person.name = person_name
-        
-                                        # check status
-                                        current_person_status = current_article_person.match_status
-        
-                                        # got a status?
-                                        if ( ( current_person_status is not None ) and ( current_person_status != "" ) ):
-        
-                                            # success?
-                                            if ( current_person_status != self.STATUS_SUCCESS ):
-        
-                                                # error.  Add message to status list.
-                                                status_message_list.append( current_person_status )
-        
-                                            #-- END check of person status --#
-        
-                                        #-- END check if current person has status --#
-                                        
+                                        #-- END check to see how many matches. --#
+                                                                                
                                     else:
                                     
-                                        # empty person list entry.  Make a note and
-                                        #    move on.
-                                        debug_message = "person_list item " + str( person_counter ) + " is None.  Moving on."
+                                        # empty mention list entry.  Make a note
+                                        #     and move on.
+                                        debug_message = "mention_list item " + str( mention_counter ) + " is None.  Moving on."
                                         # status_message_list.append( debug_message )
                                         debug_message = "WARNING: " + debug_message
                                         self.output_debug( debug_message, me )
                                     
-                                    #-- END check to see if empty entry in person list --#
+                                    #-- END check to see if empty entry in mention list --#
     
                                 #-- END loop over persons --#
                                 
                                 # ! ==> removal check
-                                # Remove any Article_Author or Article_Subject
-                                #     whose ID is in the original list but not
-                                #     in the processed list.
-                                
-                                # ! removals - Article_Author
-                                deleted_article_author_list = self.winnow_orphaned_records(
-                                        original_article_author_id_list,
-                                        processed_article_author_id_list,
-                                        Article_Author
+                                # Remove any DataSetMention whose ID is in the
+                                #     original list but not in the processed
+                                #     list.
+                                deleted_data_set_mention_list = self.winnow_orphaned_records(
+                                        original_data_set_mention_id_list,
+                                        processed_data_set_mention_id_list,
+                                        DataSetMention
                                     )
-                                
-                                # ! removals - Article_Subject
-                                deleted_article_subject_list = self.winnow_orphaned_records(
-                                        original_article_subject_id_list,
-                                        processed_article_subject_id_list,
-                                        Article_Subject
-                                    )
-
-                                '''                                    
-                                # authors
-                                for current_article_author in current_article_data.article_author_set.all():
-                                
-                                    # get person ID and full name.
-                                    current_person_id = current_article_author.person.id
-                                    current_full_name = current_article_author.name
-                                    
-                                    # look for either ID or name to be in one of our
-                                    #    dictionaries.
-                                    if ( ( current_full_name not in person_name_to_article_author_map )
-                                        and ( current_person_id not in person_id_to_article_author_map ) ):
-                                        
-                                        debug_message = "in " + me + "(): removal check - deleting article_author: " + str( current_article_author )
-                                        self.output_debug( debug_message, me, "========> " )
-                                        
-                                        # not in either map.  Delete.
-                                        current_article_author.delete()
-                                        
-                                    #-- END look for author in processed dictionaries --#
-                                
-                                #-- END loop over related Article_Author instances --#
-                                
-                                # subjects
-                                for current_article_subject in current_article_data.article_subject_set.all():
-                                
-                                    # get person ID and full name.
-                                    current_person_id = current_article_subject.person.id
-                                    current_full_name = current_article_subject.name
-                                    
-                                    # look for either ID or name to be in one of our
-                                    #    dictionaries.
-                                    if ( ( current_full_name not in person_name_to_article_subject_map )
-                                        and ( current_person_id not in person_id_to_article_subject_map ) ):
-                                        
-                                        debug_message = "in " + me + "(): removal check - deleting Article_Subject: " + str( current_article_subject )
-                                        self.output_debug( debug_message, me, "========> " )
-                                        
-                                        # not in either map.  Delete.
-                                        current_article_subject.delete()
-                                        
-                                    #-- END look for subject in processed dictionaries --#
-                                
-                                #-- END loop over related Article_Subject instances --#
-                                '''
-                                
-                            #-- END check to see if there are any persons. --#
+                                                                
+                            #-- END check to see if there are any mentions. --#
                             
                         else:
                         
@@ -1286,14 +867,6 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
             article_data_OUT = None
         
         #-- END check to see if article ID passed in.
-
-        # got an Article_Data instance (no likely means error)?
-        if ( article_data_OUT is None ):
-
-            # OK... create one.
-            article_data_OUT = Article_Data()
-
-        #-- END check to see if Article_Data instance. --#
 
         # got status messages?
         if ( ( status_message_list is not None ) and ( len( status_message_list ) > 0 ) ):

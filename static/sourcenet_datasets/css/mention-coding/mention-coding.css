@@ -213,6 +213,16 @@ table.mentionListTable
     background-color: #fcac02;
 }
 
+.foundInTextRed
+{
+    background-color: #f08181;
+}
+
+.foundInTextMatchedWordsRed
+{
+    background-color: #e83434;
+}
+
 .hidden
 {
     /* default to not shown - show when "source" type selected. */

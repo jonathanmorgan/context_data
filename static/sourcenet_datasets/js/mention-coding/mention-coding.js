@@ -2,6 +2,8 @@
 // javascript for article coding.
 //============================================================================//
 
+// ! requires sourcenet.js
+
 //----------------------------------------------------------------------------//
 // !====> namespace!
 //----------------------------------------------------------------------------//
@@ -63,13 +65,21 @@ SOURCENET.INPUT_ID_DATA_STORE_JSON = "id_data_store_json";
 // Find in Article Text - Dynamic CSS class names
 SOURCENET.CSS_CLASS_FOUND_IN_TEXT = "foundInText";
 SOURCENET.CSS_CLASS_FOUND_IN_TEXT_MATCHED_WORDS = "foundInTextMatchedWords";
+SOURCENET.CSS_CLASS_FOUND_IN_TEXT_RED = "foundInTextRed";
+SOURCENET.CSS_CLASS_FOUND_IN_TEXT_MATCHED_WORDS_RED = "foundInTextMatchedWordsRed";
+
+// defaults:
+SOURCENET.CSS_CLASS_DEFAULT_P_MATCH = SOURCENET.CSS_CLASS_FOUND_IN_TEXT;
+SOURCENET.CSS_CLASS_DEFAULT_WORD_MATCH = SOURCENET.CSS_CLASS_FOUND_IN_TEXT_MATCHED_WORDS;
 
 // Find in Article Text - HTML element IDs
 SOURCENET.INPUT_ID_TEXT_TO_FIND_IN_ARTICLE = "text-to-find-in-article";
 
 // Find in Article Text - HTML for matched word highlighting
-SOURCENET.HTML_SPAN_MATCHED_WORDS = "<span class=\"" + SOURCENET.CSS_CLASS_FOUND_IN_TEXT_MATCHED_WORDS + "\">";
+SOURCENET.HTML_SPAN_TO_CLASS = "<span class=\""
+SOURCENET.HTML_SPAN_AFTER_CLASS = "\">";
 SOURCENET.HTML_SPAN_CLOSE = "</span>";
+SOURCENET.HTML_SPAN_MATCHED_WORDS = SOURCENET.HTML_SPAN_TO_CLASS + SOURCENET.CSS_CLASS_DEFAULT_WORD_MATCH + SOURCENET.HTML_SPAN_AFTER_CLASS;
 
 // Compress white space in values?
 SOURCENET.compress_white_space = false;
@@ -78,29 +88,6 @@ SOURCENET.compress_white_space = false;
 //----------------------------------------------------------------------------//
 // !====> function definitions
 //----------------------------------------------------------------------------//
-
-
-SOURCENET.decode_html = function( html_IN )
-{
-    // from: http://stackoverflow.com/questions/7394748/whats-the-right-way-to-decode-a-string-that-has-special-html-entities-in-it?lq=1
-
-    // return reference
-    var text_OUT = "";
-
-    // declare variables
-    var txt = null;
-
-    // create textarea
-    txt = document.createElement("textarea");
-
-    // store HTML inside
-    txt.innerHTML = html_IN;
-
-    // get value back out.
-    text_OUT = txt.value;
-    
-    return text_OUT;
-}
 
 
 /**
@@ -245,7 +232,7 @@ SOURCENET.clear_find_in_text = function()
  * Postconditions: Updates classes on article <p> tags so none are assigned
  *     "foundInText".
  */
-SOURCENET.clear_find_in_text_matches = function(  )
+SOURCENET.clear_find_in_text_matches = function()
 {
     
     // declare variables
@@ -746,7 +733,7 @@ SOURCENET.find_in_p_tag = function( p_tag_jquery_IN, find_text_list_IN )
             text_around_match_list = paragraph_text.split( current_find_text );
             
             // add a span around the matched words.
-            matched_words_html = SOURCENET.HTML_SPAN_MATCHED_WORDS + current_find_text + SOURCENET.HTML_SPAN_CLOSE;
+            matched_words_html = SOURCENET.HTML_SPAN_TO_CLASS + SOURCENET.CSS_CLASS_DEFAULT_WORD_MATCH + SOURCENET.HTML_SPAN_AFTER_CLASS + current_find_text + SOURCENET.HTML_SPAN_CLOSE;
     
             // put together again, but with <span>-ed matched words
             //     rather than just the words themselves.
@@ -1068,176 +1055,6 @@ SOURCENET.get_mention_text_value = function()
 
 
 /**
- * Accepts id of select whose selected value we want to retrieve.  After making
- *    sure we have an OK ID, looks for select with that ID.  If one found, finds
- *    selectedIndex, retrieves option at that index, and retrieves value from
- *    that option.  Returns the selected value.
- *
- * Preconditions: None.
- *
- * Postconditions: None.
- *
- * @param {string} select_id_IN - HTML id attribute value for select whose selected value we want to retrieve.
- * @returns {string} - selected value of select matching ID passed in, else null if error.
- */
-SOURCENET.get_selected_value_for_id = function( select_id_IN )
-{
-    
-    // return reference
-    var value_OUT = null;
-    
-    // declare variables
-    var me = "SOURCENET.get_selected_value_for_id";
-    
-    // just call get_value_for_id()
-    value_OUT = SOURCENET.get_value_for_id( select_id_IN, null );
-    
-    return value_OUT;
-    
-} //-- END function SOURCENET.get_selected_value_for_id() --//
-
-
-/**
- * Accepts id of input whose value we want to retrieve.  After making sure we
- *     have an OK ID, looks for input with that ID.  If one found, gets value
- *     from that input and returns it.
- *
- * Preconditions: None.
- *
- * Postconditions: None.
- *
- * @param {string} id_IN - HTML id attribute value for input whose value we want to retrieve.
- * @returns {string} - value of input matching ID passed in, else null if error.
- */
-SOURCENET.get_value_for_id = function( id_IN, default_IN )
-{
-    
-    // return reference
-    var value_OUT = null;
-    
-    // declare variables
-    var me = "SOURCENET.get_input_value_for_id";
-    var is_id_OK = false;
-    var element = null;
-    var value = "";
-    
-    // is ID passed in OK?
-    is_id_OK = SOURCENET.is_string_OK( id_IN );
-    if ( is_id_OK == true )
-    {
-            
-        // get select element.
-        element = $( '#' + id_IN );
-        
-        // get selected value
-        value = element.val();
-        
-        // return it.
-        value_OUT = value;
-        
-    }
-    else
-    {
-    
-        // select ID is empty.  Return default.
-        value_OUT = default_IN;
-        
-    }
-    
-    SOURCENET.log_message( "In " + me + "(): element ID = " + id_IN + "; value = " + value_OUT );
-    
-    return value_OUT;
-    
-} //-- END function SOURCENET.get_value_for_id() --//
-
-
-/**
- * Accepts integer variable.  Checks to see if it is OK.  If undefined, null, or
- *    less than min value, returns false.  Otherwise, returns true.
- *
- * @param {int} integer_IN - Integer value to check for OK-ness.
- * @param {int} min_value_IN - minimum OK value.
- * @returns {boolean} - if string is undefined, null, or "", returns false.  Otherwise returns true.
- */
-SOURCENET.is_integer_OK = function( integer_IN, min_value_IN )
-{
-    
-    // return reference
-    var is_OK_OUT = true;
-    
-    // declare variables.
-    var min_value = 0;
-    
-    // if nothing passed in for min_value, default to 0
-    if ( ( min_value_IN !== undefined ) && ( min_value_IN != null ) )
-    {
-        
-        // default passed in.  Use it.
-        min_value = min_value_IN;
-        
-    }
-    else
-    {
-        
-        // nothing passed in.  Default to 0.
-        min_value = 0;
-        
-    }
-    
-    if ( ( integer_IN !== undefined ) && ( integer_IN != null ) && ( integer_IN >= min_value ) )
-    {
-        
-        // OK!
-        is_OK_OUT = true;
-        
-    }
-    else
-    {
-        
-        // not OK.
-        is_OK_OUT = false;
-        
-    }
-    
-    return is_OK_OUT;
-    
-} //-- END function SOURCENET.is_integer_OK() --//
-
-
-/**
- * Accepts string variable.  Checks to see if it is OK.  If undefined, null, or
- *    "", returns false.  Otherwise, returns true.
- *
- * @param {string} string_IN - String value to check for OK-ness.
- * @returns {boolean} - if string is undefined, null, or "", returns false.  Otherwise returns true.
- */
-SOURCENET.is_string_OK = function( string_IN )
-{
-    
-    // return reference
-    var is_OK_OUT = true;
-    
-    if ( ( string_IN !== undefined ) && ( string_IN != null ) && ( string_IN != "" ) )
-    {
-        
-        // OK!
-        is_OK_OUT = true;
-        
-    }
-    else
-    {
-        
-        // not OK.
-        is_OK_OUT = false;
-        
-    }
-    
-    return is_OK_OUT;
-    
-} //-- END function SOURCENET.is_string_OK() --//
-
-
-/**
  * Accepts index to mention in DataStore.mention_array.  Retrieves mention 
  *     instance at the index passed in.  If not null, calls
  *     Mention.populate_form() to put its values into the form.
@@ -1324,8 +1141,8 @@ SOURCENET.load_value_fixed_mention_text = function( mention_IN )
     var value_to_load = "";
 
     // get property info for fixed-mention-text.
-    fixed_mention_text_property_name = SOURCENET.PersonProperty_names.FIXED_MENTION_TEXT;
-    fixed_mention_text_property_info = SOURCENET.Person_property_name_to_info_map[ fixed_mention_text_property_name ];
+    fixed_mention_text_property_name = SOURCENET.ObjectProperty_names.FIXED_MENTION_TEXT;
+    fixed_mention_text_property_info = SOURCENET.Mention_property_name_to_info_map[ fixed_mention_text_property_name ];
     
     // and get input_id of input for this field.
     input_id = fixed_mention_text_property_info.input_id;
@@ -1372,8 +1189,8 @@ SOURCENET.load_value_mention_type = function( mention_IN )
     var temp_value = "";
 
     // get property info for mention_type.
-    property_name = SOURCENET.PersonProperty_names.MENTION_TYPE;
-    property_info = SOURCENET.Person_property_name_to_info_map[ property_name ];
+    property_name = SOURCENET.ObjectProperty_names.MENTION_TYPE;
+    property_info = SOURCENET.Mention_property_name_to_info_map[ property_name ];
     
     // and get input_id of input for this field.
     input_id = property_info.input_id;
@@ -1410,31 +1227,6 @@ SOURCENET.load_value_mention_type = function( mention_IN )
     }
     
 } //-- END function SOURCENET.load_value_mention_type() --//
-
-
-/**
- * Accepts a message.  If console.log() is available, calls that.  If not, does
- *    nothing.
- */
-SOURCENET.log_message = function( message_IN )
-{
-    
-    // declare variables
-    var output_flag = true;
-    
-    // set to SOURCENET.debug_flag
-    output_flag = SOURCENET.debug_flag;
-    
-    // check to see if we have console.log() present.
-    if ( ( window.console ) && ( window.console.log ) && ( output_flag == true ) )
-    {
-
-        // console is available
-        console.log( message_IN );
-        
-    } //-- END check to see if console.log() present. --//
-    
-} //-- END function SOURCENET.log_message() --//
 
 
 /**
@@ -1910,93 +1702,6 @@ SOURCENET.render_coding_form_inputs = function( form_IN )
     return do_submit_OUT;
    
 } //-- END function to render form to submit coding.
-
-
-/**
- * Accepts id of select whose selected value we want to set, and value we want
- *    to be selected.  After making sure we have an OK ID, looks for select with
- *    that ID.  If one found, sets to the value passed in.  Returns the selected
- *    value.
- *
- * Preconditions: None.
- *
- * Postconditions: None.
- *
- * @param {string} select_id_IN - HTML id attribute value for select whose selected value we want to retrieve.
- * @returns {string} - selected value of select matching ID passed in, else null if error.
- */
-SOURCENET.set_selected_value_for_id = function( select_id_IN, select_value_IN )
-{
-    
-    // return reference
-    var value_OUT = null;
-    
-    // declare variables
-    var me = "SOURCENET.set_selected_value_for_id";
-    var is_select_id_OK = false;
-    var select_element = null;
-    
-    // just call SOURCENET.set_value_for_id()
-    value_OUT = SOURCENET.set_value_for_id( select_id_IN, select_value_IN );
-    
-    SOURCENET.log_message( "In " + me + "(): <select> ID = " + select_id_IN + "; value = " + value_OUT );
-    
-    return value_OUT;
-    
-} //-- END function SOURCENET.set_selected_value_for_id() --//
-
-
-/**
- * Accepts id of element whose value we want to set, and value we want
- *    to be set.  After making sure we have an OK ID, looks for element with
- *    that ID.  If one found, sets to the value passed in.  Returns the value.
- *
- * Preconditions: None.
- *
- * Postconditions: None.
- *
- * @param {string} element_id_IN - HTML id attribute value for element whose value we want to set.
- * @returns {string} - value of element matching ID passed in, else null if error.
- */
-SOURCENET.set_value_for_id = function( element_id_IN, value_IN )
-{
-    
-    // return reference
-    var value_OUT = null;
-    
-    // declare variables
-    var me = "SOURCENET.set_value_for_id";
-    var is_element_id_OK = false;
-    var element = null;
-    
-    // select ID passed in OK?
-    is_element_id_OK = SOURCENET.is_string_OK( element_id_IN );
-    if ( is_element_id_OK == true )
-    {
-        
-        // get element.
-        element = $( '#' + element_id_IN );
-        
-        // set value
-        element.val( value_IN );
-        
-        // get value.
-        value_OUT = SOURCENET.get_value_for_id( element_id_IN );
-    
-    }
-    else
-    {
-    
-        // element ID is empty.  Return null.
-        value_OUT = null;
-        
-    }
-    
-    SOURCENET.log_message( "In " + me + "(): HTML element ID = " + element_id_IN + "; value = " + value_OUT );
-    
-    return value_OUT;
-    
-} //-- END function SOURCENET.set_value_for_id() --//
 
 
 //----------------------------------------------------------------------------//
@@ -2718,7 +2423,7 @@ SOURCENET.DataStore.prototype.remove_mention_at_index = function( index_IN )
         {
             
             // get value.
-            current_value = name_to_index_map[ current_key ];
+            current_value = text_to_index_map[ current_key ];
             
             // convert to integer (just in case).
             current_value = parseInt( current_value );
@@ -2738,7 +2443,7 @@ SOURCENET.DataStore.prototype.remove_mention_at_index = function( index_IN )
                 }
                 
                 // remove key-value pair from object.
-                delete name_to_index_map[ current_key ];
+                delete text_to_index_map[ current_key ];
                 
             } //-- END check to see if vkey references the index we've been asked to remove --//
             
@@ -3460,8 +3165,8 @@ SOURCENET.Mention.prototype.populate_form = function()
     // retrieve values from instance and use to populate the form.
     
     // get property info.
-    property_list = SOURCENET.Person_property_name_list;
-    property_info = SOURCENET.Person_property_name_to_info_map;
+    property_list = SOURCENET.Mention_property_name_list;
+    property_info = SOURCENET.Mention_property_name_to_info_map;
         
     // loop over properties
     property_count = property_list.length;

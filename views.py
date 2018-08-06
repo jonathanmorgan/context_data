@@ -61,6 +61,7 @@ from sourcenet.models import Article_Data
 
 # python_utilities imports
 from python_utilities.django_utils.django_view_helper import DjangoViewHelper
+from python_utilities.exceptions.exception_helper import ExceptionHelper
 from python_utilities.lists.list_helper import ListHelper
 from python_utilities.strings.string_helper import StringHelper
 
@@ -136,23 +137,6 @@ def output_debug( message_IN, method_IN = "", indent_with_IN = "", logger_name_I
                                    debug_flag_IN = DEBUG )
 
 #-- END method output_debug() --#
-
-
-def process_data_store_json( citation_instance_IN,
-                             current_user_IN,
-                             data_store_json_string_IN,
-                             article_data_id_IN,
-                             request_IN,
-                             response_dictionary_IN ):
-    
-    # return reference
-    article_data_OUT = None
-    
-    # declare variables
-    
-    return article_data_OUT
-
-#-- END function process_data_store_json --#
 
 
 #===============================================================================
@@ -454,7 +438,7 @@ def dataset_code_mentions( request_IN ):
                 try:
 
                     # process data store JSON.
-                    article_data_instance = ManualDataSetMentionsCoder.process_data_store_json( citation_instance,
+                    article_data_instance = manual_coder.process_data_store_json( citation_instance,
                                                                                                 current_user,
                                                                                                 data_store_json_string,
                                                                                                 article_data_id,
@@ -579,7 +563,7 @@ def dataset_code_mentions( request_IN ):
             if ( article_data_instance is not None ):
     
                 # convert to JSON and store in response dictionary - so data is displayed.
-                new_data_store_json = ManualDataSetMentionsCoder.convert_article_data_to_data_store_json( article_data_instance )
+                new_data_store_json = ManualDataSetMentionsCoder.convert_article_data_to_data_store_json( article_data_instance, citation_instance )
                 new_data_store_json_string = json.dumps( new_data_store_json )
                 #output_debug( "\n\nnew_data_store_json_string : \n\n" + new_data_store_json_string, me )
                 response_dictionary[ 'existing_data_store_json' ] = new_data_store_json_string
