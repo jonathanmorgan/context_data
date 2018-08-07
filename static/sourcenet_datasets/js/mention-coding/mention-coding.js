@@ -848,6 +848,73 @@ SOURCENET.find_words_in_article_text = function( find_text_IN )
 
 
 /**
+ * Accepts a jquery DOM element instance.  Retrieves HTML.  Inside the HTML,
+ *     searches for each word (space-delimited) in the text in
+ *     "find_text_IN".  For each match, wraps the matched text in a span so it
+ *     stands out.
+ *
+ * Preconditions: None.
+ *
+ * Postconditions: Adds <span> tags to make found matches stand out.
+ */
+SOURCENET.find_words_in_html = function( element_to_search_IN, find_text_IN )
+{
+    
+    // declare variables
+    var me = "SOURCENET.find_words_in_article_text";
+    var is_text_OK = false;
+    var article_paragraphs = null;
+    //var contains_selector = "";
+    //var match_paragraphs = null;
+    
+    // clear any previous matches
+    SOURCENET.clear_find_in_text_matches();
+
+    SOURCENET.log_message( "In " + me + "(): find_text_IN = " + find_text_IN );
+    
+    // is text passed in OK?
+    is_text_OK = SOURCENET.is_string_OK( find_text_IN );
+    if ( is_text_OK == true )
+    {
+        
+        // get article <p> tags.
+        article_paragraphs = SOURCENET.get_article_paragraphs();
+        
+        SOURCENET.log_message( "In " + me + "(): paragraph count = " + article_paragraphs.length );
+        
+        article_paragraphs.each( function()
+            {
+                // declare variables.
+                var jquery_p_element = null;
+                var find_text_list = [];
+               
+                // get paragraph text
+                jquery_p_element = $( this );
+                
+                // set up list of items to look for (split find_text_IN on " ").
+                find_text_list = find_text_IN.split( " " );
+                
+                // call function to find in <p> tag
+                SOURCENET.find_in_p_tag( jquery_p_element, find_text_list );
+            } //-- END anonymous function called on each paragraph --//
+        );
+    
+        // look for those that contain the text passed in.
+        //contains_selector = "p:contains( '" + find_text_IN + "' )";
+        //SOURCENET.log_message( "In " + me + "(): contains_selector = " + contains_selector );
+        //match_paragraphs = article_paragraphs.find( contains_selector );
+        
+        //SOURCENET.log_message( "In " + me + "(): match count = " + match_paragraphs.length );
+    
+        // For matches, add class "foundInText".
+        //match_paragraphs.toggleClass( SOURCENET.CSS_CLASS_FOUND_IN_TEXT, true )
+
+    } //-- END to make sure we have text. --//
+
+} //-- END function SOURCENET.find_words_in_html() --//
+
+
+/**
  * Hides link to fix mention text, reveals form input and buttons to fix mention
  *     text, places current mention text in "fixed-mention-text" <input>.
  *
