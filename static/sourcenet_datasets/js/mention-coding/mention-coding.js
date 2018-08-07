@@ -46,6 +46,7 @@ SOURCENET.ARTICLE_CODING_SUBMIT_BUTTON_VALUE_PROCESS = "Process Article Coding";
 SOURCENET.ARTICLE_CODING_SUBMIT_BUTTON_VALUE_RESET = "Process Article Coding!";
 
 // ! HTML element IDs
+SOURCENET.DIV_ID_ARTICLE_BODY = "article_view";
 SOURCENET.DIV_ID_MENTION_CODING = "mention-coding";
 SOURCENET.INPUT_ID_MENTION_TEXT = "mention-text";
 SOURCENET.INPUT_ID_MENTION_TYPE = "mention-type";
@@ -83,6 +84,9 @@ SOURCENET.HTML_SPAN_MATCHED_WORDS = SOURCENET.HTML_SPAN_TO_CLASS + SOURCENET.CSS
 
 // Compress white space in values?
 SOURCENET.compress_white_space = false;
+
+// list of strings to highlight in the text for the current data set.
+SOURCENET.data_set_string_list = [];
 
 
 //----------------------------------------------------------------------------//
@@ -214,66 +218,17 @@ SOURCENET.clear_find_in_text = function()
     var article_paragraphs = null;
     
     // clear find in text matches
-    SOURCENET.clear_find_in_text_matches();
+    SOURCENET.text_finder.clear_find_in_text_matches(
+        SOURCENET.DIV_ID_ARTICLE_BODY,
+        [ SOURCENET.FindInText.CSS_CLASS_FOUND_IN_TEXT_RED ],
+        [ SOURCENET.FindInText.CSS_CLASS_FOUND_IN_TEXT_MATCHED_WORDS_RED ]
+    );
                 
     // get text-to-find-in-article text field, set value to "".
     input_element = $( '#' + SOURCENET.INPUT_ID_TEXT_TO_FIND_IN_ARTICLE );
     input_element.val( "" );
 
 } //-- END function SOURCENET.clear_find_in_text() --//
-
-
-/**
- * Retrieves all the <p> tags that make up the article text, removes class
- *     "foundInText" from any where that class is present.
- *
- * Preconditions: None.
- *
- * Postconditions: Updates classes on article <p> tags so none are assigned
- *     "foundInText".
- */
-SOURCENET.clear_find_in_text_matches = function()
-{
-    
-    // declare variables
-    var me = "SOURCENET.clear_find_in_text_matches";
-    var article_paragraphs = null;
-    
-    // get article <p> tags.
-    article_paragraphs = SOURCENET.get_article_paragraphs();
-    
-    // remove class "foundInText" from all.
-    article_paragraphs.toggleClass( SOURCENET.CSS_CLASS_FOUND_IN_TEXT, false );
-    
-    // set all paragraphs' html() back to their text()...
-    article_paragraphs.each( function()
-        {
-            // declare variables.
-            var jquery_p_element = null;
-            var paragraph_html = "";
-            var paragraph_text = "";
-            var span_index = -1;
-            
-            // get paragraph text
-            jquery_p_element = $( this );
-            paragraph_html = jquery_p_element.html();
-            paragraph_text = jquery_p_element.text();
-            
-            // is there a matched words span present in html?
-            span_index = paragraph_html.indexOf( SOURCENET.HTML_SPAN_MATCHED_WORDS );
-            
-            // if found, update store plain text .
-            if ( span_index > -1 )
-            {
-                
-                // store plain text in <p>.html() to remove any HTML.
-                jquery_p_element.html( paragraph_text );
-                                    
-            } //-- END check to see if <span> found --//
-        } //-- END anonymous function called on each paragraph --//
-    );
-
-} //-- END function SOURCENET.clear_find_in_text_matches() --//
 
 
 /**
@@ -368,6 +323,44 @@ SOURCENET.clear_mention_type = function( status_message_IN )
     
 } //-- END function SOURCENET.clear_mention_type() --//
 
+
+/**
+ * Configures SOURCENET.text_finder to highlight in red.
+ *
+ * Preconditions: None.
+ *
+ * Postconditions: Updates SOURCENET.text_finder to highlight in red.
+ */
+SOURCENET.config_text_finder_red_highlight = function()
+{
+    
+    // declare variables
+    var me = "SOURCENET.config_text_finder_red_highlight";
+    
+    // configure SOURCENET.text_finder
+    SOURCENET.text_finder.config_red_highlight()
+    
+}
+  
+
+/**
+ * Configures SOURCENET.text_finder to highlight in red.
+ *
+ * Preconditions: None.
+ *
+ * Postconditions: Updates SOURCENET.text_finder to highlight in yellow.
+ */
+SOURCENET.config_text_finder_yellow_highlight = function()
+{
+    
+    // declare variables
+    var me = "SOURCENET.config_text_finder_yellow_highlight";
+    
+    // configure SOURCENET.text_finder
+    SOURCENET.text_finder.config_yellow_highlight()
+    
+}
+  
 
 /**
  * Repaints the area where coded mentions are displayed.
@@ -618,19 +611,122 @@ SOURCENET.display_mentions = function()
  * Postconditions: Updates classes on article <p> tags so any that contain text
  *     passed in are assigned "foundInText".
  */
-SOURCENET.find_in_article_text = function( find_text_IN )
+SOURCENET.find_strings_in_article_text = function( find_text_list_IN, clear_existing_matches_IN )
+{
+    
+    // declare variables
+    var me = "SOURCENET.find_strings_in_article_text";
+    var string_count = -1;
+    var do_clear_matches = false;
+    var is_text_OK = false;
+    var article_paragraphs = null;
+    var article_paragraphs_count = -1;
+    var article_body_jquery_element = null;
+    var find_in_text_list = null;
+    //var contains_selector = "";
+    //var match_paragraphs = null;
+    
+    // clear any previous matches?
+    do_clear_matches = clear_existing_matches_IN;
+    if ( do_clear_matches === undefined )
+    {
+        
+        // default to false.
+        do_clear_matches = true;
+        
+    }
+    
+    if ( do_clear_matches == true )
+    {
+    
+        // yes, clear them.    
+        SOURCENET.text_finder.clear_find_in_text_matches(
+            SOURCENET.DIV_ID_ARTICLE_BODY,
+            [ SOURCENET.FindInText.CSS_CLASS_FOUND_IN_TEXT_RED ],
+            [ SOURCENET.FindInText.CSS_CLASS_FOUND_IN_TEXT_MATCHED_WORDS_RED ]
+        );
+
+    }
+
+    SOURCENET.log_message( "In " + me + "(): find_text_list_IN = " + find_text_list_IN );
+    
+    // anything in list?
+    string_count = find_text_list_IN.length;
+    if ( string_count > 0 )
+    {
+        is_text_OK = true;
+    }
+
+    // OK to proceed?
+    if ( is_text_OK == true )
+    {
+        
+        // set up find text list
+        find_in_text_list = find_text_list_IN;
+        
+        // get article <p> tags.
+        article_paragraphs = SOURCENET.get_article_paragraphs();
+        article_paragraphs_count = article_paragraphs.length
+        
+        SOURCENET.log_message( "In " + me + "(): paragraph count = " + article_paragraphs.length );
+        
+        // got paragraphs?
+        if ( article_paragraphs_count > 0 )
+        {
+            
+            article_paragraphs.each( function()
+                {
+                    // declare variables.
+                    var jquery_p_element = null;
+                   
+                    // get paragraph text
+                    jquery_p_element = $( this );
+                    
+                    // call function to find in <p> tag
+                    SOURCENET.text_finder.find_text_in_p_tag( jquery_p_element, find_in_text_list );
+                } //-- END anonymous function called on each paragraph --//
+            );
+    
+        }
+        else
+        {
+
+            // no paragraphs.  Just find in the 
+            article_body_jquery_element = SOURCENET.get_article_body();
+            
+            // call function to find in <p> tag
+            SOURCENET.text_finder.find_text_in_p_tag( jquery_p_element, find_in_text_list );    
+            
+        } //-- END check to see if paragraphs. --//
+        
+    } //-- END to make sure we have text. --//
+
+} //-- END function SOURCENET.find_in_article_text() --//
+
+
+/**
+ * Retrieves all the <p> tags that make up the article text, loops over each.
+ *     In each, searches for the text in "find_text_IN".  If it finds it,
+ *     Updates classes on article <p> tags so any that contain text passed in
+ *     are assigned "foundInText", and wraps the matched text in a span so it
+ *     stands out.
+ *
+ * Preconditions: None.
+ *
+ * Postconditions: Updates classes on article <p> tags so any that contain text
+ *     passed in are assigned "foundInText".
+ */
+SOURCENET.find_in_article_text = function( find_text_IN, clear_existing_matches_IN )
 {
     
     // declare variables
     var me = "SOURCENET.find_in_article_text";
+    var find_in_text_list = null;
     var is_text_OK = false;
-    var article_paragraphs = null;
-    //var contains_selector = "";
-    //var match_paragraphs = null;
     
-    // clear any previous matches
-    SOURCENET.clear_find_in_text_matches();
-
+    // configure SOURCENET.text_finder for red highlight.
+    SOURCENET.config_text_finder_red_highlight()
+    
     SOURCENET.log_message( "In " + me + "(): find_text_IN = " + find_text_IN );
     
     // is text passed in OK?
@@ -638,115 +734,16 @@ SOURCENET.find_in_article_text = function( find_text_IN )
     if ( is_text_OK == true )
     {
         
-        // get article <p> tags.
-        article_paragraphs = SOURCENET.get_article_paragraphs();
+        // set up list.
+        find_in_text_list = [];
+        find_in_text_list.push( find_text_IN );
         
-        SOURCENET.log_message( "In " + me + "(): paragraph count = " + article_paragraphs.length );
-        
-        article_paragraphs.each( function()
-            {
-                // declare variables.
-                var jquery_p_element = null;
-                var find_text_list = [];
-               
-                // get paragraph text
-                jquery_p_element = $( this );
-                
-                // set up list of items to look for (just find_text_IN).
-                find_text_list.push( find_text_IN );
-                
-                // call function to find in <p> tag
-                SOURCENET.find_in_p_tag( jquery_p_element, find_text_list );
-            } //-- END anonymous function called on each paragraph --//
-        );
-    
-        // look for those that contain the text passed in.
-        //contains_selector = "p:contains( '" + find_text_IN + "' )";
-        //SOURCENET.log_message( "In " + me + "(): contains_selector = " + contains_selector );
-        //match_paragraphs = article_paragraphs.find( contains_selector );
-        
-        //SOURCENET.log_message( "In " + me + "(): match count = " + match_paragraphs.length );
-    
-        // For matches, add class "foundInText".
-        //match_paragraphs.toggleClass( SOURCENET.CSS_CLASS_FOUND_IN_TEXT, true )
+        // call find_strings_in_article_text()
+        SOURCENET.find_strings_in_article_text( find_in_text_list, clear_existing_matches_IN );
 
     } //-- END to make sure we have text. --//
 
 } //-- END function SOURCENET.find_in_article_text() --//
-
-
-/**
- * Accepts jquery <p> element instance and list of strings to look for inside.
- *     for each item in the list, checks to see if the string is in the text.
- *     If it finds it, updates classes on <p> tag to assign "foundInText",
- *     and wraps the matched text in a span so it stands out.
- *
- * Preconditions: Must have found paragraph tag you want to process and have it
- *     in a jquery instance.  Must also have broken out list of search text
- *     items as you want (split on spaces, or don't, etc.).
- *
- * Postconditions: if match found, will update the <p> in the jquery instance
- *     passed in.
- */
-SOURCENET.find_in_p_tag = function( p_tag_jquery_IN, find_text_list_IN )
-{
-
-    // declare variables.
-    var me = "SOURCENET.find_in_p_tag";
-    var jquery_p_element = null;
-    var paragraph_text = "";
-    var find_text_item_count = -1;
-    var current_index = -1;
-    var current_find_text = "";
-    var found_index = -1;
-    var text_around_match_list = null;
-    var match_html = "";
-    var current_text_index = -1;
-    var new_html = "";
-    
-    // get paragraph text
-    jquery_p_element = p_tag_jquery_IN;
-    paragraph_text = jquery_p_element.text();
-    SOURCENET.log_message( "In " + me + "(): find text list = " + find_text_list_IN + "; paragraph text = " + paragraph_text );
-    
-    // split find_text_IN on spaces.
-    find_text_item_count = find_text_list_IN.length;
-    
-    // loop over words
-    for ( current_index = 0; current_index < find_text_item_count; current_index++ )
-    {
-        
-        // get current find item.
-        current_find_text = find_text_list_IN[ current_index ];
-        
-        // is find text inside the paragraph?
-        found_index = paragraph_text.indexOf( current_find_text );
-        
-        // if found, update class.
-        if ( found_index > -1 )
-        {
-            
-            // For matches, add class "foundInText".
-            jquery_p_element.toggleClass( SOURCENET.CSS_CLASS_FOUND_IN_TEXT, true );
-            
-            // split on the text we matched.
-            text_around_match_list = paragraph_text.split( current_find_text );
-            
-            // add a span around the matched words.
-            matched_words_html = SOURCENET.HTML_SPAN_TO_CLASS + SOURCENET.CSS_CLASS_DEFAULT_WORD_MATCH + SOURCENET.HTML_SPAN_AFTER_CLASS + current_find_text + SOURCENET.HTML_SPAN_CLOSE;
-    
-            // put together again, but with <span>-ed matched words
-            //     rather than just the words themselves.
-            new_html = text_around_match_list.join( matched_words_html );
-            
-            // store new HTML in <p>.
-            jquery_p_element.html( new_html );
-                                
-        } //-- END check to see if text found --//
-
-    } //-- END loop over find text items --//
-
-} //-- END function SOURCENET.find_in_p_tag --//
 
 
 /**
@@ -773,7 +770,7 @@ SOURCENET.find_mention_text_in_article_text = function( find_text_IN )
     input_element.val( mention_text );
     
     // find in text.
-    SOURCENET.find_in_article_text( mention_text );
+    SOURCENET.find_in_article_text( mention_text, true );
     
 } //-- END function SOURCENET.find_mention_text_in_article_text() --//
 
@@ -790,18 +787,60 @@ SOURCENET.find_mention_text_in_article_text = function( find_text_IN )
  * Postconditions: Updates classes on article <p> tags so any that contain text
  *     passed in are assigned "foundInText".
  */
-SOURCENET.find_words_in_article_text = function( find_text_IN )
+SOURCENET.find_words_in_article_text = function( find_text_IN, clear_existing_matches_IN )
 {
     
     // declare variables
     var me = "SOURCENET.find_words_in_article_text";
-    var is_text_OK = false;
-    var article_paragraphs = null;
+    var find_text_list = [];
+    var find_text_count = -1;
+    var current_index = -1;
+    var current_find_text = "";
+    
     //var contains_selector = "";
     //var match_paragraphs = null;
     
-    // clear any previous matches
-    SOURCENET.clear_find_in_text_matches();
+    // set up list of items to look for (split find_text_IN on " ").
+    find_text_list = find_text_IN.split( " " );
+    find_text_count = find_text_list.length;
+    
+    // loop, calling find_in_article_text() for each.
+    for ( current_index = 0; current_index < find_text_count; current_index++ )
+    {
+        
+        // get current find text value
+        current_find_text = find_text_list[ current_index ];
+        
+        // call find_in_article_text()
+        SOURCENET.find_in_article_text( current_find_text, clear_existing_matches_IN );
+        
+    } //-- END loop over words. --//
+
+    
+    // configure SOURCENET.text_finder for red highlight.
+    SOURCENET.config_text_finder_red_highlight()
+    
+    // clear any previous matches?
+    do_clear_matches = clear_existing_matches_IN;
+    if ( do_clear_matches === undefined )
+    {
+        
+        // default to false.
+        do_clear_matches = true;
+        
+    }
+    
+    if ( do_clear_matches == true )
+    {
+    
+        // yes, clear them.    
+        SOURCENET.text_finder.clear_find_in_text_matches(
+            SOURCENET.DIV_ID_ARTICLE_BODY,
+            [ SOURCENET.FindInText.CSS_CLASS_FOUND_IN_TEXT_RED ],
+            [ SOURCENET.FindInText.CSS_CLASS_FOUND_IN_TEXT_MATCHED_WORDS_RED ]
+        );
+
+    }
 
     SOURCENET.log_message( "In " + me + "(): find_text_IN = " + find_text_IN );
     
@@ -828,7 +867,7 @@ SOURCENET.find_words_in_article_text = function( find_text_IN )
                 find_text_list = find_text_IN.split( " " );
                 
                 // call function to find in <p> tag
-                SOURCENET.find_in_p_tag( jquery_p_element, find_text_list );
+                SOURCENET.text_finder.find_in_p_tag( jquery_p_element, find_text_list );
             } //-- END anonymous function called on each paragraph --//
         );
     
@@ -862,13 +901,36 @@ SOURCENET.find_words_in_html = function( element_to_search_IN, find_text_IN )
     
     // declare variables
     var me = "SOURCENET.find_words_in_article_text";
+    var do_clear_matches = false;
     var is_text_OK = false;
     var article_paragraphs = null;
     //var contains_selector = "";
     //var match_paragraphs = null;
     
-    // clear any previous matches
-    SOURCENET.clear_find_in_text_matches();
+    // configure SOURCENET.text_finder for red highlight.
+    SOURCENET.config_text_finder_red_highlight()
+    
+    // clear any previous matches?
+    do_clear_matches = clear_existing_matches_IN;
+    if ( do_clear_matches === undefined )
+    {
+        
+        // default to false.
+        do_clear_matches = true;
+        
+    }
+    
+    if ( do_clear_matches == true )
+    {
+    
+        // yes, clear them.    
+        SOURCENET.text_finder.clear_find_in_text_matches(
+            SOURCENET.DIV_ID_ARTICLE_BODY,
+            [ SOURCENET.FindInText.CSS_CLASS_FOUND_IN_TEXT_RED ],
+            [ SOURCENET.FindInText.CSS_CLASS_FOUND_IN_TEXT_MATCHED_WORDS_RED ]
+        );
+
+    }
 
     SOURCENET.log_message( "In " + me + "(): find_text_IN = " + find_text_IN );
     
@@ -895,7 +957,7 @@ SOURCENET.find_words_in_html = function( element_to_search_IN, find_text_IN )
                 find_text_list = find_text_IN.split( " " );
                 
                 // call function to find in <p> tag
-                SOURCENET.find_in_p_tag( jquery_p_element, find_text_list );
+                SOURCENET.text_finder.find_in_p_tag( jquery_p_element, find_text_list );
             } //-- END anonymous function called on each paragraph --//
         );
     
@@ -958,6 +1020,34 @@ SOURCENET.fix_mention_text = function()
  *
  * Postconditions: None.
  */
+SOURCENET.get_article_body = function()
+{
+    
+    // return reference
+    var jquery_element_OUT = null;
+    
+    // declare variables
+    var me = "SOURCENET.get_article_body";
+    var article_view_div_id = "";
+    var article_view_div = null;
+    
+    // retrieve <div> that contains article text (id/name = "article_view").
+    article_view_div_id = SOURCENET.DIV_ID_ARTICLE_BODY;
+    jquery_element_OUT = $( '#' + article_view_div_id );
+    
+    return jquery_element_OUT;
+    
+} //-- END function SOURCENET.get_article_body() --//
+
+
+/**
+ * Retrieves all the <p> tags that make up the article text, returns them in a
+ *     list.  If none found, returns empty list.  If error, returns null.
+ *
+ * Preconditions: None.
+ *
+ * Postconditions: None.
+ */
 SOURCENET.get_article_paragraphs = function()
 {
     
@@ -970,8 +1060,7 @@ SOURCENET.get_article_paragraphs = function()
     var article_view_div = null;
     
     // retrieve <div> that contains article text (id/name = "article_view").
-    article_view_div_id = "article_view";
-    article_view_div = $( '#' + article_view_div_id );
+    article_view_div = SOURCENET.get_article_body();
     
     // find all <p> tags.
     grafs_OUT = article_view_div.find( "p" );
@@ -3696,7 +3785,7 @@ $( document ).ready(
                 //SOURCENET.log_message( "In " + me + " - find text : " + find_text );
 
                 // find in text...
-                SOURCENET.find_in_article_text( find_text );
+                SOURCENET.find_in_article_text( find_text, false );
                 
             }
         )
@@ -3803,3 +3892,32 @@ $( document ).ready(
     }
 
 ); //-- END document.ready( activate coding submit button ) --//
+
+
+// ! ----> highlight data set terms in the text.
+
+// !document.ready( highlight data set terms )
+// javascript to highlight data set terms.
+$( document ).ready(
+
+    function()
+    {
+
+        // declare variables
+        var me = "SOURCENET.highlight_data_set_terms";
+        var find_in_text_list = null;
+        
+        // get list
+        find_in_text_list = SOURCENET.data_set_string_list;
+        
+        // configure text_finder to yellow.
+        SOURCENET.config_text_finder_yellow_highlight();
+    
+        // pass list to SOURCENET.find_strings_in_article_text()
+        SOURCENET.find_strings_in_article_text( find_in_text_list, false );
+        
+    }
+
+); //-- END document.ready( load existing coding data ) --//
+
+
