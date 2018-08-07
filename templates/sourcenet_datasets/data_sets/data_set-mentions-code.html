@@ -220,8 +220,27 @@
             
             <hr />
             <h2>Data Set Info</h2>
-            <p></p>
-
+            {% if data_set_instance %}
+            <h3>Data Set {{ data_set_instance.id }} - {{ data_set_instance.name }}</h3>
+            <ul>
+                {% if data_set_instance.title %}<li><em>Title:</em> {{ data_set_instance.title }}</li>{% endif %}
+                {% if data_set_instance.date %}<li><em>Date:</em> {{ data_set_instance.date }}</li>{% endif %}
+                {% if data_set_instance.description %}<li><em>Description:</em> {{ data_set_instance.description }}</li>{% endif %}
+                {% if data_set_instance.coverages %}<li><em>Coverages:</em> {{ data_set_instance.coverages }}</li>{% endif %}
+                {% if data_set_instance.subjects %}<li><em>Subjects:</em> {{ data_set_instance.subjects }}</li>{% endif %}
+                {% if data_set_instance.methodology %}<li><em>Methodology:</em> {{ data_set_instance.methodology }}</li>{% endif %}
+                {% if data_set_instance.citation %}<li><em>Citation:</em> {{ data_set_instance.citation }}</li>{% endif %}
+                {% if data_set_instance.additional_keywords %}<li><em>Additional keywords:</em> {{ data_set_instance.additional_keywords }}</li>{% endif %}
+                <li>
+                    Identifiers:
+                    <ul>
+                        {% for data_set_identifier in data_set_instance.datasetidentifier_set.all %}
+                        <li>{{ data_set_identifier.name }} - {{ data_set_identifier.identifier }}</li>
+                        {% endfor %}
+                    </ul>
+                </li>
+            </ul>
+            {% endif %}
         </div>
     </aside>
 </div>

@@ -228,6 +228,7 @@ def dataset_code_mentions( request_IN ):
     response_dictionary[ 'manual_article_coder' ] = None
     response_dictionary[ 'article_instance' ] = None
     response_dictionary[ 'article_text' ] = None
+    response_dictionary[ 'data_set_instance' ] = None
     response_dictionary[ 'base_simple_navigation' ] = True
     response_dictionary[ 'base_post_login_redirect' ] = reverse( dataset_code_mentions )
     response_dictionary[ 'existing_data_store_json' ] = ""
@@ -277,6 +278,11 @@ def dataset_code_mentions( request_IN ):
             
                 # get citation instance
                 citation_instance = citation_qs.get()
+                
+                # get related instances
+                article_instance = citation_instance.article
+                data_set_instance = citation_instance.data_set
+                #response_dictionary[ 'data_set_instance' ] = data_set_instance
         
             #-- END check if single citation. --#
             
@@ -302,25 +308,6 @@ def dataset_code_mentions( request_IN ):
 
     # make instance of DataSetCitationLookupForm
     data_set_citation_lookup_form = DataSetCitationLookupForm( request_data )
-
-    # see if citation_id is set
-    if ( ( citation_id is not None ) and ( citation_id > 0 ) ):
-
-        # retrieve QuerySet that contains that citation.
-        citation_qs = DataSetCitation.objects.filter( pk = citation_id )
-    
-        # get count of citations
-        citation_count = citation_qs.count()
-    
-        # should only be one.
-        if ( citation_count == 1 ):
-        
-            # get citation instance
-            citation_instance = citation_qs.get()
-    
-        #-- END check if single citation. --#
-        
-    #-- END check to see if citation ID set --#
 
     # get current user.
     current_user = request_IN.user
@@ -439,11 +426,11 @@ def dataset_code_mentions( request_IN ):
 
                     # process data store JSON.
                     article_data_instance = manual_coder.process_data_store_json( citation_instance,
-                                                                                                current_user,
-                                                                                                data_store_json_string,
-                                                                                                article_data_id,
-                                                                                                request_IN,
-                                                                                                response_dictionary )
+                                                                                  current_user,
+                                                                                  data_store_json_string,
+                                                                                  article_data_id,
+                                                                                  request_IN,
+                                                                                  response_dictionary )
     
                     # got anything back?
                     coding_status = ""
@@ -665,6 +652,7 @@ def dataset_code_mentions( request_IN ):
                     response_dictionary[ 'citation_instance' ] = citation_instance
                     response_dictionary[ 'article_instance' ] = article_instance
                     response_dictionary[ 'article_text' ] = article_text
+                    response_dictionary[ 'data_set_instance' ] = data_set_instance
                     response_dictionary[ 'article_content' ] = rendered_article_html
                     response_dictionary[ 'data_set_citation_lookup_form' ] = data_set_citation_lookup_form
                     response_dictionary[ 'coding_submit_form' ] = coding_submit_form

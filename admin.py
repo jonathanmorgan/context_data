@@ -15,10 +15,60 @@ from sourcenet_datasets.models import DataSetIdentifier
 from sourcenet_datasets.models import DataSetCitation
 from sourcenet_datasets.models import DataSetMention
 
-admin.site.register( DataSet )
+#admin.site.register( DataSet )
 admin.site.register( DataSetIdentifier )
 #admin.site.register( DataSetCitation )
 admin.site.register( DataSetMention )
+
+#-------------------------------------------------------------------------------
+# DataSet admin definition
+#-------------------------------------------------------------------------------
+
+class DataSetIdentifierInline( admin.TabularInline ):
+
+    model = DataSetIdentifier
+    extra = 1
+    fk_name = 'dataset'
+
+#-- END Person_Newspaper_Inline model --#
+
+class DataSetAdmin( admin.ModelAdmin ):
+
+    # set up ajax-selects - for make_ajax_form, 1st argument is the model you
+    #    are looking to make ajax selects form fields for; 2nd argument is a
+    #    dict of pairs of field names in the model in argument 1 (with no quotes
+    #    around them) mapped to lookup channels used to service them (lookup
+    #    channels are defined in settings.py, implenented in a separate module -
+    #    in this case, implemented in sourcenet.ajax-select-lookups.py
+    #form = make_ajax_form( DataSet, dict( article_data = 'article_data' ) )
+
+    fieldsets = [
+        (
+            None,
+            {
+                'fields' : [ 'name', 'title', 'description', 'date', 'tags' ]
+            }
+        ),
+        (
+            "More details (Optional)",
+            {
+                'fields' : [ 'citation', 'coverages', 'subjects', 'methodology', 'additional_keywords' ],
+                'classes' : ( "collapse", )
+            }
+        ),
+    ]
+
+    inlines = [
+        DataSetIdentifierInline
+    ]
+
+    list_display = ( 'id', 'name', 'title', 'date' )
+    list_display_links = ( 'id', 'name' )
+    search_fields = [ 'name', 'title', 'description', 'citation', 'coverages', 'subjects', 'methodology' ]
+    date_hierarchy = 'create_date'
+
+admin.site.register( DataSet, DataSetAdmin )
+
 
 #-------------------------------------------------------------------------------
 # DataSetCitation admin definition

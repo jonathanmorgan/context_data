@@ -55,10 +55,21 @@ class DataSet( models.Model ):
     #----------------------------------------------------------------------
 
     name = models.CharField( max_length = 255 )
+    title = models.TextField( blank = True, null = True )
     description = models.TextField( blank = True, null = True )
+    date = models.DateTimeField( blank = True, null = True )
+    coverages = models.TextField( blank = True, null = True )
+    subjects = models.TextField( blank = True, null = True )
+    methodology = models.TextField( blank = True, null = True )
+    citation = models.TextField( blank = True, null = True )
+    additional_keywords = models.TextField( blank = True, null = True )
 
     # tags!
     tags = TaggableManager( blank = True )
+
+    # time stamps.
+    create_date = models.DateTimeField( auto_now_add = True )
+    last_modified = models.DateTimeField( auto_now = True )
 
     #----------------------------------------------------------------------
     # methods
