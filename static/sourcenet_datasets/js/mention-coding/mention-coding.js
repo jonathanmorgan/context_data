@@ -25,7 +25,7 @@ SOURCENET.article_data_id = -1;
 SOURCENET.data_store = null;
 
 // DEBUG!
-SOURCENET.debug_flag = false;
+SOURCENET.debug_flag = true;
 
 // JSON property names
 SOURCENET.JSON_PROP_MENTION_TEXT = "mention_text";
@@ -99,6 +99,7 @@ SOURCENET.article_text_ignore_p_tags = true;
 SOURCENET.text_to_ignore_list = [];
 SOURCENET.text_to_ignore_list.push( "the" );
 SOURCENET.text_to_ignore_list.push( "The" );
+SOURCENET.text_finder.text_to_ignore_list = SOURCENET.text_to_ignore_list;
 
 
 //----------------------------------------------------------------------------//

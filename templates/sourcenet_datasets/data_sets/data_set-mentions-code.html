@@ -21,6 +21,7 @@
     SOURCENET.text_finder.ignore_wrapper_element = false;
 </script>
 {% endif %}
+{% if default_find_location != "" %}<script>SOURCENET.text_finder.default_find_location = "{{ default_find_location }}";</script>{% endif %}
 {% if existing_data_store_json %}<script>SOURCENET.data_store_json = '{{ existing_data_store_json }}';</script>{% endif %}
 {% endblock %}
 
@@ -114,6 +115,7 @@
                 {% if article_text_is_preformatted %}<pre>{% endif %}
 
                 {# are we outputting HTML <table>, or plain text, custom, or PDF? #}
+                <!-- {{ article_text_render_type }} -->
                 {% if article_text_render_type == "table" %}
                     {{ article_content | safe }}
                 {% elif article_text_render_type == "custom" %}
