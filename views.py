@@ -44,6 +44,9 @@ from django.template.context_processors import csrf
 # django core imports
 from django.urls import reverse
 
+# django_config
+from django_config.models import Config_Property
+
 # import model classes
 from sourcenet_datasets.models import DataSetCitation
 
@@ -233,11 +236,11 @@ def dataset_code_mentions( request_IN ):
     response_dictionary[ 'article_text' ] = None
     response_dictionary[ 'article_text_custom' ] = None
     response_dictionary[ 'article_text_type' ] = None
-    response_dictionary[ 'article_text_render_type' ] = "custom"  # one of "table", "raw", "custom", "pdf"
-    response_dictionary[ 'article_text_is_preformatted' ] = False
-    response_dictionary[ 'article_text_wrap_in_p' ] = True
-    response_dictionary[ 'mention_text_read_only' ] = False
-    response_dictionary[ 'include_find_in_article_text' ] = True
+    response_dictionary[ 'article_text_render_type' ] = Config_Property.get_property_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_ARTICLE_TEXT_RENDER_TYPE, default_IN = "raw" )  # one of "table", "raw", "custom", "pdf"
+    response_dictionary[ 'article_text_is_preformatted' ] = Config_Property.get_property_boolean_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_ARTICLE_TEXT_IS_PREFORMATTED, default_IN = False )
+    response_dictionary[ 'article_text_wrap_in_p' ] = Config_Property.get_property_boolean_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_ARTICLE_TEXT_WRAP_IN_P, default_IN = True )
+    response_dictionary[ 'mention_text_read_only' ] = Config_Property.get_property_boolean_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_MENTION_TEXT_READ_ONLY, default_IN = False )
+    response_dictionary[ 'include_find_in_article_text' ] = Config_Property.get_property_boolean_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_INCLUDE_FIND_IN_ARTICLE_TEXT, default_IN = True )
     response_dictionary[ 'data_set_instance' ] = None
     response_dictionary[ 'base_simple_navigation' ] = True
     response_dictionary[ 'base_post_login_redirect' ] = reverse( dataset_code_mentions )
@@ -605,6 +608,8 @@ def dataset_code_mentions( request_IN ):
                     article_content = article_text.get_content()
                     article_text_type = article_text.content_type
                     response_dictionary[ 'article_text_type' ] = article_text_type
+                    
+                    # if not "text", want to make sure to not use "custom".
                     
                     # ! ------ create custom text
                     article_content_line_list = article_content.split( "\n" )

@@ -94,6 +94,11 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
     
     # config application
     CONFIG_APPLICATION = "Manual_Data_Set_Mentions_Coding"
+    CONFIG_NAME_ARTICLE_TEXT_RENDER_TYPE = "article_text_render_type"
+    CONFIG_NAME_ARTICLE_TEXT_IS_PREFORMATTED = "article_text_is_preformatted"
+    CONFIG_NAME_ARTICLE_TEXT_WRAP_IN_P = "article_text_wrap_in_p"
+    CONFIG_NAME_MENTION_TEXT_READ_ONLY = "mention_text_read_only"
+    CONFIG_NAME_INCLUDE_FIND_IN_ARTICLE_TEXT = "include_find_in_article_text"
 
     # kwarg parameter names
     KWARG_DATA_STORE_JSON_STRING = "data_store_json_string_IN"
