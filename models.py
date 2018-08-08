@@ -87,7 +87,7 @@ class DataSet( models.Model ):
 @python_2_unicode_compatible
 class DataSetIdentifier( models.Model ):
 
-    dataset = models.ForeignKey( 'DataSet', on_delete = models.CASCADE )
+    data_set = models.ForeignKey( 'DataSet', on_delete = models.CASCADE )
     name = models.CharField( max_length = 255, null = True, blank = True )
     identifier = models.TextField( blank = True, null = True )
     source = models.CharField( max_length = 255, null = True, blank = True )

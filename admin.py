@@ -28,7 +28,7 @@ class DataSetIdentifierInline( admin.TabularInline ):
 
     model = DataSetIdentifier
     extra = 1
-    fk_name = 'dataset'
+    fk_name = 'data_set'
 
 #-- END Person_Newspaper_Inline model --#
 
