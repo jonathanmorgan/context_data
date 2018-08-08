@@ -55,6 +55,7 @@ class DataSet( models.Model ):
     #----------------------------------------------------------------------
 
     name = models.CharField( max_length = 255 )
+    unique_identifier = models.CharField( max_length = 255, blank = True, null = True )
     title = models.TextField( blank = True, null = True )
     description = models.TextField( blank = True, null = True )
     date = models.DateTimeField( blank = True, null = True )

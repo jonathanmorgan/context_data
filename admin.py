@@ -46,7 +46,7 @@ class DataSetAdmin( admin.ModelAdmin ):
         (
             None,
             {
-                'fields' : [ 'name', 'title', 'description', 'date', 'tags' ]
+                'fields' : [ 'name', 'title', 'unique_identifier', 'description', 'date', 'tags' ]
             }
         ),
         (
