@@ -101,7 +101,9 @@
                 {% if do_output_table_html %}
                     {{ article_content | safe }}
                 {% else %}
+                    {% if preformatted %}<pre>{% endif %}
                     {{ article_text.get_content | safe }}
+                    {% if preformatted %}</pre>{% endif %}
                 {% endif %}
 
                 <p id="article_end" name="article_end" class="articleEnd">-- 30 --</p>

@@ -232,6 +232,7 @@ def dataset_code_mentions( request_IN ):
     response_dictionary[ 'base_simple_navigation' ] = True
     response_dictionary[ 'base_post_login_redirect' ] = reverse( dataset_code_mentions )
     response_dictionary[ 'existing_data_store_json' ] = ""
+    response_dictionary[ 'preformatted' ] = False    
     response_dictionary[ 'page_status_message_list' ] = page_status_message_list
     
     # create manual coder and place in response so we can access constants-ish.
