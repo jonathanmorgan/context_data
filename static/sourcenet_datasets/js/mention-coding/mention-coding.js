@@ -25,7 +25,7 @@ SOURCENET.article_data_id = -1;
 SOURCENET.data_store = null;
 
 // DEBUG!
-SOURCENET.debug_flag = true;
+SOURCENET.debug_flag = false;
 
 // JSON property names
 SOURCENET.JSON_PROP_MENTION_TEXT = "mention_text";
@@ -3821,7 +3821,7 @@ $( document ).ready(
 );
 
 
-// ! document.ready( button - #store-name )
+// ! document.ready( button - #store-mention )
 // javascript to store selected text as mention text.
 $( document ).ready(
     function()
@@ -3940,6 +3940,38 @@ $( document ).ready(
 
                 // find in text...
                 SOURCENET.find_in_article_text( find_text, false );
+                
+            }
+        )
+    }
+); //-- END document.ready( button - #find-in-article-text ) --//
+
+
+// ! document.ready( button - #find-words-in-article-text )
+// javascript to look for whatever is in the <input> with
+//     id="text-to-find-in-article" inside the article's text, and highlight any
+//     paragraphs that contain a match.
+$( document ).ready(
+    function()
+    {
+        $( '#find-words-in-article-text' ).click(        
+            function()
+            {
+
+                // declare variables
+                var me = "document.ready( button - #find-words-in-article-text )";
+                var input_element = "";
+                var find_text = "";
+    
+                // get text-to-find-in-article text field,  get value, then
+                //    find_in_article_text().
+                input_element = $( '#' + SOURCENET.INPUT_ID_TEXT_TO_FIND_IN_ARTICLE );
+                find_text = input_element.val();
+
+                //SOURCENET.log_message( "In " + me + " - find text : " + find_text );
+
+                // find in text...
+                SOURCENET.find_words_in_article_text( find_text, false );
                 
             }
         )
@@ -4092,10 +4124,11 @@ $( document ).ready(
         // loop
         for ( text_index = 0; text_index < find_in_text_count; text_index++ )
         {
-            
+         
             // get text snippet.
             current_text = find_in_text_list[ text_index ];
             
+            /*
             // split on space and loop
             current_text_words_list = current_text.split( " " )
             current_text_words_count = current_text_words_list.length
@@ -4106,7 +4139,10 @@ $( document ).ready(
                 current_word = current_text_words_list[ word_index ]
                 SOURCENET.find_in_article_text( current_word, false, "yellow" )
                 
-            }                        
+            }
+            */
+            
+            SOURCENET.find_words_in_article_text( current_text, false, "yellow" ) 
             
         } //-- END loop over strings --//
         

@@ -171,13 +171,13 @@
                 </p>
 -->
 
-                <hr class="fieldSeparator" />
+                <!-- <hr class="fieldSeparator" /> -->
                 <p class="inputContainer" id="process-mention-container">
                     <input type="button" id="process-mention" name="process-mention" value="Process Mention" onclick="SOURCENET.process_mention_coding()" />&nbsp;&nbsp;|&nbsp;&nbsp;<input type="button" id="clear-mention-coding" name="clear-mention-coding" value="Clear Mention Coding" onclick="SOURCENET.clear_coding_form( 'Mention Coding Cleared' )" />
                 </p>
             </div>
             <!-- </form> -->
-            <hr />
+            <hr class="fieldSeparator" />
             <div id="status-message-area" class="statusMessageArea">
                 <h4>Status Messages</h4>
             </div>
@@ -212,7 +212,7 @@
             {% if include_find_in_article_text %}
             <hr />
             <p class="inputContainer" id="find-text-in-article-text" name="find-text-in-article-text">
-                <h4>Find in Article Text</h4>
+                <h4><em>Find in Article Text</em></h4>
                 <table>
                     <tr>
                         <td>
@@ -221,6 +221,8 @@
                             <input type="text" name="{{ manual_coder.INPUT_ID_TEXT_TO_FIND_IN_ARTICLE }}" id="{{ manual_coder.INPUT_ID_TEXT_TO_FIND_IN_ARTICLE }}" size="25" />
                             <br />
                             <input type="button" id="find-in-article-text" name="find-in-article-text" value="<== Find in Text" />
+                            <br />
+                            <input type="button" id="find-words-in-article-text" name="find-words-in-article-text" value="<== Find Words in Text" />
                             <br />
                             <input type="button" id="clear-find-in-article-text" name="clear-find-in-article-text" value="<== Clear Matches" />
                         </td>
