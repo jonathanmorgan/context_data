@@ -911,7 +911,7 @@ def dataset_mention_coding_list( request_IN ):
                             
                             # then look for mentions related to the dataset.
                             related_data_set = citation_instance.data_set
-                            mention_qs = article_data.datasetmention_set.filter( data_set = related_data_set )
+                            mention_qs = article_data.datasetmention_set.filter( data_set_citation__data_set = related_data_set )
                             mention_count = mention_qs.count()
                             
                             # got any mentions?
