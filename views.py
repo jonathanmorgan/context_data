@@ -798,9 +798,13 @@ def dataset_mention_coding_list( request_IN ):
     citation_instance = ""
     
     # declare variables - Article_Data lookup
+    related_article = None
+    related_data_set = None
     related_article_id = None
     article_data = None
     citation_status = ""
+    mention_qs = None
+    mention_count = -1
     
     # initialize response dictionary
     response_dictionary = {}
@@ -903,10 +907,25 @@ def dataset_mention_coding_list( request_IN ):
                             
                             # ...and the article related to this citation...
                             related_article = citation_instance.article
-                            article_data_qs = article_data_qs.get( article = related_article )
+                            article_data = article_data_qs.get( article = related_article )
                             
-                            # if we get here, just one Article_Data for this coder and article.
-                            citation_status = "coded"
+                            # then look for mentions related to the dataset.
+                            related_data_set = citation_instance.data_set
+                            mention_qs = article_data.datasetmention_set.filter( data_set = related_data_set )
+                            mention_count = mention_qs.count()
+                            
+                            # got any mentions?
+                            if ( mention_count > 0 ):
+                            
+                                # if we get here, one Article_Data, and mentions
+                                citation_status = "coded"
+                                
+                            else:
+                            
+                                # if we get here, one Article_Data, no mentions
+                                citation_status = "pending"
+                                
+                            #-- END check to see if mentions coded for this article. --#  
                             
                         except Article_Data.MultipleObjectsReturned as amore:
                         
