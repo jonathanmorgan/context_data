@@ -25,7 +25,7 @@ SOURCENET.article_data_id = -1;
 SOURCENET.data_store = null;
 
 // DEBUG!
-SOURCENET.debug_flag = true;
+SOURCENET.debug_flag = false;
 
 // JSON property names
 SOURCENET.JSON_PROP_MENTION_TEXT = "mention_text";
