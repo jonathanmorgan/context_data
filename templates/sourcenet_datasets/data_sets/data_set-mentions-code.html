@@ -88,23 +88,33 @@
                 <ul>
                     {% if article_instance.section %}<li><em>Section:</em> {{ article_instance.section }}</li>{% endif %}
                     {% if article_instance.pub_date %}<li><em>Publication Date:</em> {{ article_instance.pub_date }}</li>{% endif %}
+                    {% if article_instance.file_path %}<li><em>Original PDF:</em> <a target="_blank" href="/pdf/{{ article_instance.file_path }}">{{ article_instance.file_path }}</a></li>{% endif %}
+
                     {% if include_detail %}
                     <li><em>Page:</em> {{ article_instance.page }}</li>                
                     <li><em>Edition:</em> {{ article_instance.edition }}</li>                
                     <li><em>Terms:</em> {{ article_instance.index_terms }}</li>                
                     <li><em>Source:</em> {{ article_instance.archive_source }} ( <em>id:</em> {{ article_instance.archive_id }} )</li>
                     {% endif %}
-                    <li><em><strong>Byline:</strong></em> {{ article_instance.author_string }}</li>
+                    {% if article_instance.author_string %}<li><em><strong>Byline:</strong></em> {{ article_instance.author_string }}</li>{% endif %}
                 </ul>
                 
-                {# are we outputting HTML <table>, or plain text? #}
-                {% if do_output_table_html %}
+                {% if article_text_wrap_in_p %}<p>{% endif %}
+                {% if article_text_is_preformatted %}<pre>{% endif %}
+
+                {# are we outputting HTML <table>, or plain text, custom, or PDF? #}
+                {% if article_text_render_type == "table" %}
                     {{ article_content | safe }}
+                {% elif article_text_render_type == "custom" %}
+                    {{ article_text_custom | safe }}
+                {% elif article_text_render_type == "pdf" %}
+                    <iframe src="/pdf/{{ article_instance.file_path }}" width="630" height="820"></iframe>
                 {% else %}
-                    {% if preformatted %}<pre>{% endif %}
                     {{ article_text.get_content | safe }}
-                    {% if preformatted %}</pre>{% endif %}
                 {% endif %}
+
+                {% if article_text_is_preformatted %}</pre>{% endif %}
+                {% if article_text_wrap_in_p %}</p>{% endif %}
 
                 <p id="article_end" name="article_end" class="articleEnd">-- 30 --</p>
             </div>
@@ -131,7 +141,12 @@
                 <br />
 -->
                 <p class="inputContainer" id="input-mention-text" name="input-mention-text">
-                    <input type="button" id="store-mention" name="store-mention" value="Mention ==>" />: <textarea id="{{ manual_coder.INPUT_ID_MENTION_TEXT }}" name="{{ manual_coder.INPUT_ID_MENTION_TEXT }}" readonly="readonly"></textarea>
+                    <input type="button" id="store-mention" name="store-mention" value="Mention ==>" />: 
+                    {% if mention_text_read_only %}
+                    <textarea id="{{ manual_coder.INPUT_ID_MENTION_TEXT }}" name="{{ manual_coder.INPUT_ID_MENTION_TEXT }}" readonly="readonly"></textarea>
+                    {% else %}
+                    <textarea id="{{ manual_coder.INPUT_ID_MENTION_TEXT }}" name="{{ manual_coder.INPUT_ID_MENTION_TEXT }}"></textarea>
+                    {% endif %}
                 </p>
                 {% if include_fix_mention_text %}
                     <p class="inputContainer" id="fix-mention-text-link" name="fix-mention-text-link">
@@ -140,10 +155,10 @@
                     <p class="inputContainer hidden" id="fix-mention-text" name="fix-mention-text">
                         <a href="#" onclick="SOURCENET.cancel_fix_mention_text(); return false;"><-- Cancel Fix Mention Text</a>
                         <br />
-                        <input type="button" id="fix-mention-text" name="fix-mention-text" value="==> Fix Mention Text" />: <textarea id="{{ manual_coder.INPUT_ID_FIXED_PERSON_NAME }}" name="{{ manual_coder.INPUT_ID_FIXED_PERSON_NAME }}"></textarea>
+                        <input type="button" id="fix-mention-text" name="fix-mention-text" value="==> Fix Mention Text" />: <textarea id="{{ manual_coder.INPUT_ID_FIXED_MENTION_TEXT }}" name="{{ manual_coder.INPUT_ID_FIXED_MENTION_TEXT }}"></textarea>
                     </p>
                 {% else %}
-                    <input type="hidden" name="{{ manual_article_coder.INPUT_ID_FIXED_PERSON_NAME }}" id="{{ manual_article_coder.INPUT_ID_FIXED_PERSON_NAME }}" />
+                    <input type="hidden" name="{{ manual_coder.INPUT_ID_FIXED_MENTION_TEXT }}" id="{{ manual_coder.INPUT_ID_FIXED_MENTION_TEXT }}" />
                 {% endif %}
                 
 <!--
@@ -203,16 +218,14 @@
                         <td>
                             Search for:
                             <br />
-                            <input type="text" name="{{ manual_article_coder.INPUT_ID_TEXT_TO_FIND_IN_ARTICLE }}" id="{{ manual_article_coder.INPUT_ID_TEXT_TO_FIND_IN_ARTICLE }}" size="25" />
+                            <input type="text" name="{{ manual_coder.INPUT_ID_TEXT_TO_FIND_IN_ARTICLE }}" id="{{ manual_coder.INPUT_ID_TEXT_TO_FIND_IN_ARTICLE }}" size="25" />
                             <br />
                             <input type="button" id="find-in-article-text" name="find-in-article-text" value="<== Find in Text" />
                             <br />
                             <input type="button" id="clear-find-in-article-text" name="clear-find-in-article-text" value="<== Clear Matches" />
                         </td>
                         <td>
-                            <input type="button" id="find-name-in-article-text" name="find-name-in-article-text" value="<== Fetch Name" />
-                            <br />
-                            <input type="button" id="find-last-name-in-article-text" name="find-last-name-in-article-text" value="<== Fetch Last Name" />
+                            <input type="button" id="find-mention-in-article-text" name="find-mention-in-article-text" value="<== Mention" />
                         </td>
                     </tr>
                 </table>

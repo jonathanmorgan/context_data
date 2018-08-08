@@ -130,6 +130,7 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
     INPUT_ID_DATA_SET_MENTION_ID = "data-set-mention-id"
     INPUT_ID_ORIGINAL_MENTION_TYPE = "original-mention-type"
     INPUT_ID_DATA_STORE_MENTION_INDEX = "data-store-mention-index"
+    INPUT_ID_TEXT_TO_FIND_IN_ARTICLE = "text-to-find-in-article"
     
     # HTML elements - form submission
     INPUT_ID_SUBMIT_ARTICLE_CODING = "input-submit-article-coding";

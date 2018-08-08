@@ -204,6 +204,8 @@ def dataset_code_mentions( request_IN ):
     
     # declare variables - interacting with article text
     article_content = ""
+    article_content_line_list = []
+    article_text_custom = ""
     article_content_bs = None
     p_tag_list = []
     p_tag_count = -1
@@ -228,11 +230,16 @@ def dataset_code_mentions( request_IN ):
     response_dictionary[ 'manual_article_coder' ] = None
     response_dictionary[ 'article_instance' ] = None
     response_dictionary[ 'article_text' ] = None
+    response_dictionary[ 'article_text_custom' ] = None
+    response_dictionary[ 'article_text_render_type' ] = "custom"  # one of "table", "raw", "custom", "pdf"
+    response_dictionary[ 'article_text_is_preformatted' ] = False
+    response_dictionary[ 'article_text_wrap_in_p' ] = True
+    response_dictionary[ 'mention_text_read_only' ] = False
+    response_dictionary[ 'include_find_in_article_text' ] = True
     response_dictionary[ 'data_set_instance' ] = None
     response_dictionary[ 'base_simple_navigation' ] = True
     response_dictionary[ 'base_post_login_redirect' ] = reverse( dataset_code_mentions )
     response_dictionary[ 'existing_data_store_json' ] = ""
-    response_dictionary[ 'preformatted' ] = False    
     response_dictionary[ 'page_status_message_list' ] = page_status_message_list
     
     # create manual coder and place in response so we can access constants-ish.
@@ -589,12 +596,18 @@ def dataset_code_mentions( request_IN ):
                     # get article instance
                     article_instance = article_qs.get()
                     
-                    # retrieve article text.
+                    # ! ---- retrieve article text.
                     article_text = article_instance.article_text_set.get()
                     
                     # get content
                     article_content = article_text.get_content()
                     
+                    # ! ------ create custom text
+                    article_content_line_list = article_content.split( "\n" )
+                    article_text_custom = "<p>" + "</p>\n<p>".join( article_content_line_list ) + "</p>"
+                    response_dictionary[ 'article_text_custom' ] = article_text_custom
+                    
+                    # ! ------ table HTML
                     # parse with beautifulsoup
                     article_content_bs = BeautifulSoup( article_content, "html5lib" )
                     
@@ -659,9 +672,6 @@ def dataset_code_mentions( request_IN ):
                     response_dictionary[ 'coding_submit_form' ] = coding_submit_form
                     response_dictionary[ 'base_include_django_ajax_selects' ] = True
                     
-                    # loaded from config
-                    response_dictionary[ 'do_output_table_html' ] = False
-
                     # get paragraph list
                     #article_paragraph_list = article_text.get_paragraph_list()
                     
