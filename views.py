@@ -204,6 +204,7 @@ def dataset_code_mentions( request_IN ):
     
     # declare variables - interacting with article text
     article_content = ""
+    article_text_type = ""
     article_content_line_list = []
     article_text_custom = ""
     article_content_bs = None
@@ -231,6 +232,7 @@ def dataset_code_mentions( request_IN ):
     response_dictionary[ 'article_instance' ] = None
     response_dictionary[ 'article_text' ] = None
     response_dictionary[ 'article_text_custom' ] = None
+    response_dictionary[ 'article_text_type' ] = None
     response_dictionary[ 'article_text_render_type' ] = "custom"  # one of "table", "raw", "custom", "pdf"
     response_dictionary[ 'article_text_is_preformatted' ] = False
     response_dictionary[ 'article_text_wrap_in_p' ] = True
@@ -601,6 +603,8 @@ def dataset_code_mentions( request_IN ):
                     
                     # get content
                     article_content = article_text.get_content()
+                    article_text_type = article_text.content_type
+                    response_dictionary[ 'article_text_type' ] = article_text_type
                     
                     # ! ------ create custom text
                     article_content_line_list = article_content.split( "\n" )

@@ -10,6 +10,17 @@
 <script src="{% static "sourcenet/js/sourcenet.js" %}"></script>
 <script src="{% static "sourcenet/js/find-in-text.js" %}"></script>
 <script src="{% static "sourcenet_datasets/js/mention-coding/mention-coding.js" %}"></script>
+{% if article_text_type == "text" %}
+<script>
+    SOURCENET.article_text_ignore_p_tags = true;
+    SOURCENET.text_finder.ignore_wrapper_element = true;
+</script>
+{% else %}
+<script>
+    SOURCENET.article_text_ignore_p_tags = false;
+    SOURCENET.text_finder.ignore_wrapper_element = false;
+</script>
+{% endif %}
 {% if existing_data_store_json %}<script>SOURCENET.data_store_json = '{{ existing_data_store_json }}';</script>{% endif %}
 {% endblock %}
 
