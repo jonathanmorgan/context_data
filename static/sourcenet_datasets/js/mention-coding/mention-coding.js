@@ -99,7 +99,7 @@ SOURCENET.article_text_ignore_p_tags = true;
 SOURCENET.text_to_ignore_list = [];
 SOURCENET.text_to_ignore_list.push( "the" );
 SOURCENET.text_to_ignore_list.push( "The" );
-SOURCENET.text_finder.text_to_ignore_list = SOURCENET.text_to_ignore_list;
+SOURCENET.FindInText.add_to_ignore_list( SOURCENET.text_to_ignore_list );
 
 
 //----------------------------------------------------------------------------//
@@ -4116,7 +4116,6 @@ $( document ).ready(
         existing_case_flag = SOURCENET.text_finder.be_case_sensitive;
 
         // set what we want.
-        SOURCENET.FindInText.text_to_ignore_list = SOURCENET.text_to_ignore_list;
         SOURCENET.text_finder.be_case_sensitive = false;
         
         // how many in list?
@@ -4143,12 +4142,14 @@ $( document ).ready(
             }
             */
             
+            SOURCENET.log_message( "In " + me + " - highlighting current_text: \"" + current_text + "\"" );
+            //console.log( "In " + me + " - highlighting current_text: \"" + current_text + "\"" );
+            
             SOURCENET.find_words_in_article_text( current_text, false, "yellow" ) 
             
         } //-- END loop over strings --//
         
         // reset to existing.
-        SOURCENET.FindInText.text_to_ignore_list = existing_ignore_list;
         SOURCENET.text_finder.be_case_sensitive = existing_case_flag;        
     
     } //-- END function --//

@@ -241,7 +241,9 @@ def dataset_code_mentions( request_IN ):
     response_dictionary[ 'article_text_wrap_in_p' ] = Config_Property.get_property_boolean_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_ARTICLE_TEXT_WRAP_IN_P, default_IN = True )
     response_dictionary[ 'mention_text_read_only' ] = Config_Property.get_property_boolean_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_MENTION_TEXT_READ_ONLY, default_IN = False )
     response_dictionary[ 'include_find_in_article_text' ] = Config_Property.get_property_boolean_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_INCLUDE_FIND_IN_ARTICLE_TEXT, default_IN = True )
-    response_dictionary[ 'default_find_location' ] = Config_Property.get_property_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_DEFAULT_FIND_LOCATION, default_IN = "text" )
+    response_dictionary[ 'default_find_location' ] = Config_Property.get_property_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_DEFAULT_FIND_LOCATION, default_IN = "html" )
+    response_dictionary[ 'ignore_word_list' ] = Config_Property.get_property_list_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_IGNORE_WORD_LIST, default_IN = None, delimiter_IN = "," )
+    response_dictionary[ 'highlight_word_list' ] = Config_Property.get_property_list_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_HIGHLIGHT_WORD_LIST, default_IN = None, delimiter_IN = "," )
     response_dictionary[ 'data_set_instance' ] = None
     response_dictionary[ 'base_simple_navigation' ] = True
     response_dictionary[ 'base_post_login_redirect' ] = reverse( dataset_code_mentions )

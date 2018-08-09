@@ -100,6 +100,9 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
     CONFIG_NAME_MENTION_TEXT_READ_ONLY = "mention_text_read_only"
     CONFIG_NAME_INCLUDE_FIND_IN_ARTICLE_TEXT = "include_find_in_article_text"
     CONFIG_NAME_DEFAULT_FIND_LOCATION = "default_find_location"
+    CONFIG_NAME_IGNORE_WORD_LIST = "ignore_word_list"
+    CONFIG_NAME_HIGHLIGHT_WORD_LIST = "highlight_word_list"
+    CONFIG_NAME_DEFAULT_FIND_LOCATION = "default_find_location"
 
     # kwarg parameter names
     KWARG_DATA_STORE_JSON_STRING = "data_store_json_string_IN"

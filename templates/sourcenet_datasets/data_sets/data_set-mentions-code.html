@@ -23,6 +23,29 @@
 {% endif %}
 {% if default_find_location != "" %}<script>SOURCENET.text_finder.default_find_location = "{{ default_find_location }}";</script>{% endif %}
 {% if existing_data_store_json %}<script>SOURCENET.data_store_json = '{{ existing_data_store_json }}';</script>{% endif %}
+
+{# got ignore word list? #}
+{% if ignore_word_list %}
+<script>
+    var ignore_word_list = [];
+    {% for ignore_word in ignore_word_list %}
+    ignore_word_list.push( "{{ ignore_word }}" );
+    {% endfor %}
+    SOURCENET.FindInText.add_to_ignore_list( ignore_word_list );
+</script>
+{% endif %}
+
+{# got highlight word list? #}
+{% if highlight_word_list %}
+<script>
+    var highlight_word_list = [];
+    {% for highlight_word in highlight_word_list %}
+    highlight_word_list.push( "{{ highlight_word }}" );
+    {% endfor %}
+    SOURCENET.data_set_string_list = SOURCENET.data_set_string_list.concat( highlight_word_list );
+</script>
+{% endif %}
+
 {% endblock %}
 
 {% block content %}
