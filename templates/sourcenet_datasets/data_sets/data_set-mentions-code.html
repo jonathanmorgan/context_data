@@ -10,6 +10,7 @@
 <script src="{% static "sourcenet/js/sourcenet.js" %}"></script>
 <script src="{% static "sourcenet/js/find-in-text.js" %}"></script>
 <script src="{% static "sourcenet_datasets/js/mention-coding/mention-coding.js" %}"></script>
+<script>SOURCENET.text_finder.be_case_sensitive = {% if be_case_sensitive %}true{% else %}false{% endif %};</script>
 {% if article_text_type == "text" %}
 <script>
     SOURCENET.article_text_ignore_p_tags = true;
@@ -281,6 +282,7 @@
                 </script>
             -->
             {% if data_set_instance %}
+            <input type="button" id="toggle-data-set_highlighting" name="toggle-data-set_highlighting" value="<== highlight OFF" />
             <h3>Data Set {{ data_set_instance.id }} - {{ data_set_instance.name }}</h3>
             <script>
                 SOURCENET.data_set_string_list.push( "{{ data_set_instance.name }}".trim() );

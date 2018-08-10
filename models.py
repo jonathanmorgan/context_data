@@ -77,8 +77,39 @@ class DataSet( models.Model ):
     #----------------------------------------------------------------------
 
     def __str__( self ):
-        string_OUT = self.name
+        
+        # return reference
+        string_OUT = "";
+
+        # declare variables
+        prefix_string = ""
+        
+        if ( self.id ):
+        
+            # yes. output.
+            string_OUT += str( self.id )
+            prefix_string = " - "
+
+        #-- END check to see if ID --#
+
+        if ( self.title ):
+        
+            string_OUT += prefix_string + self.title
+            prefix_string = " - "
+            
+        #-- END check to see if title. --#
+            
+        if ( self.unique_identifier ):
+        
+            string_OUT += prefix_string + " ( " + self.unique_identifier + " )"
+            prefix_string = " - "
+            
+        #-- END check to see if unique_identifier. --#
+            
         return string_OUT
+        
+    #-- END method __str__() --#
+
 
 #= End DataSet Model ======================================================
 

@@ -228,7 +228,7 @@ def dataset_code_mentions( request_IN ):
     # set logger_name
     logger_name = "sourcenet.views." + me
     
-    # initialize response dictionary
+    # ! ---- initialize response dictionary
     response_dictionary = {}
     response_dictionary.update( csrf( request_IN ) )
     response_dictionary[ 'manual_article_coder' ] = None
@@ -244,6 +244,7 @@ def dataset_code_mentions( request_IN ):
     response_dictionary[ 'default_find_location' ] = Config_Property.get_property_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_DEFAULT_FIND_LOCATION, default_IN = "html" )
     response_dictionary[ 'ignore_word_list' ] = Config_Property.get_property_list_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_IGNORE_WORD_LIST, default_IN = None, delimiter_IN = "," )
     response_dictionary[ 'highlight_word_list' ] = Config_Property.get_property_list_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_HIGHLIGHT_WORD_LIST, default_IN = None, delimiter_IN = "," )
+    response_dictionary[ 'be_case_sensitive' ] = Config_Property.get_property_boolean_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_BE_CASE_SENSITIVE, default_IN = False )
     response_dictionary[ 'data_set_instance' ] = None
     response_dictionary[ 'base_simple_navigation' ] = True
     response_dictionary[ 'base_post_login_redirect' ] = reverse( dataset_code_mentions )
