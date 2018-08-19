@@ -326,6 +326,75 @@ class DataSetCitation( models.Model ):
 #= END DataSetCitation Model ======================================================
 
 
+# DataSetCitationData model
+@python_2_unicode_compatible
+class DataSetCitationData( models.Model ):
+
+    # mention types
+    MENTION_TYPE_MENTION = DataSetCitation.CITATION_TYPE_MENTION
+    MENTION_TYPE_ANALYSIS = DataSetCitation.CITATION_TYPE_ANALYSIS
+    MENTION_TYPE_DEFAULT = MENTION_TYPE_ANALYSIS
+
+    MENTION_TYPE_CHOICES = (
+        ( MENTION_TYPE_MENTION, MENTION_TYPE_MENTION ),
+        ( MENTION_TYPE_ANALYSIS, MENTION_TYPE_ANALYSIS ),
+    )
+
+
+    #----------------------------------------------------------------------------
+    # model fields and meta
+    #----------------------------------------------------------------------------
+
+
+    # who captured this?
+    article_data = models.ForeignKey( Article_Data, on_delete = models.CASCADE, blank = True, null = True )
+    
+    # associated citation
+    data_set_citation = models.ForeignKey( 'DataSetCitation', on_delete = models.CASCADE, blank = True, null = True )
+    
+    # meta-data about mention
+    citation_type = models.CharField( max_length = 255, choices = MENTION_TYPE_CHOICES, default = MENTION_TYPE_DEFAULT )
+
+    #----------------------------------------------------------------------
+    # instance methods
+    #----------------------------------------------------------------------
+
+
+    def __str__( self ):
+        
+        # return reference
+        string_OUT = ""
+        
+        # declare variables
+        details_list = []
+        
+        # got id?
+        if ( self.id ):
+        
+            string_OUT = str( self.id )
+            
+        #-- END check for ID. --#
+
+        if ( self.data_set_citation ):
+        
+            string_OUT += " - " + str( self.data_set_citation )
+        
+        #-- END check to see if article_subject. --#
+        
+        # got associated quotation?...
+        if ( self.value ):
+        
+            string_OUT += ": " + self.value
+                
+        #-- END check to see if we have a quotation. --#
+        
+        return string_OUT
+
+    #-- END __str__() method --#
+    
+#= End DataSetCitationData Model ======================================================
+
+
 # DataSetMention model
 @python_2_unicode_compatible
 class DataSetMention( Abstract_Selected_Text ):
@@ -349,7 +418,10 @@ class DataSetMention( Abstract_Selected_Text ):
     # associated citation
     data_set_citation = models.ForeignKey( 'DataSetCitation', on_delete = models.CASCADE, blank = True, null = True )
     
-    # optional - who captured this?
+    # associated citation data
+    data_set_citation_data = models.ForeignKey( 'DataSetCitationData', on_delete = models.CASCADE, blank = True, null = True )
+    
+    # optional - who captured this at the article level?
     article_data = models.ForeignKey( Article_Data, on_delete = models.CASCADE, blank = True, null = True )
     
     # meta-data about mention

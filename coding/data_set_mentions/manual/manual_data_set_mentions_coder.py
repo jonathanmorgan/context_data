@@ -63,6 +63,7 @@ from sourcenet.article_coding.article_coder import ArticleCoder
 
 # sourcenet_datasets classes
 from sourcenet_datasets.models import DataSetMention
+from sourcenet_datasets.models import DataSetCitationData
 
 
 #================================================================================
@@ -81,7 +82,7 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
     '''
 
     #============================================================================
-    # Constants-ish
+    # ! ==> Constants-ish
     #============================================================================
     
 
@@ -129,6 +130,10 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
     MENTION_TYPE_CITED = "cited"
     MENTION_TYPE_ANALYZED = "analyzed"
     
+    # props for dictionary returned when getting Article_Data for article/user
+    #    pair
+    PROP_CITATION_DATA = "citation_data"
+
     #--------------------------------------------------------------------------#
     # HTML element IDs
     #--------------------------------------------------------------------------#
@@ -169,7 +174,7 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
 
 
     #==========================================================================#
-    # Constructor
+    # ! ==> Constructor
     #==========================================================================#
 
 
@@ -197,7 +202,7 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
 
 
     #==========================================================================#
-    # Class methods
+    # ! ==> Class methods
     #==========================================================================#
 
 
@@ -336,10 +341,146 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
 
 
     #============================================================================
-    # Instance methods
+    # ! ==> Instance methods
     #============================================================================
 
 
+    def get_data_set_citation_data( self, article_data_IN, citation_IN, citation_type_IN = None, *args, **kwargs ):
+        
+        '''
+        Accepts article_data, citation.  Tries to retrieve DataSetCitationData
+            from Article_Data.  If multiple found, error.
+           
+        Returns a dictionary that contains:
+        - PROP_CITATION_DATA = "citation_data" - either matching
+            DataSetCitationData instance or None.
+        - PROP_LOOKUP_STATUS = "lookup_status" - status code with one of the 
+            following statuses:
+            - PROP_LOOKUP_STATUS_VALUE_NEW = "new"
+            - PROP_LOOKUP_STATUS_VALUE_EXISTING = "existing"
+            - PROP_LOOKUP_STATUS_VALUE_MULTIPLE = "multiple"
+            - PROP_LOOKUP_STATUS_VALUE_ERROR = "error"
+        - PROP_STATUS_MESSAGE = "status_message" - if "multiple" or "error",
+            explains what happened.  If "new" or "existing", empty.
+        - PROP_EXCEPTION = "exception"
+           
+        Postconditions - Returns:
+        - if single match found, returns it with status of "existing"
+            (self.PROP_LOOKUP_STATUS_PROP_EXISTING) and no status message or
+            exception.
+        - if no match found, creates new instance, returns it with status of
+            "new" (self.PROP_LOOKUP_STATUS_PROP_NEW) and no status message
+            or exception.
+        - if multiple matches found, returns None with status of "multiple"
+            (self.PROP_LOOKUP_STATUS_PROP_MULTIPLE), status_message explaining,
+            and no exception.
+        - if other error, returns None, status of "error"
+            (self.PROP_LOOKUP_STATUS_PROP_ERROR), status message that contains
+            the exception cast as a string, and the exception itself.
+        '''
+
+        # return reference
+        result_OUT = {}
+        citation_data_OUT = None
+        status_OUT = ""
+        status_message_OUT = ""
+        exception_OUT = None
+        
+        # declare variables
+        current_article_data = None
+        citation_instance = None
+        citation_data_qs = None
+        citation_data = None
+        citation_data_count = -1
+        
+        # init
+        current_article_data = article_data_IN
+        citation_instance = citation_IN
+        
+        # got article data?
+        if ( current_article_data is not None ):
+        
+            # got citation?
+            if ( citation_instance is not None ):
+        
+                # DataSetCitationData instance
+                citation_data_qs = current_article_data.datasetcitationdata_set.all()
+                citation_data_qs = citation_data_qs.filter( data_set_citation = citation_instance )
+                
+                # how many (should just be 1)
+                citation_data_count = citation_data_qs.count()
+                if ( citation_data_count == 0 ):
+                
+                    # make one, associate it correctly, save.
+                    citation_data = DataSetCitationData()
+                    citation_data.article_data = current_article_data
+                    citation_data.data_set_citation = citation_instance
+                    if ( citation_type_IN is not None ):
+                        citation_data.citation_type = citation_type_IN
+                    #-- END check if type passed in. --#
+                    citation_data.save()
+                    
+                    # set status to "new"
+                    status_OUT = self.PROP_LOOKUP_STATUS_VALUE_NEW
+
+                elif( citation_data_count == 1 ):
+                
+                    # get and use it.
+                    citation_data = citation_data_qs.get()
+                    
+                    # set status to "existing"
+                    status_OUT = self.PROP_LOOKUP_STATUS_VALUE_EXISTING
+
+                else:
+                
+                    # error. Multiple matches. output message and
+                    #     move on.
+                    citation_data = None
+                    
+                    # ...set status to "multiple"...
+                    status_OUT = self.PROP_LOOKUP_STATUS_VALUE_MULTIPLE
+
+                    # ...create status message...
+                    status_message_OUT = "Multiple DataSetCitationData found for Article_Data: {}; and citation: {}".format( current_article_data, citation_instance )
+
+                    # ...and log it.
+                    self.output_debug( status_message, me, indent_with_IN = "====>" )
+
+                #-- END check for DataSetCitationData --#
+                
+            else:
+                        
+                # error. No citation.
+                citation_data = None
+                status_OUT = self.PROP_LOOKUP_STATUS_VALUE_ERROR
+                status_message_OUT = "Required DataSetCitation instance not passed in."
+                self.output_debug( debug_message, me )    
+            
+            #-- END check to see if citation instance --#
+
+        else:
+        
+            # No article_data - error.
+            citation_data = None
+            status_OUT = self.PROP_LOOKUP_STATUS_VALUE_ERROR
+            status_message_OUT = "No Article_Data instance passed in.  Can't lookup DataSetCitationData if no article_data specified."
+                    
+        #-- END check to see if article_data passed in. --#
+        
+        # prepare output.
+        citation_data_OUT = citation_data
+        
+        # pack up result dictionary.
+        result_OUT[ self.PROP_CITATION_DATA ] = citation_data_OUT
+        result_OUT[ self.PROP_LOOKUP_STATUS ] = status_OUT
+        result_OUT[ self.PROP_STATUS_MESSAGE ] = status_message_OUT
+        result_OUT[ self.PROP_EXCEPTION ] = exception_OUT
+        
+        return result_OUT
+        
+    #-- END method get_data_set_citation_data() --#
+    
+    
     def init_config_properties( self, *args, **kwargs ):
 
         '''
@@ -551,6 +692,12 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
         current_article = None
         current_person = None
         
+        # declare variables - DataSetCitationData instance.
+        citation_get_result = None
+        citation_data = None
+        citation_get_status = None
+        citation_get_status_message = None
+        
         # declare variables - remove obsolete - lists of IDs of DataSetMention
         #     childre that we started with (original), and then that were
         #     looked up in processing (processed), so we can remove any we
@@ -704,137 +851,227 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
                         # got article data?
                         if ( current_article_data is not None ):
                         
-                            # make list of DataSetMentions for this citation
-                            # before parsing.
-                            data_set_mention_qs = current_article_data.datasetmention_set.all()
-                            data_set_mention_qs = data_set_mention_qs.filter( data_set_citation = citation_instance_IN )
-                            original_data_set_mention_id_list = list( data_set_mention_qs.values_list( "id", flat = True ).order_by( "id" ) )
-                            
-                            # initialize other processing tracking lists.
-                            processed_data_set_mention_id_list = []                            
+                            # ! -- DataSetCitationData instance
+                            citation_get_result = self.get_data_set_citation_data( current_article_data, citation_instance_IN )
                         
-                            debug_message = "original_data_set_mention_id_list = {}".format( original_data_set_mention_id_list )
-                            self.output_debug( debug_message, me, "@@@@@@@@>" )                                        
+                            # what have we got?
+                            if ( citation_get_result is not None ):
+                    
+                                # get citation data, status, status message.
+                                citation_data = citation_get_result.get( self.PROP_CITATION_DATA, None )
+                                citation_get_status = citation_get_result.get( self.PROP_LOOKUP_STATUS, self.PROP_LOOKUP_STATUS_VALUE_ERROR )
+                                citation_get_status_message = citation_get_result.get( self.PROP_STATUS_MESSAGE, None )
+                                
+                                # set processing flags.
+                                if ( lookup_status == self.PROP_LOOKUP_STATUS_VALUE_ERROR ):
+                                
+                                    # error.  Not OK to process...
+                                    citation_data = None
+                                    
+                                    # ...create error message...
+                                    status_message_list.append( lookup_status_message )
         
-                            # yes - store JSON in an Article_Data_Note.
-                            json_article_data_note = Article_Data_Notes()
-                            json_article_data_note.article_data = current_article_data
-                            json_article_data_note.content_type = Article_Data_Notes.CONTENT_TYPE_JSON
-                            json_article_data_note.content = data_store_json_string
-                            json_article_data_note.source = self.coder_type + " - user " + str( coder_user )
-                            json_article_data_note.content_description = "Data Store JSON (likely from manual coding of mentions via data_set-mentions-code view)."
-                            json_article_data_note.save()
-    
-                            # store current_article_data in article_data_OUT.
-                            article_data_OUT = current_article_data
-    
-                            # get list of mentions.
-                            mention_list = data_store_json[ self.DATA_STORE_PROP_MENTION_ARRAY ]
+                                    # ...and log it.
+                                    self.output_debug( lookup_status_message, me, indent_with_IN = "====>" )
+                                
+                                elif ( lookup_status == self.PROP_LOOKUP_STATUS_VALUE_MULTIPLE ):
+                                
+                                    # also error.  Not OK to process...
+                                    citation_data = None
+                                                                        
+                                    # ...create error message...
+                                    status_message_list.append( lookup_status_message )
+        
+                                    # ...and log it.
+                                    self.output_debug( lookup_status_message, me, indent_with_IN = "====>" )                            
+                                
+                                elif ( lookup_status == self.PROP_LOOKUP_STATUS_VALUE_NEW ):
+        
+                                    # OK to process...
+                                    pass
+                                    
+                                elif ( lookup_status == self.PROP_LOOKUP_STATUS_VALUE_EXISTING ):
+        
+                                    # OK to process...
+                                    pass
+                                    
+                                else:
+                                
+                                    # error.  Not OK to process...
+                                    citation_data = None
+                                    
+                                    # ...create error message...
+                                    status_message = "ERROR - Unknown get_data_set_citation_data() status " + lookup_status + ", message: " + lookup_status_message
+                                    status_message_list.append( status_message )
+        
+                                    # ...and log it.
+                                    self.output_debug( status_message, me, indent_with_IN = "====>" )
+                                
+                                    # unknown status.  Error.
+                                    
+                                #-- END conditional over statuses. --#
+                                    
+                            else:
                             
-                            # get count of mentions
-                            mention_count = len( mention_list )
+                                # no result - error.  Not OK to process...
+                                citation_data = None
+                                
+                                # ...create error message...
+                                status_message = "ERROR - Nothing came back from get_data_set_citation_data() status."
+                                status_message_list.append( status_message )
+        
+                                # ...and log it.
+                                self.output_debug( status_message, me, indent_with_IN = "====>" )
                             
-                            # got one or more mentions?
-                            if ( mention_count > 0 ):
+                                # unknown status.  Error.
+                                
+                            #-- END check to make sure we have a response. --#
+                                        
+                            # got citation_data?
+                            if ( citation_data is not None ):
+                            
+                                # make list of DataSetMentions for this citation
+                                # before parsing.
+                                data_set_mention_qs = citation_data.datasetmention_set.all()
+                                original_data_set_mention_id_list = list( data_set_mention_qs.values_list( "id", flat = True ).order_by( "id" ) )
+                                
+                                # initialize other processing tracking lists.
+                                processed_data_set_mention_id_list = []                            
+                            
+                                debug_message = "original_data_set_mention_id_list = {}".format( original_data_set_mention_id_list )
+                                self.output_debug( debug_message, me, "@@@@@@@@>" )                                        
+            
+                                # yes - store JSON in an Article_Data_Note.
+                                json_article_data_note = Article_Data_Notes()
+                                json_article_data_note.article_data = current_article_data
+                                json_article_data_note.content_type = Article_Data_Notes.CONTENT_TYPE_JSON
+                                json_article_data_note.content = data_store_json_string
+                                json_article_data_note.source = self.coder_type + " - user " + str( coder_user )
+                                json_article_data_note.content_description = "Data Store JSON (likely from manual coding of mentions via data_set-mentions-code view)."
+                                json_article_data_note.save()
+        
+                                # store current_article_data in article_data_OUT.
+                                article_data_OUT = current_article_data
+        
+                                # get list of mentions.
+                                mention_list = data_store_json[ self.DATA_STORE_PROP_MENTION_ARRAY ]
+                                
+                                # get count of mentions
+                                mention_count = len( mention_list )
+                                
+                                # got one or more mentions?
+                                if ( mention_count > 0 ):
+                                                        
+                                    # !loop over mentions
+                                    mention_counter = 0
+                                    for current_mention in mention_list:
+        
+                                        # increment counter
+                                        mention_counter += 1
+                                    
+                                        # check to see if it is an empty entry (happens
+                                        #    when a mention is removed during coding).
+                                        if ( current_mention is not None ):
+                                    
+                                            # get mention text.
+                                            mention_text = current_mention.get( self.DATA_STORE_PROP_MENTION_TEXT, None )
+                                            
+                                            # set capture method.
+                                            mention_capture_method = "manual_coding"
+                                            
+                                            # look up mention with this text.
+                                            processing_qs = data_set_mention_qs.filter( value = mention_text )
+                                            
+                                            # how many?
+                                            processing_count = processing_qs.count()
+                                            if ( processing_count == 1 ):
+                                            
+                                                # got a match.  Add id to processed list and move on.
+                                                current_data_set_mention = processing_qs.get()
+                                                current_data_set_mention_id = current_data_set_mention.id
+                                                
+                                                # check to see if ID already in list
+                                                if ( current_data_set_mention_id not in processed_data_set_mention_id_list ):
+                                                
+                                                    # not there - add it.
+                                                    processed_data_set_mention_id_list.append( current_data_set_mention_id )
                                                     
-                                # !loop over mentions
-                                mention_counter = 0
-                                for current_mention in mention_list:
-    
-                                    # increment counter
-                                    mention_counter += 1
-                                
-                                    # check to see if it is an empty entry (happens
-                                    #    when a mention is removed during coding).
-                                    if ( current_mention is not None ):
-                                
-                                        # get mention text.
-                                        mention_text = current_mention.get( self.DATA_STORE_PROP_MENTION_TEXT, None )
-                                        
-                                        # set capture method.
-                                        mention_capture_method = "manual_coding"
-                                        
-                                        # look up mention with this text.
-                                        processing_qs = data_set_mention_qs.filter( value = mention_text )
-                                        
-                                        # how many?
-                                        processing_count = processing_qs.count()
-                                        if ( processing_count == 1 ):
-                                        
-                                            # got a match.  Add id to processed list and move on.
-                                            current_data_set_mention = processing_qs.get()
-                                            current_data_set_mention_id = current_data_set_mention.id
-                                            
-                                            # check to see if ID already in list
-                                            if ( current_data_set_mention_id not in processed_data_set_mention_id_list ):
-                                            
-                                                # not there - add it.
-                                                processed_data_set_mention_id_list.append( current_data_set_mention_id )
+                                                #-- END check to see if mention ID already in list. --#
                                                 
-                                            #-- END check to see if mention ID already in list. --#
+                                            elif ( processing_count == 0 ):
                                             
-                                        elif ( processing_count == 0 ):
-                                        
-                                            # new match - create new record.
-                                            current_data_set_mention = DataSetMention()
-                                            current_data_set_mention.value = mention_text
-                                            current_data_set_mention.capture_method = mention_capture_method
-                                            current_data_set_mention.data_set_citation = citation_instance_IN
-                                            current_data_set_mention.article_data = article_data_OUT
-                                            current_data_set_mention.save()
-                                            
-                                            # check to see if ID alread in the
-                                            #     processed list (better not be
-                                            #     there).
-                                            current_data_set_mention_id = current_data_set_mention.id
-                                            if ( current_data_set_mention_id not in processed_data_set_mention_id_list ):
-                                            
-                                                # not there (and better not be
-                                                #     there) - add it.
-                                                processed_data_set_mention_id_list.append( current_data_set_mention_id )
+                                                # new match - create new record.
+                                                current_data_set_mention = DataSetMention()
+                                                current_data_set_mention.value = mention_text
+                                                current_data_set_mention.capture_method = mention_capture_method
+                                                current_data_set_mention.data_set_citation = citation_instance_IN
+                                                current_data_set_mention.data_set_citation_data = citation_data
+                                                current_data_set_mention.article_data = article_data_OUT
+                                                current_data_set_mention.save()
                                                 
-                                            #-- END check to see if mention ID already in list. --#
-                                        
+                                                # check to see if ID alread in the
+                                                #     processed list (better not be
+                                                #     there).
+                                                current_data_set_mention_id = current_data_set_mention.id
+                                                if ( current_data_set_mention_id not in processed_data_set_mention_id_list ):
+                                                
+                                                    # not there (and better not be
+                                                    #     there) - add it.
+                                                    processed_data_set_mention_id_list.append( current_data_set_mention_id )
+                                                    
+                                                #-- END check to see if mention ID already in list. --#
+                                            
+                                            else:
+                                            
+                                                # error.  Multiple matches.  output
+                                                #     message and move on.
+                                                debug_message = "ERROR: mention_list item {}, mention_text {}, has multiple matches.  Moving on.".format( mention_counter, mention_text )
+                                                status_message_list.append( debug_message )
+                                                self.output_debug( debug_message, me )
+                                                
+                                            #-- END check to see how many matches. --#
+                                                                                    
                                         else:
                                         
-                                            # error.  Multiple matches.  output
-                                            #     message and move on.
-                                            debug_message = "ERROR: mention_list item {}, mention_text {}, has multiple matches.  Moving on.".format( mention_counter, mention_text )
-                                            status_message_list.append( debug_message )
+                                            # empty mention list entry.  Make a note
+                                            #     and move on.
+                                            debug_message = "mention_list item " + str( mention_counter ) + " is None.  Moving on."
+                                            # status_message_list.append( debug_message )
+                                            debug_message = "WARNING: " + debug_message
                                             self.output_debug( debug_message, me )
-                                            
-                                        #-- END check to see how many matches. --#
-                                                                                
-                                    else:
+                                        
+                                        #-- END check to see if empty entry in mention list --#
+        
+                                    #-- END loop over persons --#
                                     
-                                        # empty mention list entry.  Make a note
-                                        #     and move on.
-                                        debug_message = "mention_list item " + str( mention_counter ) + " is None.  Moving on."
-                                        # status_message_list.append( debug_message )
-                                        debug_message = "WARNING: " + debug_message
-                                        self.output_debug( debug_message, me )
-                                    
-                                    #-- END check to see if empty entry in mention list --#
-    
-                                #-- END loop over persons --#
+                                    # ! ==> removal check
+                                    # Remove any DataSetMention whose ID is in the
+                                    #     original list but not in the processed
+                                    #     list.
+                                    deleted_data_set_mention_list = self.winnow_orphaned_records(
+                                            original_data_set_mention_id_list,
+                                            processed_data_set_mention_id_list,
+                                            DataSetMention
+                                        )
+                                                                    
+                                #-- END check to see if there are any mentions. --#
                                 
-                                # ! ==> removal check
-                                # Remove any DataSetMention whose ID is in the
-                                #     original list but not in the processed
-                                #     list.
-                                deleted_data_set_mention_list = self.winnow_orphaned_records(
-                                        original_data_set_mention_id_list,
-                                        processed_data_set_mention_id_list,
-                                        DataSetMention
-                                    )
-                                                                
-                            #-- END check to see if there are any mentions. --#
+                            else:
                             
+                                # No citation data instance.  Can't process. 
+                                #    Add message to list, log it.
+                                status_message = "ERROR - Even though  lookup indicated success, no Article_Data.  Don't know what to tell you."
+                                status_message_list.append( status_message )
+                                self.output_debug( status_message, me, "====> " )
+                                article_data_OUT = None
+                            
+                            #-- END check to see if any DataSetCitationData --#
+
                         else:
                         
                             # No article data instance.  Can't process.  Add
                             #    message to list, log it.
-                            status_message = "ERROR - Even though Article_Data lookup indicated success, no Article_Data.  Don't know what to tell you."
+                            status_message = "ERROR - Even though get_data_set_citation_data() indicated success, no citation data.  Don't know what to tell you."
                             status_message_list.append( status_message )
                             self.output_debug( status_message, me, "====> " )
                             article_data_OUT = None
