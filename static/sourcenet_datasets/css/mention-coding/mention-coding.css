@@ -193,7 +193,7 @@ table.mentionListTable
 .submitArticleCoding
 {
     /* default to not shown - show one or more person coded. */
-    display: none;    
+    /* display: none; */
 }
 
 .articleEnd
@@ -221,6 +221,16 @@ table.mentionListTable
 .foundInTextMatchedWordsRed
 {
     background-color: #e83434;
+}
+
+.foundInTextGreen
+{
+    background-color: #78f294;
+}
+
+.foundInTextMatchedWordsGreen
+{
+    background-color: #158009;
 }
 
 .hidden

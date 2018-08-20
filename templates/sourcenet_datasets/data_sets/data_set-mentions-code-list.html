@@ -69,6 +69,7 @@
                     <tr>
                         <th>index</th>
                         <th>citation</th>
+                        <th>dataset</th>
                         <th>status</th>
                         <th>coding</th>
                     </tr>
@@ -78,6 +79,7 @@
                         <tr>
                             <td>{{ citation_details.index }}</td>
                             <td>{{ citation_details.citation_instance }}</td>
+                            <td>{{ citation_details.citation_instance.data_set.title }}</td>
                             <td>{{ citation_details.citation_status }}</td>
                             <td><a href="{% url 'sourcenet_datasets-dataset_code_mentions' %}?data_set_citation_id={{ citation_details.citation_instance.id }}&source=dataset-mentions-code-list&tags_in_list={{ tags_in_list }}">{% if citation_details.article_data %}Edit Coding{{ article_details.article_data }}{% else %}Begin Coding{% endif %}</a></td>
                         </tr>

@@ -105,6 +105,7 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
     CONFIG_NAME_HIGHLIGHT_WORD_LIST = "highlight_word_list"
     CONFIG_NAME_DEFAULT_FIND_LOCATION = "default_find_location"
     CONFIG_NAME_BE_CASE_SENSITIVE = "be_case_sensitive"
+    CONFIG_NAME_PROCESS_FOUND_SYNONYMS = "process_found_synonyms"
 
     # kwarg parameter names
     KWARG_DATA_STORE_JSON_STRING = "data_store_json_string_IN"
@@ -224,11 +225,16 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
 
         # declare variables
         me = "convert_article_data_to_data_store_json"
-        local_debug_flag = False
+        local_debug_flag = True
+        status_message_list = []
         debug_message = ""
         mention_array_list = []
         text_to_mention_index_dict = {}
         data_store_dict = None
+        get_citation_data_result = None
+        citation_data = None
+        citation_get_status = None
+        citation_get_status_message = None
         data_set_mention_qs = None
         current_data_set_mention = None
         current_mention_text = ""
@@ -257,43 +263,78 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
             # we have Article_Data - do we have a citation instance?
             if ( citation_instance_IN is not None ):
             
-                # we have Article_Data - First get list of DataSetMentions.
-                data_set_mention_qs = article_data_IN.datasetmention_set.all()
+                # we have Article_Data - First get DataSetCitationData
+                get_citation_data_result = cls.get_data_set_citation_data( article_data_IN, citation_instance_IN )
+                
+                # retrieve results
+                if ( get_citation_data_result is not None ):
+        
+                    # get citation data, status, status message.
+                    citation_data = get_citation_data_result.get( cls.PROP_CITATION_DATA, None )
+                    citation_get_status = get_citation_data_result.get( cls.PROP_LOOKUP_STATUS, cls.PROP_LOOKUP_STATUS_VALUE_ERROR )
+                    citation_get_status_message = get_citation_data_result.get( cls.PROP_STATUS_MESSAGE, None )
+                    
+                    # error?
+                    if ( citation_get_status not in cls.PROP_LOOKUP_ERROR_STATUS_LIST ):
+                    
+                        # no - process.
+                        
+                        # then get list of DataSetMentions.
+                        data_set_mention_qs = citation_data.datasetmention_set.all()
+        
+                        # filter mentions down to just those for citation.
+                        data_set_mention_qs = data_set_mention_qs.filter( data_set_citation = citation_instance_IN )
+                        
+                        # loop over mentions.
+                        for current_data_set_mention in data_set_mention_qs:
+                        
+                            # increment index
+                            mention_index += 1
+                            
+                            # get values
+                            current_mention_text = JSONHelper.escape_json_value( current_data_set_mention.value )
+                        
+                            # init mention dict
+                            current_mention_dict = {}
+                            current_mention_dict[ cls.DATA_STORE_PROP_MENTION_TEXT ] = current_mention_text
+                            current_mention_dict[ cls.DATA_STORE_PROP_FIXED_MENTION_TEXT ] = ""
+                            current_mention_dict[ cls.DATA_STORE_PROP_MENTION_TYPE ] = ""
+                            current_mention_dict[ cls.DATA_STORE_PROP_MENTION_INDEX ] = mention_index
+                            current_mention_dict[ cls.DATA_STORE_PROP_ORIGINAL_MENTION_TYPE ] = current_data_set_mention.mention_type
+                            current_mention_dict[ cls.DATA_STORE_PROP_DATA_SET_MENTION_ID ] = int( current_data_set_mention.id )
+                            
+                            # add to mention array list.
+                            mention_array_list.append( current_mention_dict )
+                            text_to_mention_index_dict[ current_mention_text ] = mention_index
+                            
+                        #-- END loop over data set mentions --#
+                        
+                        # put it all together.
+                        data_store_dict[ cls.DATA_STORE_PROP_MENTION_ARRAY ] = mention_array_list
+                        data_store_dict[ cls.DATA_STORE_PROP_NEXT_MENTION_INDEX ] = mention_index + 1
+                        data_store_dict[ cls.DATA_STORE_PROP_STATUS_MESSAGE_ARRAY ] = []
+                        data_store_dict[ cls.DATA_STORE_PROP_LATEST_MENTION_INDEX ] = mention_index
+                        data_store_dict[ 'article_data_id' ] = article_data_IN.id
+                        data_store_dict[ 'citation_id' ] = citation_instance_IN.id
+                        data_store_dict[ 'data_set_citation_data_id' ] = citation_data.id
 
-                # filter mentions down to just those for citation.
-                data_set_mention_qs = data_set_mention_qs.filter( data_set_citation = citation_instance_IN )
-                
-                # loop over mentions.
-                for current_data_set_mention in data_set_mention_qs:
-                
-                    # increment index
-                    mention_index += 1
+                    else:
                     
-                    # get values
-                    current_mention_text = JSONHelper.escape_json_value( current_data_set_mention.value )
-                
-                    # init mention dict
-                    current_mention_dict = {}
-                    current_mention_dict[ cls.DATA_STORE_PROP_MENTION_TEXT ] = current_mention_text
-                    current_mention_dict[ cls.DATA_STORE_PROP_FIXED_MENTION_TEXT ] = ""
-                    current_mention_dict[ cls.DATA_STORE_PROP_MENTION_TYPE ] = ""
-                    current_mention_dict[ cls.DATA_STORE_PROP_MENTION_INDEX ] = mention_index
-                    current_mention_dict[ cls.DATA_STORE_PROP_ORIGINAL_MENTION_TYPE ] = ""
-                    current_mention_dict[ cls.DATA_STORE_PROP_DATA_SET_MENTION_ID ] = int( current_data_set_mention.id )
+                        # error.  No citation data.
+                        status_message = "ERROR - status: {}; status message: {}.".format( citation_get_status, citation_get_status_message )
+                        status_message_list.append( status_message )
                     
-                    # add to mention array list.
-                    mention_array_list.append( current_mention_dict )
-                    text_to_mention_index_dict[ current_mention_text ] = mention_index
-                    
-                #-- END loop over data set mentions --#
+                    # END check to see if citation present. --#
+
+                else:
                 
-                # put it all together.
-                data_store_dict[ cls.DATA_STORE_PROP_MENTION_ARRAY ] = mention_array_list
-                data_store_dict[ cls.DATA_STORE_PROP_NEXT_MENTION_INDEX ] = mention_index + 1
-                data_store_dict[ cls.DATA_STORE_PROP_STATUS_MESSAGE_ARRAY ] = []
-                data_store_dict[ cls.DATA_STORE_PROP_LATEST_MENTION_INDEX ] = mention_index
-                data_store_dict[ 'article_data_id' ] = article_data_IN.id
-                data_store_dict[ 'citation_id' ] = citation_instance_IN.id
+                    # error.  No citation data response from get method.
+                        
+                    # Error.  Need a citation.
+                    status_message = "ERROR - No response from call to cls.get_data_set_citation_data().  Very strange."
+                    status_message_list.append( status_message )
+                
+                # END check to see if citation present. --#
 
             else:
             
@@ -329,6 +370,13 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
 
         # local debug on?
         if ( local_debug_flag == True ):
+        
+            # log status message list
+            for status_message in status_message_list:
+            
+                LoggingHelper.output_debug( status_message, me, indent_with_IN = '====>', logger_name_IN = cls.LOGGER_NAME, resource_string_IN = my_resource_string )
+                
+            #-- END logging of status messages --#
 
             # remove resource string from LoggingHelper instance-level string.
             LoggingHelper.remove_from_class_resource_string( my_resource_string )
@@ -340,12 +388,8 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
     #-- END class method convert_article_data_to_json() --#
 
 
-    #============================================================================
-    # ! ==> Instance methods
-    #============================================================================
-
-
-    def get_data_set_citation_data( self, article_data_IN, citation_IN, citation_type_IN = None, *args, **kwargs ):
+    @classmethod
+    def get_data_set_citation_data( cls, article_data_IN, citation_IN, citation_type_IN = None, *args, **kwargs ):
         
         '''
         Accepts article_data, citation.  Tries to retrieve DataSetCitationData
@@ -421,7 +465,7 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
                     citation_data.save()
                     
                     # set status to "new"
-                    status_OUT = self.PROP_LOOKUP_STATUS_VALUE_NEW
+                    status_OUT = cls.PROP_LOOKUP_STATUS_VALUE_NEW
 
                 elif( citation_data_count == 1 ):
                 
@@ -429,7 +473,7 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
                     citation_data = citation_data_qs.get()
                     
                     # set status to "existing"
-                    status_OUT = self.PROP_LOOKUP_STATUS_VALUE_EXISTING
+                    status_OUT = cls.PROP_LOOKUP_STATUS_VALUE_EXISTING
 
                 else:
                 
@@ -438,13 +482,13 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
                     citation_data = None
                     
                     # ...set status to "multiple"...
-                    status_OUT = self.PROP_LOOKUP_STATUS_VALUE_MULTIPLE
+                    status_OUT = cls.PROP_LOOKUP_STATUS_VALUE_MULTIPLE
 
                     # ...create status message...
                     status_message_OUT = "Multiple DataSetCitationData found for Article_Data: {}; and citation: {}".format( current_article_data, citation_instance )
 
                     # ...and log it.
-                    self.output_debug( status_message, me, indent_with_IN = "====>" )
+                    cls.output_debug( status_message, me, indent_with_IN = "====>" )
 
                 #-- END check for DataSetCitationData --#
                 
@@ -452,9 +496,9 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
                         
                 # error. No citation.
                 citation_data = None
-                status_OUT = self.PROP_LOOKUP_STATUS_VALUE_ERROR
+                status_OUT = cls.PROP_LOOKUP_STATUS_VALUE_ERROR
                 status_message_OUT = "Required DataSetCitation instance not passed in."
-                self.output_debug( debug_message, me )    
+                cls.output_debug( debug_message, me )    
             
             #-- END check to see if citation instance --#
 
@@ -462,7 +506,7 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
         
             # No article_data - error.
             citation_data = None
-            status_OUT = self.PROP_LOOKUP_STATUS_VALUE_ERROR
+            status_OUT = cls.PROP_LOOKUP_STATUS_VALUE_ERROR
             status_message_OUT = "No Article_Data instance passed in.  Can't lookup DataSetCitationData if no article_data specified."
                     
         #-- END check to see if article_data passed in. --#
@@ -471,16 +515,21 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
         citation_data_OUT = citation_data
         
         # pack up result dictionary.
-        result_OUT[ self.PROP_CITATION_DATA ] = citation_data_OUT
-        result_OUT[ self.PROP_LOOKUP_STATUS ] = status_OUT
-        result_OUT[ self.PROP_STATUS_MESSAGE ] = status_message_OUT
-        result_OUT[ self.PROP_EXCEPTION ] = exception_OUT
+        result_OUT[ cls.PROP_CITATION_DATA ] = citation_data_OUT
+        result_OUT[ cls.PROP_LOOKUP_STATUS ] = status_OUT
+        result_OUT[ cls.PROP_STATUS_MESSAGE ] = status_message_OUT
+        result_OUT[ cls.PROP_EXCEPTION ] = exception_OUT
         
         return result_OUT
         
     #-- END method get_data_set_citation_data() --#
     
     
+    #============================================================================
+    # ! ==> Instance methods
+    #============================================================================
+
+
     def init_config_properties( self, *args, **kwargs ):
 
         '''
@@ -775,7 +824,7 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
                         lookup_status_message = lookup_result.get( self.PROP_STATUS_MESSAGE, None )
                         
                         # set processing flags.
-                        if ( lookup_status == self.PROP_LOOKUP_STATUS_VALUE_ERROR ):
+                        if ( lookup_status in self.PROP_LOOKUP_ERROR_STATUS_LIST ):
                         
                             # error.  Not OK to process...
                             is_ok_to_process = False
@@ -785,17 +834,6 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
 
                             # ...and log it.
                             self.output_debug( lookup_status_message, me, indent_with_IN = "====>" )
-                        
-                        elif ( lookup_status == self.PROP_LOOKUP_STATUS_VALUE_MULTIPLE ):
-                        
-                            # also error.  Not OK to process...
-                            is_ok_to_process = False
-                            
-                            # ...create error message...
-                            status_message_list.append( lookup_status_message )
-
-                            # ...and log it.
-                            self.output_debug( lookup_status_message, me, indent_with_IN = "====>" )                            
                         
                         elif ( lookup_status == self.PROP_LOOKUP_STATUS_VALUE_NEW ):
 
@@ -863,45 +901,30 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
                                 citation_get_status_message = citation_get_result.get( self.PROP_STATUS_MESSAGE, None )
                                 
                                 # set processing flags.
-                                if ( lookup_status == self.PROP_LOOKUP_STATUS_VALUE_ERROR ):
+                                if ( citation_get_status in self.PROP_LOOKUP_ERROR_STATUS_LIST ):
                                 
-                                    # error.  Not OK to process...
+                                    # error (error, or multiple found).  Not OK to process...
                                     citation_data = None
                                     
                                     # ...create error message...
-                                    status_message_list.append( lookup_status_message )
+                                    status_message_list.append( citation_get_status_message )
         
                                     # ...and log it.
-                                    self.output_debug( lookup_status_message, me, indent_with_IN = "====>" )
+                                    self.output_debug( citation_get_status_message, me, indent_with_IN = "====>" )
                                 
-                                elif ( lookup_status == self.PROP_LOOKUP_STATUS_VALUE_MULTIPLE ):
-                                
-                                    # also error.  Not OK to process...
-                                    citation_data = None
-                                                                        
-                                    # ...create error message...
-                                    status_message_list.append( lookup_status_message )
-        
-                                    # ...and log it.
-                                    self.output_debug( lookup_status_message, me, indent_with_IN = "====>" )                            
-                                
-                                elif ( lookup_status == self.PROP_LOOKUP_STATUS_VALUE_NEW ):
+                                elif ( citation_get_status in self.PROP_LOOKUP_FOUND_STATUS_LIST ):
         
                                     # OK to process...
-                                    pass
-                                    
-                                elif ( lookup_status == self.PROP_LOOKUP_STATUS_VALUE_EXISTING ):
-        
-                                    # OK to process...
-                                    pass
-                                    
+                                    debug_message = "Found DataSetCitationData instance, status: {}; message: {}".format( citation_get_status, citation_get_status_message )
+                                    self.output_debug( debug_message, me, indent_with_IN = "====>" )
+
                                 else:
                                 
-                                    # error.  Not OK to process...
+                                    # unknown error.  Not OK to process...
                                     citation_data = None
                                     
                                     # ...create error message...
-                                    status_message = "ERROR - Unknown get_data_set_citation_data() status " + lookup_status + ", message: " + lookup_status_message
+                                    status_message = "ERROR - Unknown get_data_set_citation_data() status: {}, message: {}".format( citation_get_status, citation_get_status_message )
                                     status_message_list.append( status_message )
         
                                     # ...and log it.
@@ -918,10 +941,10 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
                                 
                                 # ...create error message...
                                 status_message = "ERROR - Nothing came back from get_data_set_citation_data() status."
-                                status_message_list.append( status_message )
+                                status_message_list.append( citation_get_status_message )
         
                                 # ...and log it.
-                                self.output_debug( status_message, me, indent_with_IN = "====>" )
+                                self.output_debug( citation_get_status_message, me, indent_with_IN = "====>" )
                             
                                 # unknown status.  Error.
                                 
@@ -947,7 +970,7 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
                                 json_article_data_note.content_type = Article_Data_Notes.CONTENT_TYPE_JSON
                                 json_article_data_note.content = data_store_json_string
                                 json_article_data_note.source = self.coder_type + " - user " + str( coder_user )
-                                json_article_data_note.content_description = "Data Store JSON (likely from manual coding of mentions via data_set-mentions-code view)."
+                                json_article_data_note.content_description = "Data Store JSON (likely from manual coding of mentions via data_set-mentions-code view) - DataSetCitationData: {}".format( citation_data )
                                 json_article_data_note.save()
         
                                 # store current_article_data in article_data_OUT.

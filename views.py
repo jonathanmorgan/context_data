@@ -49,6 +49,7 @@ from django_config.models import Config_Property
 
 # import model classes
 from sourcenet_datasets.models import DataSetCitation
+from sourcenet_datasets.models import DataSetCitationData
 
 # other sourcenet_datasets classes
 from sourcenet_datasets.coding.data_set_mentions.manual.manual_data_set_mentions_coder import ManualDataSetMentionsCoder
@@ -110,7 +111,7 @@ def get_request_data( request_IN ):
 debugging code, shared across all models.
 '''
 
-DEBUG = True
+DEBUG = False
 LOGGER_NAME = "sourcenet.views"
 
 def output_debug( message_IN, method_IN = "", indent_with_IN = "", logger_name_IN = "" ):
@@ -245,7 +246,9 @@ def dataset_code_mentions( request_IN ):
     response_dictionary[ 'ignore_word_list' ] = Config_Property.get_property_list_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_IGNORE_WORD_LIST, default_IN = None, delimiter_IN = "," )
     response_dictionary[ 'highlight_word_list' ] = Config_Property.get_property_list_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_HIGHLIGHT_WORD_LIST, default_IN = None, delimiter_IN = "," )
     response_dictionary[ 'be_case_sensitive' ] = Config_Property.get_property_boolean_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_BE_CASE_SENSITIVE, default_IN = False )
+    response_dictionary[ 'process_found_synonyms' ] = Config_Property.get_property_boolean_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_PROCESS_FOUND_SYNONYMS, default_IN = False )
     response_dictionary[ 'data_set_instance' ] = None
+    response_dictionary[ 'data_set_mention_list' ] = []
     response_dictionary[ 'base_simple_navigation' ] = True
     response_dictionary[ 'base_post_login_redirect' ] = reverse( dataset_code_mentions )
     response_dictionary[ 'existing_data_store_json' ] = ""
@@ -299,7 +302,9 @@ def dataset_code_mentions( request_IN ):
                 # get related instances
                 article_instance = citation_instance.article
                 data_set_instance = citation_instance.data_set
-                #response_dictionary[ 'data_set_instance' ] = data_set_instance
+                response_dictionary[ 'data_set_instance' ] = data_set_instance
+                data_set_mention_list = data_set_instance.get_unique_mention_string_list()
+                response_dictionary[ 'data_set_mention_list' ] = data_set_mention_list
         
             #-- END check if single citation. --#
             
@@ -742,17 +747,17 @@ def dataset_code_mentions( request_IN ):
             
                 # ERROR - nothing returned from attempt to get queryset (would expect empty query set)
 
-                    # create error message.
-                    page_status_message = "ERROR - no QuerySet returned from call to filter().  This is odd."
+                # create error message.
+                page_status_message = "ERROR - no QuerySet returned from call to filter().  This is odd."
 
-                    # log it...
-                    output_debug( page_status_message, me, indent_with_IN = "====> ", logger_name_IN = logger_name )
+                # log it...
+                output_debug( page_status_message, me, indent_with_IN = "====> ", logger_name_IN = logger_name )
 
-                    # ...and output it.
-                    page_status_message_list.append( page_status_message )
+                # ...and output it.
+                page_status_message_list.append( page_status_message )
 
-                    # and pass on the form.
-                    response_dictionary[ 'data_set_citation_lookup_form' ] = data_set_citation_lookup_form
+                # and pass on the form.
+                response_dictionary[ 'data_set_citation_lookup_form' ] = data_set_citation_lookup_form
 
             #-- END check to see if query set is None --#
 
@@ -816,6 +821,7 @@ def dataset_mention_coding_list( request_IN ):
     related_article_id = None
     article_data = None
     citation_status = ""
+    related_citation_data = None
     mention_qs = None
     mention_count = -1
     
@@ -874,6 +880,7 @@ def dataset_mention_coding_list( request_IN ):
             #     - article string and data set strings
             #     - link to code mentions for citation.
             
+            # ! ---- tag lookup
             # retrieve QuerySet that contains citations with requested tag(s).
             tags_in_list = ListHelper.get_value_as_list( tags_in_list )
             
@@ -911,10 +918,13 @@ def dataset_mention_coding_list( request_IN ):
                         # store index and article
                         citation_details[ "index" ] = citation_counter
                         citation_details[ "citation_instance" ] = citation_instance
+                        related_data_set = citation_instance.data_set
                         
                         # see if there is an Article_Data for current user.
                         try:
                         
+                            # ! ---- Article_Data lookup
+
                             # look up Article_Data for this user...
                             article_data_qs = Article_Data.objects.filter( coder = current_user )
                             
@@ -923,30 +933,55 @@ def dataset_mention_coding_list( request_IN ):
                             article_data = article_data_qs.get( article = related_article )
                             
                             # then look for mentions related to the dataset.
-                            related_data_set = citation_instance.data_set
-                            mention_qs = article_data.datasetmention_set.filter( data_set_citation__data_set = related_data_set )
-                            mention_count = mention_qs.count()
+                            try:
                             
-                            # got any mentions?
-                            if ( mention_count > 0 ):
-                            
-                                # if we get here, one Article_Data, and mentions
-                                citation_status = "coded"
+                                # ! ---- DataSetCitationData lookup
                                 
-                            else:
-                            
-                                # if we get here, one Article_Data, no mentions
-                                citation_status = "pending"
+                                # get DataSetCitationData for citation.
+                                related_citation_data = article_data.datasetcitationdata_set.get( data_set_citation = citation_instance )
+                                mention_qs = related_citation_data.datasetmention_set.filter( data_set_citation__data_set = related_data_set )
+                                mention_count = mention_qs.count()
                                 
-                            #-- END check to see if mentions coded for this article. --#  
+                                # got any mentions?
+                                if ( mention_count > 0 ):
+                                
+                                    # if we get here, one Article_Data, and mentions
+                                    citation_status = "coded - {} mentions".format( mention_count )
+                                    
+                                else:
+                                
+                                    # if we get here, one Article_Data, no mentions
+                                    citation_status = "coded - no mentions"
+                                    
+                                #-- END check to see if mentions coded for this article. --#  
                             
-                        except Article_Data.MultipleObjectsReturned as amore:
+                            except DataSetCitationData.MultipleObjectsReturned as dscd_mor:
+                            
+                                # multiple returned.
+                                related_citation_data = None
+                                citation_status = "multiple"
+    
+                            except DataSetCitationData.DoesNotExist as dscd_dne:
+                            
+                                # None returned.
+                                related_citation_data = None
+                                citation_status = "new"
+    
+                            except Exception as e:
+                            
+                                # multiple returned.
+                                related_citation_data = None
+                                citation_status = "error: {}".format( e )
+                                
+                            #-- END attempt to get Article_Data for current user. --#
+
+                        except Article_Data.MultipleObjectsReturned as ad_mor:
                         
                             # multiple returned.
                             article_data = None
                             citation_status = "multiple"
 
-                        except Article_Data.DoesNotExist as adne:
+                        except Article_Data.DoesNotExist as ad_dne:
                         
                             # None returned.
                             article_data = None
@@ -962,6 +997,7 @@ def dataset_mention_coding_list( request_IN ):
                         
                         # place article_data in article_details
                         citation_details[ "article_data" ] = article_data
+                        citation_details[ "data_set_citation_data" ] = related_citation_data
                         citation_details[ "citation_status" ] = citation_status
                         
                         # add details to list.
@@ -974,7 +1010,7 @@ def dataset_mention_coding_list( request_IN ):
                     
                 else:
                 
-                    # error - none or multiple articles found for ID. --#
+                    # error - none or multiple citations found for ID. --#
                     print( "No citation returned for ID passed in." )
                     response_dictionary[ 'output_string' ] = "ERROR - nothing in QuerySet returned from call to DataSetCitation.filter() ( tags_in_list_IN = " + str( tags_in_list ) + " )."
                     response_dictionary[ 'dataset_mention_coding_list_form' ] = dataset_mention_coding_list_form

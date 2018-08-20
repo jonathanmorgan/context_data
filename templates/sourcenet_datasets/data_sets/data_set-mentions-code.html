@@ -11,6 +11,7 @@
 <script src="{% static "sourcenet/js/find-in-text.js" %}"></script>
 <script src="{% static "sourcenet_datasets/js/mention-coding/mention-coding.js" %}"></script>
 <script>SOURCENET.text_finder.be_case_sensitive = {% if be_case_sensitive %}true{% else %}false{% endif %};</script>
+<script>SOURCENET.process_found_synonyms = {% if process_found_synonyms %}true{% else %}false{% endif %};</script>
 {% if article_text_type == "text" %}
 <script>
     SOURCENET.article_text_ignore_p_tags = true;
@@ -326,6 +327,19 @@
                         {% endfor %}
                     </ul>
                 </li>
+                {% if data_set_mention_list %}
+                <li>
+                    Synonyms:
+                    <ul>
+                        {% for mention in data_set_mention_list %}
+                        <li>{{ mention }}</li>
+                        <script>
+                            SOURCENET.data_set_mention_list.push( "{{ mention }}".trim() );
+                        </script>
+                        {% endfor %}
+                    </ul>
+                </li>
+                {% endif %}
             </ul>
             {% endif %}
         </div>

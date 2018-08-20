@@ -109,7 +109,63 @@ class DataSet( models.Model ):
         return string_OUT
         
     #-- END method __str__() --#
+    
+    
+    def get_unique_mention_string_list( self, *args, **kwargs ):
 
+        '''
+        Retrieves all DataSetMention-s that relate to this DataSet, across
+            all citations.  Builds and returns a set of the distinct strings
+            used to refer to the dataset.
+        '''
+        
+        # return reference
+        mention_list_OUT = []
+        
+        # declare variables
+        my_id = -1
+        mention_set = set()
+        data_set_citation_data_qs = None
+        citation_data = None
+        mention_qs = None
+        mention = None
+        mention_string = None
+        
+        # get citation data
+        data_set_citation_data_qs = DataSetCitationData.objects.filter( data_set_citation__data_set = self )
+        
+        # for each citation data, get all mentions, and add the value of each
+        #     to set.
+        for citation_data in data_set_citation_data_qs:
+        
+            # get mentions
+            mention_qs = citation_data.datasetmention_set.all()
+            
+            # for each mention, grab value and add to set if not already there.
+            for mention in mention_qs:
+            
+                # get value
+                mention_string = mention.value
+                
+                # is it in set?
+                if ( mention_string not in mention_set ):
+                
+                    # no - add it.
+                    mention_set.add( mention_string )
+                    
+                #-- END check to see if in set. --#
+                
+            #-- END loop over mentions. --#
+            
+        #-- END loop over citation data related to current data set --#
+        
+        # convert set to list.
+        mention_list_OUT = list( mention_set )
+        mention_list_OUT.sort()
+        
+        return mention_list_OUT
+
+    #-- END method get_unique_mention_list() --#
 
 #= End DataSet Model ======================================================
 
@@ -377,14 +433,14 @@ class DataSetCitationData( models.Model ):
 
         if ( self.data_set_citation ):
         
-            string_OUT += " - " + str( self.data_set_citation )
+            string_OUT += " - Citation: {}".format( str( self.data_set_citation ) )
         
         #-- END check to see if article_subject. --#
         
         # got associated quotation?...
-        if ( self.value ):
+        if ( self.article_data ):
         
-            string_OUT += ": " + self.value
+            string_OUT += "; Article_Data: {}".format( str( self.article_data ) )
                 
         #-- END check to see if we have a quotation. --#
         

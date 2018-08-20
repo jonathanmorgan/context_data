@@ -96,6 +96,8 @@ SOURCENET.compress_white_space = true;
 
 // list of strings to highlight in the text for the current data set.
 SOURCENET.data_set_string_list = [];
+SOURCENET.data_set_mention_list = [];
+SOURCENET.process_found_synonyms = false;
 
 // ignore <p> tags?
 SOURCENET.article_text_ignore_p_tags = true;
@@ -228,32 +230,90 @@ SOURCENET.clear_coding_form = function( status_message_IN )
  * Postconditions: Updates classes on article <p> tags so none are assigned
  *     "foundInText".  Wipes input with id "text-to-find-in-article".
  */
-SOURCENET.clear_yellow_highlight = function()
+SOURCENET.clear_highlight_by_color = function( color_IN )
 {
     
     // declare variables
-    var me = "SOURCENET.clear_find_in_text";
-    var article_paragraphs = null;
+    var me = "SOURCENET.clear_green_highlight";
     
-    // clear find in text matches
-    SOURCENET.text_finder.clear_find_in_text_matches(
-        SOURCENET.DIV_ID_ARTICLE_BODY,
-        [ SOURCENET.FindInText.CSS_CLASS_FOUND_IN_TEXT ],
-        [ SOURCENET.FindInText.CSS_CLASS_FOUND_IN_TEXT_MATCHED_WORDS ]
-    );
-                
-} //-- END function SOURCENET.clear_yellow_highlight() --//
+    // declare variables
+    var me = "SOURCENET.config_text_finder_color";
+    
+    if ( color_IN !== undefined )
+    {
+        if ( color_IN == "yellow" )
+        {
+            
+            // clear yellow highlight.
+            SOURCENET.clear_yellow_highlight();
 
+        }
+        else if ( color_IN == "red" )
+        {
+        
+            // clear red highlight.
+            SOURCENET.clear_red_highlight();
+            
+        }
+        else if ( color_IN == "green" )
+        {
+        
+            // clear green highlight.
+            SOURCENET.clear_green_highlight();
+            
+        }
+        else
+        {
+            
+            // unknown = red.
+            SOURCENET.clear_red_highlight();
+    
+        }
+        
+    }
+    else
+    {
+        
+        // undefined = red.
+        SOURCENET.clear_red_highlight();
 
+    }
+
+} //-- END function clear_highlight_by_color() --//
+    
 /**
  * Retrieves all the <p> tags that make up the article text, removes class
- *     "foundInText" from any where that class is present.  Also clears out the
- *     field where text to be found is entered.
+ *     for green from any where that class is present.
  *
  * Preconditions: None.
  *
  * Postconditions: Updates classes on article <p> tags so none are assigned
- *     "foundInText".  Wipes input with id "text-to-find-in-article".
+ *     "foundInText".
+ */
+SOURCENET.clear_green_highlight = function()
+{
+    
+    // declare variables
+    var me = "SOURCENET.clear_green_highlight";
+    
+    // clear find in text matches
+    SOURCENET.text_finder.clear_find_in_text_matches(
+        SOURCENET.DIV_ID_ARTICLE_BODY,
+        [ SOURCENET.FindInText.CSS_CLASS_FOUND_IN_TEXT_GREEN ],
+        [ SOURCENET.FindInText.CSS_CLASS_FOUND_IN_TEXT_MATCHED_WORDS_GREEN ]
+    );
+                
+} //-- END function SOURCENET.clear_green_highlight() --//
+
+
+/**
+ * Retrieves all the <p> tags that make up the article text, removes class
+ *     for red from any where that class is present.
+ *
+ * Preconditions: None.
+ *
+ * Postconditions: Updates classes on article <p> tags so none are assigned
+ *     "foundInText".
  */
 SOURCENET.clear_red_highlight = function()
 {
@@ -269,6 +329,31 @@ SOURCENET.clear_red_highlight = function()
     );
                 
 } //-- END function SOURCENET.clear_red_highlight() --//
+
+
+/**
+ * Retrieves all the <p> tags that make up the article text, removes class
+ *     for yellow from any where that class is present.
+ *
+ * Preconditions: None.
+ *
+ * Postconditions: Updates classes on article <p> tags so none are assigned
+ *     "foundInText".
+ */
+SOURCENET.clear_yellow_highlight = function()
+{
+    
+    // declare variables
+    var me = "SOURCENET.clear_yellow_highlight";
+    
+    // clear find in text matches
+    SOURCENET.text_finder.clear_find_in_text_matches(
+        SOURCENET.DIV_ID_ARTICLE_BODY,
+        [ SOURCENET.FindInText.CSS_CLASS_FOUND_IN_TEXT ],
+        [ SOURCENET.FindInText.CSS_CLASS_FOUND_IN_TEXT_MATCHED_WORDS ]
+    );
+                
+} //-- END function SOURCENET.clear_yellow_highlight() --//
 
 
 /**
@@ -392,6 +477,82 @@ SOURCENET.clear_mention_type = function( status_message_IN )
 
 
 /**
+ * Configures SOURCENET.text_finder to highlight in green.
+ *
+ * Preconditions: None.
+ *
+ * Postconditions: Updates SOURCENET.text_finder to highlight in yellow.
+ */
+SOURCENET.config_text_finder_color = function( color_IN )
+{
+    
+    // declare variables
+    var me = "SOURCENET.config_text_finder_color";
+    
+    if ( color_IN !== undefined )
+    {
+        if ( color_IN == "yellow" )
+        {
+            
+            // configure SOURCENET.text_finder for red highlight.
+            SOURCENET.config_text_finder_yellow_highlight();
+
+        }
+        else if ( color_IN == "red" )
+        {
+        
+            // configure SOURCENET.text_finder for red highlight.
+            SOURCENET.config_text_finder_red_highlight();
+            
+        }
+        else if ( color_IN == "green" )
+        {
+        
+            // configure SOURCENET.text_finder for green highlight.
+            SOURCENET.config_text_finder_green_highlight();
+            
+        }
+        else
+        {
+            
+            // unknown = red.
+            SOURCENET.config_text_finder_red_highlight();
+    
+        }
+        
+    }
+    else
+    {
+        
+        // undefined = red.
+        SOURCENET.config_text_finder_red_highlight();
+
+    }
+
+    
+} //-- END function config_text_finder_color() --//
+  
+
+/**
+ * Configures SOURCENET.text_finder to highlight in green.
+ *
+ * Preconditions: None.
+ *
+ * Postconditions: Updates SOURCENET.text_finder to highlight in yellow.
+ */
+SOURCENET.config_text_finder_green_highlight = function()
+{
+    
+    // declare variables
+    var me = "SOURCENET.config_text_finder_green_highlight";
+    
+    // configure SOURCENET.text_finder
+    SOURCENET.text_finder.config_green_highlight();
+    
+}
+  
+
+/**
  * Configures SOURCENET.text_finder to highlight in red.
  *
  * Preconditions: None.
@@ -405,7 +566,7 @@ SOURCENET.config_text_finder_red_highlight = function()
     var me = "SOURCENET.config_text_finder_red_highlight";
     
     // configure SOURCENET.text_finder
-    SOURCENET.text_finder.config_red_highlight()
+    SOURCENET.text_finder.config_red_highlight();
     
 }
   
@@ -424,7 +585,7 @@ SOURCENET.config_text_finder_yellow_highlight = function()
     var me = "SOURCENET.config_text_finder_yellow_highlight";
     
     // configure SOURCENET.text_finder
-    SOURCENET.text_finder.config_yellow_highlight()
+    SOURCENET.text_finder.config_yellow_highlight();
     
 }
   
@@ -458,6 +619,7 @@ SOURCENET.display_mentions = function()
     var do_remove_row = false;
     var row_contents = "";
     var button_element = null;
+    var hide_empty_form = false;
     
     // declare variables - make form to submit list.
     var active_mention_count = -1;
@@ -635,24 +797,30 @@ SOURCENET.display_mentions = function()
         // try to find the form element.
         form_element = $( '#submit-article-coding' );
         
-        // got active mentions?
-        if ( active_mention_count > 0 )
+        // hide empty form?
+        if ( hide_empty_form == true )
         {
             
-            // make sure form is visible.
-            SOURCENET.log_message( "In " + me + "(): active mentions, show coding submit <form>." );
-            form_element.show();
+            // got active mentions?
+            if ( active_mention_count > 0 )
+            {
+                
+                // make sure form is visible.
+                SOURCENET.log_message( "In " + me + "(): active mentions, show coding submit <form>." );
+                form_element.show();
+                            
+            }
+            else //-- no active people. --//
+            {
+                
+                // no active people, hide form.
+                SOURCENET.log_message( "In " + me + "(): no mentions, hide coding submit <form>." );
+                form_element.hide();
                         
-        }
-        else //-- no active people. --//
-        {
+            } //-- END check to see if active people. --//
             
-            // no active people, hide form.
-            SOURCENET.log_message( "In " + me + "(): no mentions, hide coding submit <form>." );
-            form_element.hide();
-                    
-        } //-- END check to see if active people. --//
-        
+        } //-- END check to see if we hide empty form --//
+
     }
     else
     {
@@ -664,6 +832,64 @@ SOURCENET.display_mentions = function()
     } //-- END check to see if at least 1 item in list. --//
     
 } //-- END function SOURCENET.display_mentions() --//
+
+
+/**
+ * 
+ */
+SOURCENET.find_and_process_data_set_synonyms = function()
+{
+    // declare variables
+    var article_body = null;
+    var article_body_text = null;
+    var mention_list = null;
+    var mention_count = -1;
+    var mention_index = -1;
+    var current_mention = null;
+    var find_index = -1;
+    
+    // get mention list
+    mention_list = SOURCENET.data_set_mention_list;
+    
+    // loop over the mentions.
+    mention_count = mention_list.length;
+    
+    // got any mentions?
+    if ( mention_count > 0 )
+    {
+        
+        // retrieve article body's text.
+        article_body = SOURCENET.get_article_body();
+        article_body_text = article_body.text();
+        
+        for ( mention_index = 0; mention_index < mention_count; mention_index++ )
+        {
+            
+            // get current mention.
+            current_mention = mention_list[ mention_index ];
+            
+            // find it in article text (not HTML).
+            SOURCENET.text_finder.find_text_in_string( current_mention, article_body_text );
+            find_index = SOURCENET.text_finder.find_text_in_string_index;
+
+            // if found, process it.
+            if ( find_index > 0 )
+            {
+                
+                // grab mention, then process.
+                SOURCENET.grab_mention( current_mention );
+                SOURCENET.process_mention_coding();
+                
+            } //-- END look for find_index --//
+            
+        } //-- END loop over mentions --//
+        
+        // clear out the mention field.
+        SOURCENET.clear_coding_form( "Data Set synonyms automatically matched - any found in article have \"new\" in second column below." )
+        
+    } //-- END check to see if mentions. --//
+        
+} //-- END function SOURCENET.find_and_process_data_set_synonyms() --//
 
 
 /**
@@ -693,21 +919,9 @@ SOURCENET.find_strings_in_article_text = function( find_text_list_IN, clear_exis
     //var contains_selector = "";
     //var match_paragraphs = null;
     
-    if ( ( color_IN !== undefined ) && ( color_IN == "yellow" ) )
-    {
-        
-        // configure SOURCENET.text_finder for red highlight.
-        SOURCENET.config_text_finder_yellow_highlight()
-
-    }
-    else
-    {
-    
-        // configure SOURCENET.text_finder for red highlight.
-        SOURCENET.config_text_finder_red_highlight()
-        
-    }
-    
+    // configure color.
+    SOURCENET.config_text_finder_color( color_IN );
+     
     // clear any previous matches?
     do_clear_matches = clear_existing_matches_IN;
     if ( do_clear_matches === undefined )
@@ -721,28 +935,8 @@ SOURCENET.find_strings_in_article_text = function( find_text_list_IN, clear_exis
     if ( do_clear_matches == true )
     {
     
-        if ( ( color_IN !== undefined ) && ( color_IN == "yellow" ) )
-        {
-            
-            // yes, clear them.    
-            SOURCENET.text_finder.clear_find_in_text_matches(
-                SOURCENET.DIV_ID_ARTICLE_BODY,
-                [ SOURCENET.FindInText.CSS_CLASS_FOUND_IN_TEXT ],
-                [ SOURCENET.FindInText.CSS_CLASS_FOUND_IN_TEXT_MATCHED_WORDS ]
-            );
-    
-        }
-        else
-        {
-        
-            // yes, clear them.    
-            SOURCENET.text_finder.clear_find_in_text_matches(
-                SOURCENET.DIV_ID_ARTICLE_BODY,
-                [ SOURCENET.FindInText.CSS_CLASS_FOUND_IN_TEXT_RED ],
-                [ SOURCENET.FindInText.CSS_CLASS_FOUND_IN_TEXT_MATCHED_WORDS_RED ]
-            );
-    
-        }
+        // clear matches for color.
+        SOURCENET.clear_highlight_by_color( color_IN );
 
     }
 
@@ -926,7 +1120,7 @@ SOURCENET.find_words_in_article_text = function( find_text_IN,
     if ( do_clear_matches === undefined )
     {
         
-        // default to false.
+        // default to true.
         do_clear_matches = true;
         
     }
@@ -980,20 +1174,8 @@ SOURCENET.find_words_in_html_element = function( find_text_IN,
     //var contains_selector = "";
     //var match_paragraphs = null;
     
-    if ( ( color_IN !== undefined ) && ( color_IN == "yellow" ) )
-    {
-        
-        // configure SOURCENET.text_finder for red highlight.
-        SOURCENET.config_text_finder_yellow_highlight()
-
-    }
-    else
-    {
-    
-        // configure SOURCENET.text_finder for red highlight.
-        SOURCENET.config_text_finder_red_highlight()
-        
-    }
+    // configure highlight color.
+    SOURCENET.config_text_finder_color( color_IN );
     
     // clear any previous matches?
     do_clear_matches = clear_existing_matches_IN;
@@ -1008,28 +1190,8 @@ SOURCENET.find_words_in_html_element = function( find_text_IN,
     if ( do_clear_matches == true )
     {
     
-        if ( ( color_IN !== undefined ) && ( color_IN == "yellow" ) )
-        {
-            
-            // yes, clear them.    
-            SOURCENET.text_finder.clear_find_in_text_matches(
-                SOURCENET.DIV_ID_ARTICLE_BODY,
-                [ SOURCENET.FindInText.CSS_CLASS_FOUND_IN_TEXT ],
-                [ SOURCENET.FindInText.CSS_CLASS_FOUND_IN_TEXT_MATCHED_WORDS ]
-            );
-    
-        }
-        else
-        {
-        
-            // yes, clear them.    
-            SOURCENET.text_finder.clear_find_in_text_matches(
-                SOURCENET.DIV_ID_ARTICLE_BODY,
-                [ SOURCENET.FindInText.CSS_CLASS_FOUND_IN_TEXT_RED ],
-                [ SOURCENET.FindInText.CSS_CLASS_FOUND_IN_TEXT_MATCHED_WORDS_RED ]
-            );
-    
-        }
+        // clear highlighting by color
+        SOURCENET.clear_highlight_by_color( color_IN );
 
     }
 
@@ -1290,6 +1452,44 @@ SOURCENET.get_mention_text_value = function()
 } //-- END function SOURCENET.get_mention_text_value() --//
 
 
+SOURCENET.grab_mention = function( text_IN )
+{
+
+    // declare variables
+    selected_text = "";
+
+    // get selection
+    selected_text = text_IN;
+    
+    // got something?
+    if ( ( selected_text !== undefined ) && ( selected_text != null ) && ( selected_text != "" ) )
+    {
+        
+        selected_text = selected_text.trim();
+        
+        if ( SOURCENET.compress_white_space == true )
+        {
+            // replace more than one contiguous internal white space
+            //     character with a single space.
+            selected_text = selected_text.replace( /\s+/g, ' ' );
+        }
+    
+        //SOURCENET.log_message( "selected text : \"" + selected_text + "\"" );
+    
+        $( '#' + SOURCENET.INPUT_ID_MENTION_TEXT ).val( selected_text );
+        
+        // place last name in text-to-find-in-article <input>, then try
+        //     to find in text.
+        SOURCENET.find_mention_text_in_article_text();
+        
+        // clear out the fix name area.
+        SOURCENET.cancel_fix_mention_text();
+
+    } //-- END check to see if we have some text. --//
+                    
+} //-- END function SOURCENET.grab_mention() --//
+
+
 /**
  * Retrieves the list of strings we want to highlight words from for a given
  *     data set, then calls highlight_unique_words() to create list of unique
@@ -1301,14 +1501,37 @@ SOURCENET.highlight_data_set_terms = function()
     // declare variables
     var me = "SOURCENET.highlight_data_set_terms";
     var find_in_text_list = null;
+    var mention_list = null;
      
     // get list
     find_in_text_list = SOURCENET.data_set_string_list;
     
     // call highlight function.
-    SOURCENET.highlight_unique_words( find_in_text_list, "yellow" )
+    SOURCENET.highlight_unique_words( find_in_text_list, "yellow" );
     
 } //-- END function SOURCENET.highlight_data_set_terms --//
+
+
+
+/**
+ * Retrieves the list of strings we want to highlight words from for a given
+ *     data set, then calls highlight_unique_words() to create list of unique
+ *     words, then find and highlight each in yellow (orange).
+ */
+SOURCENET.highlight_data_set_mentions = function()
+{
+
+    // declare variables
+    var me = "SOURCENET.highlight_data_set_mentions";
+    var mention_list = null;
+     
+    // get list
+    mention_list = SOURCENET.data_set_mention_list;
+    
+    // call highlight function.
+    SOURCENET.highlight_unique_words( mention_list, "green" );
+    
+} //-- END function SOURCENET.highlight_data_set_mentions --//
 
 
 
@@ -1340,23 +1563,11 @@ SOURCENET.highlight_unique_words = function( find_in_text_list_IN, color_IN )
     // get list
     find_in_text_list = find_in_text_list_IN;
     
-    if ( ( color_IN !== undefined ) && ( color_IN == "yellow" ) )
-    {
-        
-        // configure SOURCENET.text_finder for red highlight.
-        SOURCENET.config_text_finder_yellow_highlight()
-
-    }
-    else
-    {
-    
-        // configure SOURCENET.text_finder for red highlight.
-        SOURCENET.config_text_finder_red_highlight()
-        
-    }
+    // configure color
+    SOURCENET.config_text_finder_color( color_IN );
     
     // how many in list?
-    find_in_text_count = find_in_text_list.length
+    find_in_text_count = find_in_text_list.length;
     
     // loop
     for ( text_index = 0; text_index < find_in_text_count; text_index++ )
@@ -1369,13 +1580,13 @@ SOURCENET.highlight_unique_words = function( find_in_text_list_IN, color_IN )
         //console.log( "In " + me + " - highlighting current_text: \"" + current_text + "\"" );
 
         // split on space and loop
-        current_text_words_list = current_text.split( " " )
-        current_text_words_count = current_text_words_list.length
+        current_text_words_list = current_text.split( " " );
+        current_text_words_count = current_text_words_list.length;
         for( word_index = 0; word_index < current_text_words_count; word_index++ )
         {
             
             // call find_words_in_article_text()
-            current_word = current_text_words_list[ word_index ]
+            current_word = current_text_words_list[ word_index ];
             
             // is it in our local list?
             current_word_index = unique_word_list.indexOf( current_word );
@@ -1392,7 +1603,7 @@ SOURCENET.highlight_unique_words = function( find_in_text_list_IN, color_IN )
     SOURCENET.log_message( "In " + me + " - unique word list: " + unique_word_list );
     //console.log( "In " + me + " - unique word list: " + unique_word_list );
 
-    SOURCENET.find_strings_in_article_text( unique_word_list, false, "yellow" ) 
+    SOURCENET.find_strings_in_article_text( unique_word_list, false, color_IN );
         
 } //-- END function SOURCENET.highlight_words --//
 
@@ -1666,21 +1877,6 @@ SOURCENET.output_status_messages = function( status_message_array_IN )
 } //-- END function SOURCENET.output_status_messages() --//
 
 
-SOURCENET.process_selected_mention_type = function()
-{
-    // declare variables
-    var me = "SOURCENET.process_selected_mention_type";
-    var selected_value = "";
-    var p_source_quote_element = null;
-
-    SOURCENET.log_message( "In " + me + "(): Process Selected Mention Type!" );
-    
-    // get select element.
-    selected_value = SOURCENET.get_selected_value_for_id( 'mention-type' );
-    
-} //-- END function SOURCENET.process_selected_mention_type() --#
-
-
 /**
  * Event function that is called when coder is finished coding a particular
  *    mention and is ready to add it to the list of mentions in the article.
@@ -1775,6 +1971,21 @@ SOURCENET.process_mention_coding = function()
     } //-- END check to see if messages --//    
     
 } //-- END function SOURCENET.process_mention_coding() --#
+
+
+SOURCENET.process_selected_mention_type = function()
+{
+    // declare variables
+    var me = "SOURCENET.process_selected_mention_type";
+    var selected_value = "";
+    var p_source_quote_element = null;
+
+    SOURCENET.log_message( "In " + me + "(): Process Selected Mention Type!" );
+    
+    // get select element.
+    selected_value = SOURCENET.get_selected_value_for_id( 'mention-type' );
+    
+} //-- END function SOURCENET.process_selected_mention_type() --#
 
 
 /**
@@ -2130,7 +2341,7 @@ SOURCENET.DataStore.prototype.add_mention = function( instance_IN )
                     
                     // already in map...  Error.
                     is_ok_to_add = false;
-                    status_array_OUT.push( "Mention text " + my_mention_text + " already present in DataStore." );
+                    status_array_OUT.push( "Mention text \"" + my_mention_text + "\" already present in DataStore." );
                     
                 } //-- END check to see if mention text already stored. --//
                 
@@ -3871,25 +4082,9 @@ $( document ).ready(
     
                 // get selection
                 selected_text = $.selection();
-                selected_text = selected_text.trim();
                 
-                if ( SOURCENET.compress_white_space == true )
-                {
-                    // replace more than one contiguous internal white space
-                    //     character with a single space.
-                    selected_text = selected_text.replace( /\s+/g, ' ' );
-                }
-
-                //SOURCENET.log_message( "selected text : \"" + selected_text + "\"" );
-
-                $( '#' + SOURCENET.INPUT_ID_MENTION_TEXT ).val( selected_text );
-                
-                // place last name in text-to-find-in-article <input>, then try
-                //     to find in text.
-                SOURCENET.find_mention_text_in_article_text();
-                
-                // clear out the fix name area.
-                SOURCENET.cancel_fix_mention_text();
+                // grab it form
+                SOURCENET.grab_mention( selected_text );
             }
         )
     }
@@ -4143,6 +4338,7 @@ $( document ).ready(
                 {
                     // clear
                     SOURCENET.clear_yellow_highlight();
+                    SOURCENET.clear_green_highlight();
                     
                     // change button to OFF.
                     button_element.val( SOURCENET.DATA_SET_HIGHLIGHTING_BUTTON_VALUE_OFF );
@@ -4152,6 +4348,7 @@ $( document ).ready(
                 {
                     // highlight
                     SOURCENET.highlight_data_set_terms();
+                    SOURCENET.highlight_data_set_mentions();
                     
                     // change button to ON.
                     button_element.val( SOURCENET.DATA_SET_HIGHLIGHTING_BUTTON_VALUE_ON );   
@@ -4172,8 +4369,20 @@ $( document ).ready(
     {
 
         // call the highlight data set terms function.
-        SOURCENET.highlight_data_set_terms()        
-    
+        SOURCENET.highlight_data_set_terms();
+        
+        // call the highlight data_set_mentions function.
+        SOURCENET.highlight_data_set_mentions();
+        
+        // process found synonyms?
+        if ( SOURCENET.process_found_synonyms == true )
+        {
+           
+            // pre-populate the mention area any mentions present in text.
+            SOURCENET.find_and_process_data_set_synonyms();
+ 
+        } //-- END check to see if we process synonyms. --//
+        
     } //-- END function --//
 
 ); //-- END document.ready( load existing coding data ) --//
