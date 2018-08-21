@@ -264,7 +264,7 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
             if ( citation_instance_IN is not None ):
             
                 # we have Article_Data - First get DataSetCitationData
-                get_citation_data_result = cls.get_data_set_citation_data( article_data_IN, citation_instance_IN )
+                get_citation_data_result = cls.get_data_set_citation_data( article_data_IN, citation_instance_IN, create_if_no_match_IN = False )
                 
                 # retrieve results
                 if ( get_citation_data_result is not None ):
@@ -389,7 +389,7 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
 
 
     @classmethod
-    def get_data_set_citation_data( cls, article_data_IN, citation_IN, citation_type_IN = None, *args, **kwargs ):
+    def get_data_set_citation_data( cls, article_data_IN, citation_IN, citation_type_IN = None, create_if_no_match_IN = True, *args, **kwargs ):
         
         '''
         Accepts article_data, citation.  Tries to retrieve DataSetCitationData
@@ -431,12 +431,27 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
         exception_OUT = None
         
         # declare variables
+        me = "ManualDataSetMentionsCoder.get_data_set_citation_data()"
+        local_debug_flag = False
         current_article_data = None
         citation_instance = None
         citation_data_qs = None
         citation_data = None
         citation_data_count = -1
         
+        # declare variables - logging
+        my_resource_string = ""
+        
+        # local debug on?
+        if ( local_debug_flag == True ):
+
+            # initialize resource string and add it to the LoggingHelper class-level
+            #     string.
+            my_resource_string = cls.LOGGER_NAME + "." + me
+            LoggingHelper.add_to_class_resource_string( my_resource_string )
+            
+        #-- END check to see if local debug on. --#
+
         # init
         current_article_data = article_data_IN
         citation_instance = citation_IN
@@ -455,17 +470,37 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
                 citation_data_count = citation_data_qs.count()
                 if ( citation_data_count == 0 ):
                 
-                    # make one, associate it correctly, save.
-                    citation_data = DataSetCitationData()
-                    citation_data.article_data = current_article_data
-                    citation_data.data_set_citation = citation_instance
-                    if ( citation_type_IN is not None ):
-                        citation_data.citation_type = citation_type_IN
-                    #-- END check if type passed in. --#
-                    citation_data.save()
+                    # create_if_no_match_IN?
+                    if ( create_if_no_match_IN == True ):
+                
+                        # make one, associate it correctly, save.
+                        citation_data = DataSetCitationData()
+                        citation_data.article_data = current_article_data
+                        citation_data.data_set_citation = citation_instance
+                        if ( citation_type_IN is not None ):
+                            citation_data.citation_type = citation_type_IN
+                        #-- END check if type passed in. --#
+                        citation_data.save()
+                        
+                        # set status to "new"
+                        status_OUT = cls.PROP_LOOKUP_STATUS_VALUE_NEW
                     
-                    # set status to "new"
-                    status_OUT = cls.PROP_LOOKUP_STATUS_VALUE_NEW
+                    else:
+                        
+                        # No match, don't create, output message and
+                        #     move on.
+                        citation_data = None
+                        
+                        # ...set status to "multiple"...
+                        status_OUT = cls.PROP_LOOKUP_STATUS_VALUE_ERROR
+    
+                        # ...create status message...
+                        status_message_OUT = "create_if_no_match_IN == False, no match for Article_Data: {}; and citation: {}".format( current_article_data, citation_instance )
+    
+                        # ...and log it.
+                        LoggingHelper.output_debug( status_message_OUT, me, indent_with_IN = '====>', logger_name_IN = cls.LOGGER_NAME, resource_string_IN = my_resource_string )
+                    
+                    #-- END check to see if create_if_no_match_IN --#
 
                 elif( citation_data_count == 1 ):
                 
@@ -484,11 +519,8 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
                     # ...set status to "multiple"...
                     status_OUT = cls.PROP_LOOKUP_STATUS_VALUE_MULTIPLE
 
-                    # ...create status message...
+                    # ...create status message.
                     status_message_OUT = "Multiple DataSetCitationData found for Article_Data: {}; and citation: {}".format( current_article_data, citation_instance )
-
-                    # ...and log it.
-                    cls.output_debug( status_message, me, indent_with_IN = "====>" )
 
                 #-- END check for DataSetCitationData --#
                 
@@ -498,7 +530,6 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
                 citation_data = None
                 status_OUT = cls.PROP_LOOKUP_STATUS_VALUE_ERROR
                 status_message_OUT = "Required DataSetCitation instance not passed in."
-                cls.output_debug( debug_message, me )    
             
             #-- END check to see if citation instance --#
 
@@ -520,6 +551,21 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
         result_OUT[ cls.PROP_STATUS_MESSAGE ] = status_message_OUT
         result_OUT[ cls.PROP_EXCEPTION ] = exception_OUT
         
+        # local debug on?
+        if ( local_debug_flag == True ):
+        
+            # is there a status message?
+            if ( ( status_message_OUT is not None ) and ( status_message_OUT != "" ) ):
+            
+                LoggingHelper.output_debug( status_message_OUT, me, indent_with_IN = '====>', logger_name_IN = cls.LOGGER_NAME, resource_string_IN = my_resource_string )
+                
+            #-- END check to see if status message --#
+        
+            # remove resource string from LoggingHelper instance-level string.
+            LoggingHelper.remove_from_class_resource_string( my_resource_string )
+
+        #-- END check to see if local debug is on. --#
+
         return result_OUT
         
     #-- END method get_data_set_citation_data() --#
@@ -889,7 +935,7 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
                         # got article data?
                         if ( current_article_data is not None ):
                         
-                            # ! -- DataSetCitationData instance
+                            # ! -- lookup DataSetCitationData instance - don't create
                             citation_get_result = self.get_data_set_citation_data( current_article_data, citation_instance_IN )
                         
                             # what have we got?

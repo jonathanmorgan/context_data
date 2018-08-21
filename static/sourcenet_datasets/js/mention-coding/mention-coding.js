@@ -99,8 +99,9 @@ SOURCENET.data_set_string_list = [];
 SOURCENET.data_set_mention_list = [];
 SOURCENET.process_found_synonyms = false;
 
-// ignore <p> tags?
-SOURCENET.article_text_ignore_p_tags = true;
+// ignore wrapping elements?
+SOURCENET.article_text_ignore_p_tags == false;
+SOURCENET.text_finder.ignore_wrapper_element = false;
 
 // words to ignore
 SOURCENET.text_to_ignore_list = [];
@@ -916,6 +917,7 @@ SOURCENET.find_strings_in_article_text = function( find_text_list_IN, clear_exis
     var article_paragraphs_count = -1;
     var article_body_jquery_element = null;
     var find_in_text_list = null;
+    var saved_ignore_in_wrapper_element = null;
     //var contains_selector = "";
     //var match_paragraphs = null;
     
@@ -965,10 +967,15 @@ SOURCENET.find_strings_in_article_text = function( find_text_list_IN, clear_exis
             article_text_element = SOURCENET.get_article_body()
             
             // set text finder to ignore wrapper element.
+            saved_ignore_in_wrapper_element = SOURCENET.text_finder.ignore_wrapper_element
             SOURCENET.text_finder.ignore_wrapper_element = true;
             
             // just search in the article text element.
             SOURCENET.text_finder.find_text_in_element( article_text_element, find_in_text_list );
+            
+            // put ignore wrapper element back.
+            SOURCENET.text_finder.ignore_wrapper_element = saved_ignore_in_wrapper_element
+
         }
         else
         {
@@ -1004,10 +1011,14 @@ SOURCENET.find_strings_in_article_text = function( find_text_list_IN, clear_exis
                 article_body_jquery_element = SOURCENET.get_article_body();
                 
                 // set text finder to ignore wrapper element.
+                saved_ignore_in_wrapper_element = SOURCENET.text_finder.ignore_wrapper_element
                 SOURCENET.text_finder.ignore_wrapper_element = true;
             
                 // call function to find in <p> tag
-                SOURCENET.text_finder.find_text_in_element( article_body_jquery_element, find_in_text_list );    
+                SOURCENET.text_finder.find_text_in_element( article_body_jquery_element, find_in_text_list );
+                
+                // put ignore wrapper element back.
+                SOURCENET.text_finder.ignore_wrapper_element = saved_ignore_in_wrapper_element
                 
             } //-- END check to see if paragraphs. --//
             
@@ -1050,7 +1061,7 @@ SOURCENET.find_in_article_text = function( find_text_IN, clear_existing_matches_
         find_in_text_list.push( find_text_IN );
         
         // call find_strings_in_article_text()
-        SOURCENET.find_strings_in_article_text( find_in_text_list, clear_existing_matches_IN );
+        SOURCENET.find_strings_in_article_text( find_in_text_list, clear_existing_matches_IN, color_IN );
 
     } //-- END to make sure we have text. --//
 
@@ -1066,7 +1077,7 @@ SOURCENET.find_in_article_text = function( find_text_IN, clear_existing_matches_
  * Postconditions: Updates classes on article <p> tags so any that contain
  *     current last name are assigned "foundInText".
  */
-SOURCENET.find_mention_text_in_article_text = function( find_text_IN )
+SOURCENET.find_mention_text_in_article_text = function( find_text_IN, color_IN )
 {
     // declare variables
     var me = "SOURCENET.find_mention_text_in_article_text";
@@ -1082,7 +1093,7 @@ SOURCENET.find_mention_text_in_article_text = function( find_text_IN )
     input_element.val( mention_text );
     
     // find in text.
-    SOURCENET.find_in_article_text( mention_text, true );
+    SOURCENET.find_in_article_text( mention_text, true, color_IN );
     
 } //-- END function SOURCENET.find_mention_text_in_article_text() --//
 // ! ==> mention text - single string --> find_in_article_text()
@@ -1111,6 +1122,7 @@ SOURCENET.find_words_in_article_text = function( find_text_IN,
     var find_in_text_count = -1;
     var current_index = -1;
     var current_find_text = "";
+    var saved_ignore_in_wrapper_element = "";
     
     //var contains_selector = "";
     //var match_paragraphs = null;
@@ -1137,6 +1149,7 @@ SOURCENET.find_words_in_article_text = function( find_text_IN,
         article_text_element = SOURCENET.get_article_body()
         
         // set text finder to ignore wrapper element.
+        saved_ignore_in_wrapper_element = SOURCENET.text_finder.ignore_wrapper_element
         SOURCENET.text_finder.ignore_wrapper_element = true;
         
         // just search in the article text element.
@@ -1145,6 +1158,9 @@ SOURCENET.find_words_in_article_text = function( find_text_IN,
                                               do_clear_matches,
                                               color_IN );
 
+        // put ignore wrapper element back.
+        SOURCENET.text_finder.ignore_wrapper_element = saved_ignore_in_wrapper_element
+                
     } //-- END to make sure we have text. --//
 
 } //-- END function SOURCENET.find_words_in_article_text() --//
@@ -1171,6 +1187,7 @@ SOURCENET.find_words_in_html_element = function( find_text_IN,
     var do_clear_matches = false;
     var is_text_OK = false;
     var article_paragraphs = null;
+    var saved_ignore_in_wrapper_element = "";
     //var contains_selector = "";
     //var match_paragraphs = null;
     
@@ -1206,11 +1223,15 @@ SOURCENET.find_words_in_html_element = function( find_text_IN,
         find_in_text_list = find_text_IN.split( " " );
         
         // set text finder to ignore wrapper element.
+        saved_ignore_in_wrapper_element = SOURCENET.text_finder.ignore_wrapper_element
         SOURCENET.text_finder.ignore_wrapper_element = true;
         
         // just search in the article text element.
         SOURCENET.text_finder.find_text_in_element( element_to_search_IN, find_in_text_list );
 
+        // put ignore wrapper element back.
+        SOURCENET.text_finder.ignore_wrapper_element = saved_ignore_in_wrapper_element
+                
     } //-- END to make sure we have text. --//
 
 } //-- END function SOURCENET.find_words_in_html_element() --//
@@ -1529,7 +1550,8 @@ SOURCENET.highlight_data_set_mentions = function()
     mention_list = SOURCENET.data_set_mention_list;
     
     // call highlight function.
-    SOURCENET.highlight_unique_words( mention_list, "green" );
+    //SOURCENET.highlight_unique_words( mention_list, "green" );
+    SOURCENET.find_strings_in_article_text( mention_list, false, "green" );
     
 } //-- END function SOURCENET.highlight_data_set_mentions --//
 
@@ -2768,75 +2790,86 @@ SOURCENET.DataStore.prototype.load_from_json = function()
         my_status_message_array = my_data_store_json[ "status_message_array" ];
         my_latest_mention_index = my_data_store_json[ "latest_mention_index" ];
 
-        // loop over mention array to create and store SOURCENET.Mention
-        //    instances.
-        // how many we got?
-        mention_count = my_mention_array.length;
-
-        SOURCENET.log_message( "In " + me + "(): mention_count = " + mention_count );
-
-        // !---- mention loop
-        for ( mention_index = 0; mention_index < mention_count; mention_index++ )
+        // do we have any mentions?
+        if ( ( my_mention_array !== undefined ) && ( my_mention_array != null ) )
         {
-
-            SOURCENET.log_message( "In " + me + "(): mention_index = " + mention_index );
-
-            // get mention at current index
-            current_mention_data = my_mention_array[ mention_index ];
-
-            // get values
-            current_mention_text = current_mention_data[ "mention_text" ];
-            current_fixed_mention_text = current_mention_data[ "fixed_mention_text" ];
-            current_mention_type = current_mention_data[ "mention_type" ];
-            current_original_mention_type = current_mention_data[ "original_mention_type" ];
-            current_data_set_mention_id = current_mention_data[ "data_set_mention_id" ];
-            current_mention_index = current_mention_data[ "mention_index" ];
-
-            // create and populate Mention instance.
-            current_instance = new SOURCENET.Mention();
             
-            // mention type
-            current_instance.mention_type = current_mention_type;
-            current_instance.original_mention_type = current_original_mention_type;
-
-            // ID for DataSetMention instance.
-            current_instance.data_set_mention_id = current_data_set_mention_id;
-            
-            // mention text - are verbatim and name different?
-            if ( ( current_fixed_mention_text != null )
-                && ( current_fixed_mention_text != "" )
-                && ( current_fixed_mention_text != current_mention_text ) )
+            // loop over mention array to create and store SOURCENET.Mention
+            //    instances.
+            // how many we got?
+            mention_count = my_mention_array.length;
+    
+            SOURCENET.log_message( "In " + me + "(): mention_count = " + mention_count );
+    
+            // !---- mention loop
+            for ( mention_index = 0; mention_index < mention_count; mention_index++ )
             {
+    
+                SOURCENET.log_message( "In " + me + "(): mention_index = " + mention_index );
+    
+                // get mention at current index
+                current_mention_data = my_mention_array[ mention_index ];
+    
+                // get values
+                current_mention_text = current_mention_data[ "mention_text" ];
+                current_fixed_mention_text = current_mention_data[ "fixed_mention_text" ];
+                current_mention_type = current_mention_data[ "mention_type" ];
+                current_original_mention_type = current_mention_data[ "original_mention_type" ];
+                current_data_set_mention_id = current_mention_data[ "data_set_mention_id" ];
+                current_mention_index = current_mention_data[ "mention_index" ];
+    
+                // create and populate Mention instance.
+                current_instance = new SOURCENET.Mention();
                 
-                // they are different - store each in their appropriate field.
-                current_instance.mention_text = current_mention_text;
-                current_instance.fixed_mention_text = current_fixed_mention_text;
+                // mention type
+                current_instance.mention_type = current_mention_type;
+                current_instance.original_mention_type = current_original_mention_type;
+    
+                // ID for DataSetMention instance.
+                current_instance.data_set_mention_id = current_data_set_mention_id;
                 
-            }
-            else
-            {
+                // mention text - are verbatim and name different?
+                if ( ( current_fixed_mention_text != null )
+                    && ( current_fixed_mention_text != "" )
+                    && ( current_fixed_mention_text != current_mention_text ) )
+                {
+                    
+                    // they are different - store each in their appropriate field.
+                    current_instance.mention_text = current_mention_text;
+                    current_instance.fixed_mention_text = current_fixed_mention_text;
+                    
+                }
+                else
+                {
+                    
+                    // nothing fancy, just resting a bit.
+                    current_instance.mention_text = current_mention_text;
+                    current_instance.fixed_mention_text = "";
+    
+                } //-- END check to see if mention text has been fixed --//
                 
-                // nothing fancy, just resting a bit.
-                current_instance.mention_text = current_mention_text;
-                current_instance.fixed_mention_text = "";
-
-            } //-- END check to see if mention text has been fixed --//
+                current_instance.mention_index = mention_index;
+    
+                // add mention to this DataStore.
+                this.add_mention( current_instance );
+    
+            } //-- END loop over mentions --//
             
-            current_instance.mention_index = mention_index;
-
-            // add mention to this DataStore.
-            this.add_mention( current_instance );
-
-        } //-- END loop over mentions --//
-
-        /*
-        // No need to do this - add_mention() builds all this stuff for you.
-        // then store off all the rest of the stuff.
-        this.next_mention_index = my_next_mention_index;
-        this.text_to_mention_index_map = my_text_to_mention_index_map;
-        this.status_message_array = my_status_message_array;
-        this.latest_mention_index = my_latest_mention_index;
-         */
+    
+            /*
+            // No need to do this - add_mention() builds all this stuff for you.
+            // then store off all the rest of the stuff.
+            this.next_mention_index = my_next_mention_index;
+            this.text_to_mention_index_map = my_text_to_mention_index_map;
+            this.status_message_array = my_status_message_array;
+            this.latest_mention_index = my_latest_mention_index;
+             */
+    
+        }
+        else
+        {
+            SOURCENET.log_message( "In " + me + "(): mention_array is undefined or null" );
+        } //-- END check to see if any mentions at all --//
 
     } //-- END check to see if JSON passed in. --//
 
@@ -4347,8 +4380,8 @@ $( document ).ready(
                 else if ( button_value == SOURCENET.DATA_SET_HIGHLIGHTING_BUTTON_VALUE_OFF )
                 {
                     // highlight
-                    SOURCENET.highlight_data_set_terms();
                     SOURCENET.highlight_data_set_mentions();
+                    SOURCENET.highlight_data_set_terms();
                     
                     // change button to ON.
                     button_element.val( SOURCENET.DATA_SET_HIGHLIGHTING_BUTTON_VALUE_ON );   
@@ -4368,11 +4401,11 @@ $( document ).ready(
     function()
     {
 
-        // call the highlight data set terms function.
-        SOURCENET.highlight_data_set_terms();
-        
         // call the highlight data_set_mentions function.
         SOURCENET.highlight_data_set_mentions();
+        
+        // call the highlight data set terms function.
+        SOURCENET.highlight_data_set_terms();
         
         // process found synonyms?
         if ( SOURCENET.process_found_synonyms == true )

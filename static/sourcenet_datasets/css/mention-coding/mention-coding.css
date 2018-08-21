@@ -203,36 +203,6 @@ table.mentionListTable
     font-style: italic;
 }
 
-.foundInText
-{
-    background-color: #fcd889;
-}
-
-.foundInTextMatchedWords
-{
-    background-color: #fcac02;
-}
-
-.foundInTextRed
-{
-    background-color: #f08181;
-}
-
-.foundInTextMatchedWordsRed
-{
-    background-color: #e83434;
-}
-
-.foundInTextGreen
-{
-    background-color: #78f294;
-}
-
-.foundInTextMatchedWordsGreen
-{
-    background-color: #158009;
-}
-
 .hidden
 {
     /* default to not shown - show when "source" type selected. */
