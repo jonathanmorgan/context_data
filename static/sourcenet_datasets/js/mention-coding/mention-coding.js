@@ -1079,11 +1079,10 @@ SOURCENET.find_mention_text_in_article_text = function( color_IN )
     
     // get mention text
     mention_text = SOURCENET.get_mention_text_value();
-    //SOURCENET.log_message( "In " + me + "(): mention text : " + mention_text );
 
     debug_message = "In " + me + " - mention text = " + mention_text;
-    //SOURCENET.log_message( debug_message );
-    console.log( debug_message );
+    SOURCENET.log_message( debug_message );
+    //console.log( debug_message );
 
     // get text-to-find-in-article text field, place value.
     SOURCENET.send_text_to_find_input( mention_text );
@@ -1533,16 +1532,16 @@ SOURCENET.grab_mention = function( text_IN )
         $( '#' + SOURCENET.INPUT_ID_MENTION_TEXT ).val( selected_text );
         
         debug_message = "In " + me + " - before SOURCENET.find_mention_text_in_article_text(), selected text = " + selected_text;
-        //SOURCENET.log_message( debug_message );
-        console.log( debug_message );
+        SOURCENET.log_message( debug_message );
+        //console.log( debug_message );
        
         // place last name in text-to-find-in-article <input>, then try
         //     to find in text.
         SOURCENET.find_mention_text_in_article_text();
         
         debug_message = "In " + me + " - after SOURCENET.find_mention_text_in_article_text(), selected text = " + selected_text;
-        //SOURCENET.log_message( debug_message );
-        console.log( debug_message );
+        SOURCENET.log_message( debug_message );
+        //console.log( debug_message );
 
         // clear out the fix name area.
         SOURCENET.cancel_fix_mention_text();
