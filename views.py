@@ -303,8 +303,8 @@ def dataset_code_mentions( request_IN ):
                 article_instance = citation_instance.article
                 data_set_instance = citation_instance.data_set
                 response_dictionary[ 'data_set_instance' ] = data_set_instance
-                data_set_mention_list = data_set_instance.get_unique_mention_string_list()
-                response_dictionary[ 'data_set_mention_list' ] = data_set_mention_list
+                # have to create mention list after processing, so if we remove,
+                #    the items don't show up in the list.
         
             #-- END check if single citation. --#
             
@@ -570,6 +570,10 @@ def dataset_code_mentions( request_IN ):
         
             # got article_data?
             if ( article_data_instance is not None ):
+    
+                # render list of mentions now that we have processed updates.
+                data_set_mention_list = data_set_instance.get_unique_mention_string_list( replace_white_space_IN = True )
+                response_dictionary[ 'data_set_mention_list' ] = data_set_mention_list
     
                 # convert to JSON and store in response dictionary - so data is displayed.
                 new_data_store_json = ManualDataSetMentionsCoder.convert_article_data_to_data_store_json( article_data_instance, citation_instance )

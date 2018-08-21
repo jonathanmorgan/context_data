@@ -30,6 +30,9 @@ from taggit.managers import TaggableManager
 # import six for Python 2 and 3 compatibility.
 import six
 
+# python_utilties
+from python_utilities.strings.string_helper import StringHelper
+
 # sourcenet imports
 from sourcenet.models import Article
 from sourcenet.models import Article_Data
@@ -111,7 +114,7 @@ class DataSet( models.Model ):
     #-- END method __str__() --#
     
     
-    def get_unique_mention_string_list( self, *args, **kwargs ):
+    def get_unique_mention_string_list( self, replace_white_space_IN = False, *args, **kwargs ):
 
         '''
         Retrieves all DataSetMention-s that relate to this DataSet, across
@@ -149,6 +152,15 @@ class DataSet( models.Model ):
                 
                 # is it in set?
                 if ( mention_string not in mention_set ):
+                
+                    # are we replacing white space for javascript?
+                    if ( replace_white_space_IN == True ):
+                    
+                        # replace more than one contiguous white space character
+                        #     with a space.
+                        mention_string = StringHelper.replace_white_space( mention_string )
+                        
+                    #-- END check if we unicode_escape --#
                 
                     # no - add it.
                     mention_set.add( mention_string )
