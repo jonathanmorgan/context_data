@@ -25,7 +25,7 @@ SOURCENET.article_data_id = -1;
 SOURCENET.data_store = null;
 
 // DEBUG!
-SOURCENET.debug_flag = true;
+SOURCENET.debug_flag = false;
 
 // JSON property names
 SOURCENET.JSON_PROP_MENTION_TEXT = "mention_text";
@@ -109,6 +109,10 @@ SOURCENET.text_to_ignore_list = [];
 SOURCENET.text_to_ignore_list.push( "the" );
 SOURCENET.text_to_ignore_list.push( "The" );
 SOURCENET.FindInText.add_to_ignore_list( SOURCENET.text_to_ignore_list );
+
+// find_in_article_text parameters
+//SOURCENET.find_in_article_text_type = "phrase";
+SOURCENET.find_in_article_text_type = "words";
 
 
 //----------------------------------------------------------------------------//
@@ -379,8 +383,7 @@ SOURCENET.clear_find_in_text = function()
     SOURCENET.clear_red_highlight();
                 
     // get text-to-find-in-article text field, set value to "".
-    input_element = $( '#' + SOURCENET.INPUT_ID_TEXT_TO_FIND_IN_ARTICLE );
-    input_element.val( "" );
+    SOURCENET.send_text_to_find_input( "" );
 
 } //-- END function SOURCENET.clear_find_in_text() --//
 
@@ -934,11 +937,13 @@ SOURCENET.find_strings_in_article_text = function( find_text_list_IN, clear_exis
     var string_count = -1;
     var do_clear_matches = false;
     var is_text_OK = false;
+    var article_text_element = null;
     var article_paragraphs = null;
     var article_paragraphs_count = -1;
     var article_body_jquery_element = null;
     var find_in_text_list = null;
     var saved_ignore_in_wrapper_element = null;
+    var force_ignore_wrapper_element = false;
     //var contains_selector = "";
     //var match_paragraphs = null;
     
@@ -980,70 +985,36 @@ SOURCENET.find_strings_in_article_text = function( find_text_list_IN, clear_exis
         find_in_text_list = find_text_list_IN;
         
         // do we ignore <p>-tags?
-        if ( SOURCENET.article_text_ignore_p_tags == true )
+        //if ( SOURCENET.article_text_ignore_p_tags == true )
+        //{
+        if ( force_ignore_wrapper_element == true )
         {
             
-            // just retrieve the element of the article body and search within,
-            //     ignoring wrapper element.
-            article_text_element = SOURCENET.get_article_body()
-            
+            SOURCENET.log_message( "In " + me + "(): ignore p tags" );
+
             // set text finder to ignore wrapper element.
             saved_ignore_in_wrapper_element = SOURCENET.text_finder.ignore_wrapper_element
             SOURCENET.text_finder.ignore_wrapper_element = true;
-            
-            // just search in the article text element.
-            SOURCENET.text_finder.find_text_in_element( article_text_element, find_in_text_list );
+        }
+
+             
+        // just retrieve the element of the article body and search within,
+        //     ignoring wrapper element.
+        article_text_element = SOURCENET.get_article_body()
+        
+        
+        // just search in the article text element.
+        SOURCENET.text_finder.find_text_in_element( article_text_element, find_in_text_list );
+        
+        // do we ignore <p>-tags?
+        //if ( SOURCENET.article_text_ignore_p_tags == true )
+        //{
+        if ( force_ignore_wrapper_element == true )
+        {
             
             // put ignore wrapper element back.
             SOURCENET.text_finder.ignore_wrapper_element = saved_ignore_in_wrapper_element
-
         }
-        else
-        {
-            
-            // get article <p> tags.
-            article_paragraphs = SOURCENET.get_article_paragraphs();
-            article_paragraphs_count = article_paragraphs.length
-            
-            SOURCENET.log_message( "In " + me + "(): paragraph count = " + article_paragraphs.length );
-            
-            // got paragraphs?
-            if ( article_paragraphs_count > 0 )
-            {
-                
-                article_paragraphs.each( function()
-                    {
-                        // declare variables.
-                        var jquery_p_element = null;
-                       
-                        // get paragraph text
-                        jquery_p_element = $( this );
-                        
-                        // call function to find in <p> tag
-                        SOURCENET.text_finder.find_text_in_element( jquery_p_element, find_in_text_list );
-                    } //-- END anonymous function called on each paragraph --//
-                );
-        
-            }
-            else
-            {
-    
-                // no paragraphs.  Just find in the body
-                article_body_jquery_element = SOURCENET.get_article_body();
-                
-                // set text finder to ignore wrapper element.
-                saved_ignore_in_wrapper_element = SOURCENET.text_finder.ignore_wrapper_element
-                SOURCENET.text_finder.ignore_wrapper_element = true;
-            
-                // call function to find in <p> tag
-                SOURCENET.text_finder.find_text_in_element( article_body_jquery_element, find_in_text_list );
-                
-                // put ignore wrapper element back.
-                SOURCENET.text_finder.ignore_wrapper_element = saved_ignore_in_wrapper_element
-                
-            } //-- END check to see if paragraphs. --//
-            
-        } //-- END check to see if we just ignore paragraphs. --//
         
     } //-- END to make sure we have text. --//
 
@@ -1070,7 +1041,7 @@ SOURCENET.find_in_article_text = function( find_text_IN, clear_existing_matches_
     var find_in_text_list = null;
     var is_text_OK = false;
     
-    SOURCENET.log_message( "In " + me + "(): find_text_IN = " + find_text_IN );
+    SOURCENET.log_message( "In " + me + "(): find_text_IN = " + find_text_IN + "; clear? = " + clear_existing_matches_IN + "; color = " + color_IN );
     
     // is text passed in OK?
     is_text_OK = SOURCENET.is_string_OK( find_text_IN );
@@ -1104,6 +1075,7 @@ SOURCENET.find_mention_text_in_article_text = function( color_IN )
     var me = "SOURCENET.find_mention_text_in_article_text";
     var mention_text = "";
     var input_element = null;
+    var find_type = "";
     
     // get mention text
     mention_text = SOURCENET.get_mention_text_value();
@@ -1114,11 +1086,23 @@ SOURCENET.find_mention_text_in_article_text = function( color_IN )
     console.log( debug_message );
 
     // get text-to-find-in-article text field, place value.
-    input_element = $( '#' + SOURCENET.INPUT_ID_TEXT_TO_FIND_IN_ARTICLE );
-    input_element.val( mention_text );
+    SOURCENET.send_text_to_find_input( mention_text );
     
     // find in text.
-    SOURCENET.find_in_article_text( mention_text, true, color_IN );
+    find_type = SOURCENET.find_in_article_text_type;
+    if ( find_type == "phrase" )
+    {
+        SOURCENET.find_in_article_text( mention_text, true, color_IN );    
+    }
+    else if ( find_type == "word" )
+    {
+        SOURCENET.find_words_in_article_text( mention_text, true, color_IN );
+    }
+    else
+    {
+        // default is word.
+        SOURCENET.find_words_in_article_text( mention_text, true, color_IN );
+    }
     
 } //-- END function SOURCENET.find_mention_text_in_article_text() --//
 // ! ==> mention text - single string --> find_in_article_text()
@@ -1148,6 +1132,7 @@ SOURCENET.find_words_in_article_text = function( find_text_IN,
     var current_index = -1;
     var current_find_text = "";
     var saved_ignore_in_wrapper_element = "";
+    var force_ignore_wrapper_element = false;
     
     //var contains_selector = "";
     //var match_paragraphs = null;
@@ -1173,9 +1158,14 @@ SOURCENET.find_words_in_article_text = function( find_text_IN,
         //     ignoring wrapper element.
         article_text_element = SOURCENET.get_article_body()
         
-        // set text finder to ignore wrapper element.
-        saved_ignore_in_wrapper_element = SOURCENET.text_finder.ignore_wrapper_element
-        SOURCENET.text_finder.ignore_wrapper_element = true;
+        if ( force_ignore_wrapper_element == true )
+        {
+            
+            // set text finder to ignore wrapper element.
+            saved_ignore_in_wrapper_element = SOURCENET.text_finder.ignore_wrapper_element
+            SOURCENET.text_finder.ignore_wrapper_element = true;
+
+        }
         
         // just search in the article text element.
         SOURCENET.find_words_in_html_element( find_text_IN,
@@ -1183,8 +1173,13 @@ SOURCENET.find_words_in_article_text = function( find_text_IN,
                                               do_clear_matches,
                                               color_IN );
 
-        // put ignore wrapper element back.
-        SOURCENET.text_finder.ignore_wrapper_element = saved_ignore_in_wrapper_element
+        if ( force_ignore_wrapper_element == true )
+        {
+            
+            // put ignore wrapper element back.
+            SOURCENET.text_finder.ignore_wrapper_element = saved_ignore_in_wrapper_element
+
+        }
                 
     } //-- END to make sure we have text. --//
 
@@ -1213,6 +1208,7 @@ SOURCENET.find_words_in_html_element = function( find_text_IN,
     var is_text_OK = false;
     var article_paragraphs = null;
     var saved_ignore_in_wrapper_element = "";
+    var force_ignore_wrapper_element = false;
     //var contains_selector = "";
     //var match_paragraphs = null;
     
@@ -1247,15 +1243,25 @@ SOURCENET.find_words_in_html_element = function( find_text_IN,
         // set up list of items to look for (split find_text_IN on " ").
         find_in_text_list = find_text_IN.split( " " );
         
-        // set text finder to ignore wrapper element.
-        saved_ignore_in_wrapper_element = SOURCENET.text_finder.ignore_wrapper_element
-        SOURCENET.text_finder.ignore_wrapper_element = true;
+        if ( force_ignore_wrapper_element == true )
+        {
+            
+            // set text finder to ignore wrapper element.
+            saved_ignore_in_wrapper_element = SOURCENET.text_finder.ignore_wrapper_element
+            SOURCENET.text_finder.ignore_wrapper_element = true;
+            
+        }
         
         // just search in the article text element.
         SOURCENET.text_finder.find_text_in_element( element_to_search_IN, find_in_text_list );
 
-        // put ignore wrapper element back.
-        SOURCENET.text_finder.ignore_wrapper_element = saved_ignore_in_wrapper_element
+        if ( force_ignore_wrapper_element == true )
+        {
+            
+            // put ignore wrapper element back.
+            SOURCENET.text_finder.ignore_wrapper_element = saved_ignore_in_wrapper_element
+            
+        }
                 
     } //-- END to make sure we have text. --//
 
@@ -2313,6 +2319,26 @@ SOURCENET.render_coding_form_inputs = function( form_IN )
     return do_submit_OUT;
    
 } //-- END function to render form to submit coding.
+
+
+SOURCENET.send_text_to_find_input = function( text_to_find_IN )
+{
+    // declare variables
+    var me = "SOURCENET.send_text_to_find_input";
+    var value = "";
+    var input_element = "";
+    var element_id = "";
+
+    // get value
+    value = text_to_find_IN;
+
+    // get text-to-find-in-article text field, place value.
+    element_id = '#' + SOURCENET.INPUT_ID_TEXT_TO_FIND_IN_ARTICLE;
+    input_element = $( element_id );
+    input_element.val( value );
+    
+    SOURCENET.log_message( "In " + me + " - sending text : " + value + "; to element_id : " + element_id );
+} //-- END function SOURCENET.send_text_to_find_input() --//
 
 
 //----------------------------------------------------------------------------//
@@ -4195,18 +4221,14 @@ $( document ).ready(
             {
                 // declare variables
                 var value = "";
-                var input_element = "";
-                var element_id = "";
     
                 // get value
                 value = SOURCENET.get_mention_text();
 
-                // get text-to-find-in-article text field, place value.
-                element_id = '#' + SOURCENET.INPUT_ID_TEXT_TO_FIND_IN_ARTICLE;
-                input_element = $( element_id );
-                input_element.val( value );
+                // send to find input.
+                SOURCENET.send_text_to_find_input( value );
                 
-                SOURCENET.log_message( "In document.ready( button - #find-mention-in-article-text ) - match text : " + value + "; element_id : " + element_id );
+                SOURCENET.log_message( "In document.ready( button - #find-mention-in-article-text ) - match text : " + value );
             }
         )
     }
@@ -4234,10 +4256,10 @@ $( document ).ready(
                 input_element = $( '#' + SOURCENET.INPUT_ID_TEXT_TO_FIND_IN_ARTICLE );
                 find_text = input_element.val();
 
-                //SOURCENET.log_message( "In " + me + " - find text : " + find_text );
+                SOURCENET.log_message( "In " + me + " - find text : " + find_text );
 
                 // find in text...
-                SOURCENET.find_in_article_text( find_text, false );
+                SOURCENET.find_in_article_text( find_text, false, "red" );
                 
             }
         )
@@ -4266,10 +4288,10 @@ $( document ).ready(
                 input_element = $( '#' + SOURCENET.INPUT_ID_TEXT_TO_FIND_IN_ARTICLE );
                 find_text = input_element.val();
 
-                //SOURCENET.log_message( "In " + me + " - find text : " + find_text );
+                SOURCENET.log_message( "In " + me + " - find text : " + find_text );
 
                 // find in text...
-                SOURCENET.find_words_in_article_text( find_text, false );
+                SOURCENET.find_words_in_article_text( find_text, false, "red" );
                 
             }
         )
