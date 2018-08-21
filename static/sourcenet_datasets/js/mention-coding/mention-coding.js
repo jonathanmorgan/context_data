@@ -25,7 +25,7 @@ SOURCENET.article_data_id = -1;
 SOURCENET.data_store = null;
 
 // DEBUG!
-SOURCENET.debug_flag = false;
+SOURCENET.debug_flag = true;
 
 // JSON property names
 SOURCENET.JSON_PROP_MENTION_TEXT = "mention_text";
@@ -93,6 +93,7 @@ SOURCENET.HTML_SPAN_MATCHED_WORDS = SOURCENET.HTML_SPAN_TO_CLASS + SOURCENET.CSS
 
 // Compress white space in values?
 SOURCENET.compress_white_space = true;
+SOURCENET.regex_compress_white_space = /\s+/g
 
 // list of strings to highlight in the text for the current data set.
 SOURCENET.data_set_string_list = [];
@@ -476,6 +477,24 @@ SOURCENET.clear_mention_type = function( status_message_IN )
     
 } //-- END function SOURCENET.clear_mention_type() --//
 
+
+/**
+ * Accepts string, uses regular expression to compress runs of internal white
+ *     space to a single space, returns the result.
+ */
+SOURCENET.compress_internal_white_space = function( string_IN ) 
+{
+    // return reference
+    var string_OUT = null;
+    
+    // replace more than one contiguous internal white space
+    //     character with a single space.
+    string_OUT = string_IN.replace( SOURCENET.regex_compress_white_space, ' ' );
+    
+    return string_OUT;
+
+} //-- end function SOURCENET.compress_internal_white_space --//
+ 
 
 /**
  * Configures SOURCENET.text_finder to highlight in green.
@@ -862,12 +881,14 @@ SOURCENET.find_and_process_data_set_synonyms = function()
         // retrieve article body's text.
         article_body = SOURCENET.get_article_body();
         article_body_text = article_body.text();
+        article_body_text = SOURCENET.compress_internal_white_space( article_body_text );
         
         for ( mention_index = 0; mention_index < mention_count; mention_index++ )
         {
             
             // get current mention.
             current_mention = mention_list[ mention_index ];
+            current_mention = SOURCENET.compress_internal_white_space( current_mention );
             
             // find it in article text (not HTML).
             SOURCENET.text_finder.find_text_in_string( current_mention, article_body_text );
@@ -1077,7 +1098,7 @@ SOURCENET.find_in_article_text = function( find_text_IN, clear_existing_matches_
  * Postconditions: Updates classes on article <p> tags so any that contain
  *     current last name are assigned "foundInText".
  */
-SOURCENET.find_mention_text_in_article_text = function( find_text_IN, color_IN )
+SOURCENET.find_mention_text_in_article_text = function( color_IN )
 {
     // declare variables
     var me = "SOURCENET.find_mention_text_in_article_text";
@@ -1087,6 +1108,10 @@ SOURCENET.find_mention_text_in_article_text = function( find_text_IN, color_IN )
     // get mention text
     mention_text = SOURCENET.get_mention_text_value();
     //SOURCENET.log_message( "In " + me + "(): mention text : " + mention_text );
+
+    debug_message = "In " + me + " - mention text = " + mention_text;
+    //SOURCENET.log_message( debug_message );
+    console.log( debug_message );
 
     // get text-to-find-in-article text field, place value.
     input_element = $( '#' + SOURCENET.INPUT_ID_TEXT_TO_FIND_IN_ARTICLE );
@@ -1477,7 +1502,9 @@ SOURCENET.grab_mention = function( text_IN )
 {
 
     // declare variables
-    selected_text = "";
+    var me = "SOURCENET.grab_mention";
+    var selected_text = "";
+    var debug_message = "";
 
     // get selection
     selected_text = text_IN;
@@ -1492,17 +1519,25 @@ SOURCENET.grab_mention = function( text_IN )
         {
             // replace more than one contiguous internal white space
             //     character with a single space.
-            selected_text = selected_text.replace( /\s+/g, ' ' );
+            selected_text = SOURCENET.compress_internal_white_space( selected_text );
         }
     
         //SOURCENET.log_message( "selected text : \"" + selected_text + "\"" );
     
         $( '#' + SOURCENET.INPUT_ID_MENTION_TEXT ).val( selected_text );
         
+        debug_message = "In " + me + " - before SOURCENET.find_mention_text_in_article_text(), selected text = " + selected_text;
+        //SOURCENET.log_message( debug_message );
+        console.log( debug_message );
+       
         // place last name in text-to-find-in-article <input>, then try
         //     to find in text.
         SOURCENET.find_mention_text_in_article_text();
         
+        debug_message = "In " + me + " - after SOURCENET.find_mention_text_in_article_text(), selected text = " + selected_text;
+        //SOURCENET.log_message( debug_message );
+        console.log( debug_message );
+
         // clear out the fix name area.
         SOURCENET.cancel_fix_mention_text();
 
