@@ -67,6 +67,7 @@ class DataSet( models.Model ):
     methodology = models.TextField( blank = True, null = True )
     citation = models.TextField( blank = True, null = True )
     additional_keywords = models.TextField( blank = True, null = True )
+    family_identifier = models.CharField( max_length = 255, blank = True, null = True )
 
     # tags!
     tags = TaggableManager( blank = True )
