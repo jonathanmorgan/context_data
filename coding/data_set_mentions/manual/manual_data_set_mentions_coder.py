@@ -106,6 +106,7 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
     CONFIG_NAME_DEFAULT_FIND_LOCATION = "default_find_location"
     CONFIG_NAME_BE_CASE_SENSITIVE = "be_case_sensitive"
     CONFIG_NAME_PROCESS_FOUND_SYNONYMS = "process_found_synonyms"
+    CONFIG_NAME_SYNCHRONIZE_DATA_SET_FAMILIES = "synchronize_data_set_families"
 
     # kwarg parameter names
     KWARG_DATA_STORE_JSON_STRING = "data_store_json_string_IN"
@@ -935,7 +936,7 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
                         # got article data?
                         if ( current_article_data is not None ):
                         
-                            # ! -- lookup DataSetCitationData instance - don't create
+                            # ! -- get/lookup DataSetCitationData instance
                             citation_get_result = self.get_data_set_citation_data( current_article_data, citation_instance_IN )
                         
                             # what have we got?

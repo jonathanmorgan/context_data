@@ -206,6 +206,13 @@ def dataset_code_mentions( request_IN ):
     page_status_message = ""
     page_status_message_list = []
     
+    # declare variables - coding - family synchronization.
+    synchronize_data_set_families = True
+    family_id = None
+    family_citation_qs = None
+    family_citation_count = -1
+    family_citation = None
+    
     # declare variables - interacting with article text
     article_content = ""
     article_text_type = ""
@@ -226,8 +233,13 @@ def dataset_code_mentions( request_IN ):
     # declare variables - submit coding back to server
     coding_submit_form = None
 
+    # Basic initialization:
+    
     # set logger_name
     logger_name = "sourcenet.views." + me
+    
+    # see if we are synchronizing information across data set families.
+    synchronize_data_set_families = Config_Property.get_property_boolean_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_SYNCHRONIZE_DATA_SET_FAMILIES, default_IN = False )
     
     # ! ---- initialize response dictionary
     response_dictionary = {}
@@ -453,6 +465,52 @@ def dataset_code_mentions( request_IN ):
                                                                                   article_data_id,
                                                                                   request_IN,
                                                                                   response_dictionary )
+
+                    # ! ------> see if we synchronize_data_set_families.
+                    if ( synchronize_data_set_families == True ):
+                    
+                        # yes - do we have a family_identifier value?
+                        family_id = data_set_instance.family_identifier
+                        if ( ( family_id is not None ) and ( family_id != "" ) ):
+                        
+                            # we do have a family_identifier.  Are there any
+                            #     other citations in this article's citation
+                            #     set with this family ID?
+                            family_citation_qs = article_instance.datasetcitation_set.filter( data_set__family_identifier = family_id )
+
+                            # Don't include the one we just processed.
+                            family_citation_qs = family_citation_qs.exclude( id = citation_instance.id )
+                            
+                            # get a count!
+                            family_citation_count = family_citation_qs.count()
+                            if ( family_citation_count > 0 ):
+                            
+                                # there are citations in this family associated
+                                #     with the current publication.  For each,
+                                #     call process_data_store_json with the
+                                #     current JSON to either make a new
+                                #     Citation Data record, or to update what is
+                                #     there with the latest data (synchronize).
+                                for family_citation in family_citation_qs:
+                                
+                                    # process data store JSON for each family
+                                    #     DataSetCitation.
+                                    family_article_data_instance = manual_coder.process_data_store_json( family_citation,
+                                                                                                         current_user,
+                                                                                                         data_store_json_string,
+                                                                                                         article_data_id,
+                                                                                                         request_IN,
+                                                                                                         response_dictionary )
+
+                                    
+                                
+                                #-- END loop over family citations. --#
+                            
+                            #-- END check to see if there are 
+                            
+                        #-- END check to see if we have family ID.
+                        
+                    #-- END check to see if we synchronize data set families. --#    
     
                     # got anything back?
                     coding_status = ""

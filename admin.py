@@ -46,7 +46,7 @@ class DataSetAdmin( admin.ModelAdmin ):
         (
             None,
             {
-                'fields' : [ 'name', 'title', 'unique_identifier', 'description', 'date', 'tags' ]
+                'fields' : [ 'name', 'title', 'unique_identifier', 'family_identifier', 'description', 'date', 'tags' ]
             }
         ),
         (
@@ -62,7 +62,7 @@ class DataSetAdmin( admin.ModelAdmin ):
         DataSetIdentifierInline
     ]
 
-    list_display = ( 'id', 'name', 'title', 'date' )
+    list_display = ( 'id', 'name', 'family_identifier', 'title', 'date' )
     list_display_links = ( 'id', 'name' )
     search_fields = [ 'name', 'title', 'description', 'citation', 'coverages', 'subjects', 'methodology' ]
     date_hierarchy = 'create_date'
