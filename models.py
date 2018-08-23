@@ -392,6 +392,74 @@ class DataSetCitation( models.Model ):
     #-- END method get_data_set_id() --#
 
 
+    def get_unique_mention_string_list( self, replace_white_space_IN = False, *args, **kwargs ):
+
+        '''
+        Retrieves all DataSetMention-s that relate to this DataSetCitation. 
+            Builds and returns a set of the distinct strings used to refer to
+            the dataset.
+        '''
+        
+        # return reference
+        mention_list_OUT = []
+        
+        # declare variables
+        my_id = -1
+        mention_set = set()
+        data_set_citation_data_qs = None
+        citation_data = None
+        mention_qs = None
+        mention = None
+        mention_string = None
+        
+        # get citation data
+        data_set_citation_data_qs = DataSetCitationData.objects.filter( data_set_citation = self )
+        
+        # for each citation data, get all mentions, and add the value of each
+        #     to set.
+        for citation_data in data_set_citation_data_qs:
+        
+            # get mentions
+            mention_qs = citation_data.datasetmention_set.all()
+            
+            # for each mention, grab value and add to set if not already there.
+            for mention in mention_qs:
+            
+                # get value
+                mention_string = mention.value
+                
+                # is it in set?
+                if ( mention_string not in mention_set ):
+                
+                    # are we replacing white space?
+                    if ( replace_white_space_IN == True ):
+                    
+                        # replace more than one contiguous white space character
+                        #     with a space.
+                        mention_string = StringHelper.replace_white_space( mention_string )
+                        
+                    #-- END check if we unicode_escape --#
+                
+                    # no - add it.
+                    mention_set.add( mention_string )
+                    
+                #-- END check to see if in set. --#
+                
+            #-- END loop over mentions. --#
+            
+        #-- END loop over citation data related to current data set --#
+        
+        # convert set to list.
+        mention_list_OUT = list( mention_set )
+        mention_list_OUT.sort()
+        
+        return mention_list_OUT
+
+    #-- END method get_unique_mention_list() --#
+
+#= End DataSet Model ======================================================
+
+
 #= END DataSetCitation Model ======================================================
 
 
