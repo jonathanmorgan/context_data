@@ -62,9 +62,9 @@ class DataSetAdmin( admin.ModelAdmin ):
         DataSetIdentifierInline
     ]
 
-    list_display = ( 'id', 'name', 'family_identifier', 'title', 'date' )
+    list_display = ( 'id', 'name', 'unique_identifier', 'family_identifier', 'title', 'date' )
     list_display_links = ( 'id', 'name' )
-    search_fields = [ 'name', 'title', 'description', 'citation', 'coverages', 'subjects', 'methodology' ]
+    search_fields = [ 'name', 'title', 'unique_identifier', 'description', 'citation', 'coverages', 'subjects', 'methodology', 'additional_keywords' ]
     date_hierarchy = 'create_date'
 
 admin.site.register( DataSet, DataSetAdmin )
