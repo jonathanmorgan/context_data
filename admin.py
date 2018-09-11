@@ -40,13 +40,13 @@ class DataSetAdmin( admin.ModelAdmin ):
     #    around them) mapped to lookup channels used to service them (lookup
     #    channels are defined in settings.py, implenented in a separate module -
     #    in this case, implemented in sourcenet.ajax-select-lookups.py
-    #form = make_ajax_form( DataSet, dict( article_data = 'article_data' ) )
+    form = make_ajax_form( DataSet, dict( parent_data_set = 'datasets' ) )
 
     fieldsets = [
         (
             None,
             {
-                'fields' : [ 'name', 'title', 'unique_identifier', 'family_identifier', 'description', 'date', 'tags' ]
+                'fields' : [ 'name', 'title', 'unique_identifier', 'family_identifier', 'parent_data_set', 'description', 'date', 'tags' ]
             }
         ),
         (

@@ -68,6 +68,7 @@ class DataSet( models.Model ):
     citation = models.TextField( blank = True, null = True )
     additional_keywords = models.TextField( blank = True, null = True )
     family_identifier = models.CharField( max_length = 255, blank = True, null = True )
+    parent_data_set = models.ForeignKey( 'DataSet', blank = True, null = True, on_delete = models.SET_NULL )
 
     # tags!
     tags = TaggableManager( blank = True )
