@@ -114,7 +114,15 @@ def output_debug( message_IN, method_IN = "", indent_with_IN = "", logger_name_I
 @register( "datasets" )
 class DataSetLookup( sourcenet.lookups.LookupParent ):
 
-    my_class = DataSet	
+    def __init__( self, *args, **kwargs ):
+        
+        # call parent's __init__()
+        super( DataSetLookup, self ).__init__()
+        
+        # initialize variables
+        self.my_class = DataSet
+        
+    #-- END method __init__() --#
 
     def get_query( self, q, request ):
 
