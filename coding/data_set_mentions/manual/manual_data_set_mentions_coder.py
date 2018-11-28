@@ -53,6 +53,9 @@ from python_utilities.strings.string_helper import StringHelper
 
 # sourcenet classes
 
+# shared
+from sourcenet.shared.sourcenet_base import SourcenetBase
+
 # models
 from sourcenet.models import Article_Data
 from sourcenet.models import Article_Data_Notes
@@ -95,9 +98,9 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
     
     # config application
     CONFIG_APPLICATION = "Manual_Data_Set_Mentions_Coding"
-    CONFIG_NAME_ARTICLE_TEXT_RENDER_TYPE = "article_text_render_type"
-    CONFIG_NAME_ARTICLE_TEXT_IS_PREFORMATTED = "article_text_is_preformatted"
-    CONFIG_NAME_ARTICLE_TEXT_WRAP_IN_P = "article_text_wrap_in_p"
+    CONFIG_NAME_ARTICLE_TEXT_RENDER_TYPE = SourcenetBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_RENDER_TYPE
+    CONFIG_NAME_ARTICLE_TEXT_IS_PREFORMATTED = SourcenetBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_IS_PREFORMATTED
+    CONFIG_NAME_ARTICLE_TEXT_WRAP_IN_P = SourcenetBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_WRAP_IN_P
     CONFIG_NAME_MENTION_TEXT_READ_ONLY = "mention_text_read_only"
     CONFIG_NAME_INCLUDE_FIND_IN_ARTICLE_TEXT = "include_find_in_article_text"
     CONFIG_NAME_DEFAULT_FIND_LOCATION = "default_find_location"

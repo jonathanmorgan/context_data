@@ -62,6 +62,8 @@ from sourcenet_datasets.forms import DataSetCitationLookupForm
 # sourcenet imports
 from sourcenet.models import Article
 from sourcenet.models import Article_Data
+import sourcenet.views
+from sourcenet.shared.sourcenet_base import SourcenetBase
 
 # python_utilities imports
 from python_utilities.django_utils.django_view_helper import DjangoViewHelper
@@ -166,6 +168,7 @@ def dataset_code_mentions( request_IN ):
     me = "dataset_code_mentions"
     logger_name = ""
     debug_message = ""
+    status_message = ""
     
     # declare variables - exception handling
     exception_message = ""
@@ -252,19 +255,22 @@ def dataset_code_mentions( request_IN ):
     response_dictionary[ 'article_text_render_type' ] = Config_Property.get_property_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_ARTICLE_TEXT_RENDER_TYPE, default_IN = "raw" )  # one of "table", "raw", "custom", "pdf"
     response_dictionary[ 'article_text_is_preformatted' ] = Config_Property.get_property_boolean_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_ARTICLE_TEXT_IS_PREFORMATTED, default_IN = False )
     response_dictionary[ 'article_text_wrap_in_p' ] = Config_Property.get_property_boolean_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_ARTICLE_TEXT_WRAP_IN_P, default_IN = True )
-    response_dictionary[ 'mention_text_read_only' ] = Config_Property.get_property_boolean_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_MENTION_TEXT_READ_ONLY, default_IN = False )
-    response_dictionary[ 'include_find_in_article_text' ] = Config_Property.get_property_boolean_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_INCLUDE_FIND_IN_ARTICLE_TEXT, default_IN = True )
-    response_dictionary[ 'default_find_location' ] = Config_Property.get_property_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_DEFAULT_FIND_LOCATION, default_IN = "html" )
-    response_dictionary[ 'ignore_word_list' ] = Config_Property.get_property_list_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_IGNORE_WORD_LIST, default_IN = None, delimiter_IN = "," )
-    response_dictionary[ 'highlight_word_list' ] = Config_Property.get_property_list_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_HIGHLIGHT_WORD_LIST, default_IN = None, delimiter_IN = "," )
-    response_dictionary[ 'be_case_sensitive' ] = Config_Property.get_property_boolean_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_BE_CASE_SENSITIVE, default_IN = False )
-    response_dictionary[ 'process_found_synonyms' ] = Config_Property.get_property_boolean_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_PROCESS_FOUND_SYNONYMS, default_IN = False )
+    response_dictionary[ 'mention_text_read_only' ] = Config_Property.get_property_boolean_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_MENTION_TEXT_READ_ONLY, default_IN = False )    
     response_dictionary[ 'data_set_instance' ] = None
     response_dictionary[ 'data_set_mention_list' ] = []
     response_dictionary[ 'base_simple_navigation' ] = True
     response_dictionary[ 'base_post_login_redirect' ] = reverse( dataset_code_mentions )
     response_dictionary[ 'existing_data_store_json' ] = ""
-    response_dictionary[ 'page_status_message_list' ] = page_status_message_list
+    response_dictionary[ SourcenetBase.VIEW_RESPONSE_KEY_PAGE_STATUS_MESSAGE_LIST ] = page_status_message_list
+
+    # find in article text (fit)
+    response_dictionary[ 'include_find_in_article_text' ] = Config_Property.get_property_boolean_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_INCLUDE_FIND_IN_ARTICLE_TEXT, default_IN = True )
+    response_dictionary[ 'fit_extra_html' ] = '<input type="button" id="find-mention-in-article-text" name="find-mention-in-article-text" value="<== Mention" />'
+    response_dictionary[ 'default_find_location' ] = Config_Property.get_property_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_DEFAULT_FIND_LOCATION, default_IN = "html" )
+    response_dictionary[ 'ignore_word_list' ] = Config_Property.get_property_list_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_IGNORE_WORD_LIST, default_IN = None, delimiter_IN = "," )
+    response_dictionary[ 'highlight_word_list' ] = Config_Property.get_property_list_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_HIGHLIGHT_WORD_LIST, default_IN = None, delimiter_IN = "," )
+    response_dictionary[ 'be_case_sensitive' ] = Config_Property.get_property_boolean_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_BE_CASE_SENSITIVE, default_IN = False )
+    response_dictionary[ 'process_found_synonyms' ] = Config_Property.get_property_boolean_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_PROCESS_FOUND_SYNONYMS, default_IN = False )
     
     # create manual coder and place in response so we can access constants-ish.
     manual_coder = ManualDataSetMentionsCoder()
@@ -647,181 +653,35 @@ def dataset_code_mentions( request_IN ):
                 
         #-- END check to see if exception --#
         
-        # ! ---- process DataSetCitation lookup?
+        # ! ---- is data set citation lookup form valid?
         if ( data_set_citation_lookup_form.is_valid() == True ):
 
-            # retrieve DataSetCitation specified by the input parameter, then
+            # ! ---- render article HTML
+
+            # retrieve article specified by the input parameter, then
             #   create HTML output of article plus Article_Text.
+            status_message = sourcenet.views.render_article_to_response(
+                article_id,
+                response_dictionary,
+                config_application_IN = ManualDataSetMentionsCoder.CONFIG_APPLICATION
+            )
             
-            # get article ID.
-            # already populated above.
-            #article_id = request_IN.POST.get( "article_id", -1 )
-
-            # retrieve QuerySet that contains that article.
-            article_qs = Article.objects.filter( pk = article_id )
-
-            # get count of queryset return items
-            if ( ( article_qs != None ) and ( article_qs != "" ) ):
-
-                # get count of articles
-                article_count = article_qs.count()
-    
-                # should only be one.
-                if ( article_count == 1 ):
-                
-                    # get article instance
-                    article_instance = article_qs.get()
-                    
-                    # ! ---- retrieve article text.
-                    article_text = article_instance.article_text_set.get()
-                    
-                    # get content
-                    article_content = article_text.get_content()
-                    article_text_type = article_text.content_type
-                    response_dictionary[ 'article_text_type' ] = article_text_type
-                    
-                    # if not "text", want to make sure to not use "custom".
-                    
-                    # ! ------ create custom text
-                    article_content_line_list = article_content.split( "\n" )
-                    article_text_custom = "<p>" + "</p>\n<p>".join( article_content_line_list ) + "</p>"
-                    response_dictionary[ 'article_text_custom' ] = article_text_custom
-                    
-                    # ! ------ table HTML
-                    # parse with beautifulsoup
-                    article_content_bs = BeautifulSoup( article_content, "html5lib" )
-                    
-                    # get paragraph tag list
-                    p_tag_list = article_content_bs.find_all( 'p' )
-                    p_tag_count = len( p_tag_list )
-                    
-                    # got p-tags?
-                    if ( p_tag_count > 0 ):
-                    
-                        # yes.  create a table with two columns per row:
-                        # - paragraph number
-                        # - paragraph text
-                        rendered_article_html = '''
-                            <table class="gridtable">
-                                <tr>
-                                    <th>graf#</th>
-                                    <th>text</th>
-                                </tr>
-                        '''
-                    
-                        # for each paragraph, grab that <p> and place it in a table
-                        #    cell.
-                        for paragraph_index in range( p_tag_count ):
-                        
-                            # paragraph number is index + 1
-                            paragraph_number = paragraph_index + 1
-                            
-                            # get <p> tag with ID of paragraph_number
-                            p_tag_bs = article_content_bs.find( id = str( paragraph_number ) )
-                            
-                            # render row
-                            p_tag_html = p_tag_bs.prettify()
-                            #p_tag_html = StringHelper.encode_string( p_tag_html, output_encoding_IN = StringHelper.ENCODING_UTF8 )
-                            debug_message = "p_tag_html type = " + str( type( p_tag_html ) )
-                            output_debug( debug_message, me, indent_with_IN = "====> ", logger_name_IN = logger_name )
-
-                            # calling str() on any part of a string being
-                            #    concatenated causes all parts of the string to
-                            #    try to encode to default encoding ('ascii').
-                            #    This breaks if there are non-ascii characters.
-                            rendered_article_html += "\n        <tr><td>" + StringHelper.object_to_unicode_string( paragraph_number ) + "</td><td>" + p_tag_html + "</td></tr>"
-                        
-                        #-- END loop over <p> ids. --#
-                        
-                        rendered_article_html += "</table>"
-                    
-                    else:
-                    
-                        # no p-tags - just use article_text.
-                        rendered_article_html = article_content
-                        
-                    #-- END check to see if paragraph tags. --#
-                    
-                    # seed response dictionary.
-                    response_dictionary[ 'citation_instance' ] = citation_instance
-                    response_dictionary[ 'article_instance' ] = article_instance
-                    response_dictionary[ 'article_text' ] = article_text
-                    response_dictionary[ 'data_set_instance' ] = data_set_instance
-                    response_dictionary[ 'article_content' ] = rendered_article_html
-                    response_dictionary[ 'data_set_citation_lookup_form' ] = data_set_citation_lookup_form
-                    response_dictionary[ 'coding_submit_form' ] = coding_submit_form
-                    response_dictionary[ 'base_include_django_ajax_selects' ] = True
-                    
-                    # get paragraph list
-                    #article_paragraph_list = article_text.get_paragraph_list()
-                    
-                elif ( article_count > 1 ):
-
-                    # error - multiple articles found for ID. --#
-
-                    # create error message.
-                    page_status_message = "ERROR - lookup for article ID " + str( article_id ) + " returned " + str( article_count ) + " records.  Oh my..."
-                    
-                    # log it...
-                    output_debug( page_status_message, me, indent_with_IN = "====> ", logger_name_IN = logger_name )
-
-                    # ...and output it.
-                    page_status_message_list.append( page_status_message )
-
-                    # and pass on the form.
-                    response_dictionary[ 'data_set_citation_lookup_form' ] = data_set_citation_lookup_form
-
-                elif ( article_count == 0 ):
-
-                    # error - multiple articles found for ID. --#
-
-                    # create error message.
-                    page_status_message = "No article found for article ID " + str( article_id ) + "."
-
-                    # log it...
-                    output_debug( page_status_message, me, indent_with_IN = "====> ", logger_name_IN = logger_name )
-
-                    # ...and output it.
-                    page_status_message_list.append( page_status_message )
-
-                    # and pass on the form.
-                    response_dictionary[ 'data_set_citation_lookup_form' ] = data_set_citation_lookup_form
-
-                else:
-                
-                    # unknown error. --#
-
-                    # create error message.
-                    page_status_message = "Unknown error encountered looking up article ID " + str( article_id ) + "."
-
-                    # log it...
-                    output_debug( page_status_message, me, indent_with_IN = "====> ", logger_name_IN = logger_name )
-
-                    # ...and output it.
-                    page_status_message_list.append( page_status_message )
-
-                    # and pass on the form.
-                    response_dictionary[ 'data_set_citation_lookup_form' ] = data_set_citation_lookup_form
-                    
-                #-- END check to see if there is one or other than one. --#
-
-            else:
+            # got a status message?
+            if ( status_message is not None ):
             
-                # ERROR - nothing returned from attempt to get queryset (would expect empty query set)
+                # ERROR - not sure what to do here.  Error should have been
+                #     stored in page_status_message_list.  Output debug.
+                debug_message = "ERROR - status from call to sourcenet.views.render_article_to_response(): {}".format( status_message )
+                output_debug( debug_message, me, indent_with_IN = "====> ", logger_name_IN = logger_name )
 
-                # create error message.
-                page_status_message = "ERROR - no QuerySet returned from call to filter().  This is odd."
-
-                # log it...
-                output_debug( page_status_message, me, indent_with_IN = "====> ", logger_name_IN = logger_name )
-
-                # ...and output it.
-                page_status_message_list.append( page_status_message )
-
-                # and pass on the form.
-                response_dictionary[ 'data_set_citation_lookup_form' ] = data_set_citation_lookup_form
-
-            #-- END check to see if query set is None --#
+            #-- END check to see if status message. --#
+                
+            # seed response dictionary.
+            response_dictionary[ 'citation_instance' ] = citation_instance
+            response_dictionary[ 'data_set_instance' ] = data_set_instance
+            response_dictionary[ 'data_set_citation_lookup_form' ] = data_set_citation_lookup_form
+            response_dictionary[ 'coding_submit_form' ] = coding_submit_form
+            response_dictionary[ 'base_include_django_ajax_selects' ] = True
 
         else:
 

@@ -55,18 +55,9 @@
 <div class="contentBox">
     <article class="contentLeft">
         
-        {# got page status message(s)? #}
-        {% if page_status_message_list %}
-            <div id="page-status-message-area" class="pageStatusMessageArea">
-                <h4>Status Messages</h4>
-                <ul>
-                {% for page_status_message in page_status_message_list %}
-                    <li>{{ page_status_message }}</li>
-                {% endfor %}
-                </ul>
-            </div>
-            <hr />
-        {% endif %}
+        <!-- ! include render status messages -->
+        {# if status message(s), output? #}
+        {% include "sourcenet/shared/render_page_status_message_list.html" %}
 
         <div id="return-to-source" class="returnToSource">
             <ul>
@@ -116,47 +107,13 @@
             
         </div>
         
+        <!-- ! include render article -->
         {% if article_instance %}
         
             <hr />
             
-            <div id="article_view" name="article_view">
-                <h3>Article {{ article_instance.id }} - {{ article_instance.headline }}</h3>
-                <ul>
-                    {% if article_instance.section %}<li><em>Section:</em> {{ article_instance.section }}</li>{% endif %}
-                    {% if article_instance.pub_date %}<li><em>Publication Date:</em> {{ article_instance.pub_date }}</li>{% endif %}
-                    {% if article_instance.file_path %}<li><em>Original PDF:</em> <a target="_blank" href="/pdf/{{ article_instance.file_path }}">{{ article_instance.file_path }}</a></li>{% endif %}
+            {% include "sourcenet/articles/render_article.html" %}            
 
-                    {% if include_detail %}
-                    <li><em>Page:</em> {{ article_instance.page }}</li>                
-                    <li><em>Edition:</em> {{ article_instance.edition }}</li>                
-                    <li><em>Terms:</em> {{ article_instance.index_terms }}</li>                
-                    <li><em>Source:</em> {{ article_instance.archive_source }} ( <em>id:</em> {{ article_instance.archive_id }} )</li>
-                    {% endif %}
-                    {% if article_instance.author_string %}<li><em><strong>Byline:</strong></em> {{ article_instance.author_string }}</li>{% endif %}
-                </ul>
-                
-                {% if article_text_wrap_in_p %}<p>{% endif %}
-                {% if article_text_is_preformatted %}<pre>{% endif %}
-
-                {# are we outputting HTML <table>, or plain text, custom, or PDF? #}
-                <!-- {{ article_text_render_type }} -->
-                {% if article_text_render_type == "table" %}
-                    {{ article_content | safe }}
-                {% elif article_text_render_type == "custom" %}
-                    {{ article_text_custom | safe }}
-                {% elif article_text_render_type == "pdf" %}
-                    <iframe src="/pdf/{{ article_instance.file_path }}" width="630" height="820"></iframe>
-                {% else %}
-                    {{ article_text.get_content | safe }}
-                {% endif %}
-
-                {% if article_text_is_preformatted %}</pre>{% endif %}
-                {% if article_text_wrap_in_p %}</p>{% endif %}
-
-                <p id="article_end" name="article_end" class="articleEnd">-- 30 --</p>
-            </div>
-            
             <hr />
             
         {% endif %}
@@ -247,33 +204,15 @@
                 </form>
             </div>
 
+            <!-- ! include FIT -->
+            {# Include find in article text? #}
             {% if include_find_in_article_text %}
-            <hr />
-            <p class="inputContainer" id="find-text-in-article-text" name="find-text-in-article-text">
-                <h4><em>Find in Article Text</em></h4>
-                <table>
-                    <tr>
-                        <td>
-                            Search for:
-                            <br />
-                            <input type="text" name="{{ manual_coder.INPUT_ID_TEXT_TO_FIND_IN_ARTICLE }}" id="{{ manual_coder.INPUT_ID_TEXT_TO_FIND_IN_ARTICLE }}" size="25" />
-                            <br />
-                            <input type="button" id="find-in-article-text" name="find-in-article-text" value="<== Find in Text" />
-                            <br />
-                            <input type="button" id="find-words-in-article-text" name="find-words-in-article-text" value="<== Find Words in Text" />
-                            <br />
-                            <input type="button" id="clear-find-in-article-text" name="clear-find-in-article-text" value="<== Clear Matches" />
-                        </td>
-                        <td>
-                            <input type="button" id="find-mention-in-article-text" name="find-mention-in-article-text" value="<== Mention" />
-                        </td>
-                    </tr>
-                </table>
-            </p>
-            {% else %}
-            <input type="hidden" name="{{ manual_article_coder.INPUT_ID_TEXT_TO_FIND_IN_ARTICLE }}" id="{{ manual_article_coder.INPUT_ID_TEXT_TO_FIND_IN_ARTICLE }}" />
+
+                <hr />
+                {% include "sourcenet/articles/render_find_in_article_text.html" %}  
+                
             {% endif %}
-            
+
             <hr />
             <h2>Data Set Info</h2>
             <!--
@@ -282,65 +221,13 @@
                     //SOURCENET.data_set_string_list = [];
                 </script>
             -->
+
+            <!-- ! include render data set -->
             {% if data_set_instance %}
             <input type="button" id="toggle-data-set_highlighting" name="toggle-data-set_highlighting" value="<== highlight OFF" />
-            <h3>Data Set {{ data_set_instance.id }} - {{ data_set_instance.name }}</h3>
-            <script>
-                SOURCENET.data_set_string_list.push( "{{ data_set_instance.name }}".trim() );
-            </script>
-            <ul>
-                {% if data_set_instance.title %}
-                    <li><em>Title:</em> {{ data_set_instance.title }}</li>
-                    <script>
-                        SOURCENET.data_set_string_list.push( "{{ data_set_instance.title }}".trim() );
-                    </script>
-                {% endif %}
-                {% if data_set_instance.date %}<li><em>Date:</em> {{ data_set_instance.date }}</li>{% endif %}
-                {% if data_set_instance.description %}<li><em>Description:</em> {{ data_set_instance.description }}</li>{% endif %}
-                {% if data_set_instance.coverages %}<li><em>Coverages:</em> {{ data_set_instance.coverages }}</li>{% endif %}
-                {% if data_set_instance.subjects %}<li><em>Subjects:</em> {{ data_set_instance.subjects }}</li>{% endif %}
-                {% if data_set_instance.methodology %}<li><em>Methodology:</em> {{ data_set_instance.methodology }}</li>{% endif %}
-                {% if data_set_instance.citation %}<li><em>Citation:</em> {{ data_set_instance.citation }}</li>{% endif %}
-                {% if data_set_instance.additional_keywords %}
-                    <li><em>Additional keywords:</em> {{ data_set_instance.additional_keywords }}</li>
-                    <script>
-                        var temp_string = "";
-                        var temp_string_list = [];
-                        var temp_item = "";
-                        temp_string = "{{ data_set_instance.additional_keywords }}";
-                        temp_string_list = temp_string.split( "," );
-                        for( var i = 0; i < temp_string_list.length; i ++ )
-                        {
-                            temp_item = temp_string_list[ i ];
-                            SOURCENET.data_set_string_list.push( temp_item.trim() );
-                        }
-                    </script>
-                {% endif %}
-                <li>
-                    Identifiers:
-                    <ul>
-                        {% for data_set_identifier in data_set_instance.datasetidentifier_set.all %}
-                        <li>{{ data_set_identifier.name }} - <a href="#" onclick="SOURCENET.send_text_to_find_input( $( this ).text() ); return false;">{{ data_set_identifier.identifier }}</a></li>
-                        <script>
-                            SOURCENET.data_set_string_list.push( "{{ data_set_identifier.identifier }}".trim() );
-                        </script>
-                        {% endfor %}
-                    </ul>
-                </li>
-                {% if data_set_mention_list %}
-                <li>
-                    Synonyms:
-                    <ul>
-                        {% for mention in data_set_mention_list %}
-                        <li><a href="#" onclick="SOURCENET.send_text_to_find_input( $( this ).text() ); return false;">{{ mention }}</a></li>
-                        <script>
-                            SOURCENET.data_set_mention_list.push( "{{ mention }}".trim() );
-                        </script>
-                        {% endfor %}
-                    </ul>
-                </li>
-                {% endif %}
-            </ul>
+            
+                {% include "sourcenet_datasets/data_sets/render_data_set.html" %}
+
             {% endif %}
         </div>
     </aside>

@@ -1,0 +1,59 @@
+{% if data_set_instance %}
+<h3>Data Set {{ data_set_instance.id }} - {{ data_set_instance.name }}</h3>
+<script>
+    SOURCENET.data_set_string_list.push( "{{ data_set_instance.name }}".trim() );
+</script>
+<ul>
+    {% if data_set_instance.title %}
+        <li><em>Title:</em> {{ data_set_instance.title }}</li>
+        <script>
+            SOURCENET.data_set_string_list.push( "{{ data_set_instance.title }}".trim() );
+        </script>
+    {% endif %}
+    {% if data_set_instance.date %}<li><em>Date:</em> {{ data_set_instance.date }}</li>{% endif %}
+    {% if data_set_instance.description %}<li><em>Description:</em> {{ data_set_instance.description }}</li>{% endif %}
+    {% if data_set_instance.coverages %}<li><em>Coverages:</em> {{ data_set_instance.coverages }}</li>{% endif %}
+    {% if data_set_instance.subjects %}<li><em>Subjects:</em> {{ data_set_instance.subjects }}</li>{% endif %}
+    {% if data_set_instance.methodology %}<li><em>Methodology:</em> {{ data_set_instance.methodology }}</li>{% endif %}
+    {% if data_set_instance.citation %}<li><em>Citation:</em> {{ data_set_instance.citation }}</li>{% endif %}
+    {% if data_set_instance.additional_keywords %}
+        <li><em>Additional keywords:</em> {{ data_set_instance.additional_keywords }}</li>
+        <script>
+            var temp_string = "";
+            var temp_string_list = [];
+            var temp_item = "";
+            temp_string = "{{ data_set_instance.additional_keywords }}";
+            temp_string_list = temp_string.split( "," );
+            for( var i = 0; i < temp_string_list.length; i ++ )
+            {
+                temp_item = temp_string_list[ i ];
+                SOURCENET.data_set_string_list.push( temp_item.trim() );
+            }
+        </script>
+    {% endif %}
+    <li>
+        Identifiers:
+        <ul>
+            {% for data_set_identifier in data_set_instance.datasetidentifier_set.all %}
+            <li>{{ data_set_identifier.name }} - <a href="#" onclick="SOURCENET.send_text_to_find_input( $( this ).text() ); return false;">{{ data_set_identifier.identifier }}</a></li>
+            <script>
+                SOURCENET.data_set_string_list.push( "{{ data_set_identifier.identifier }}".trim() );
+            </script>
+            {% endfor %}
+        </ul>
+    </li>
+    {% if data_set_mention_list %}
+    <li>
+        Synonyms:
+        <ul>
+            {% for mention in data_set_mention_list %}
+            <li><a href="#" onclick="SOURCENET.send_text_to_find_input( $( this ).text() ); return false;">{{ mention }}</a></li>
+            <script>
+                SOURCENET.data_set_mention_list.push( "{{ mention }}".trim() );
+            </script>
+            {% endfor %}
+        </ul>
+    </li>
+    {% endif %}
+</ul>
+{% endif %}
