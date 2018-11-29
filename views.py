@@ -47,12 +47,16 @@ from django.urls import reverse
 # django_config
 from django_config.models import Config_Property
 
+# import shared classes
+from sourcenet_datasets.shared.sourcenet_datasets_base import SourcenetDataSetsBase
+
 # import model classes
 from sourcenet_datasets.models import DataSetCitation
 from sourcenet_datasets.models import DataSetCitationData
 
 # other sourcenet_datasets classes
 from sourcenet_datasets.coding.data_set_mentions.manual.manual_data_set_mentions_coder import ManualDataSetMentionsCoder
+from sourcenet_datasets.coding.data_set_citations.manual.manual_data_set_citations_coder import ManualDataSetCitationsCoder
 
 # import form classes
 from sourcenet_datasets.forms import CodingSubmitForm
@@ -60,10 +64,12 @@ from sourcenet_datasets.forms import DataSetMentionsCodingListForm
 from sourcenet_datasets.forms import DataSetCitationLookupForm
 
 # sourcenet imports
+from sourcenet.forms import ArticleCodingForm
+from sourcenet.forms import ArticleLookupForm
 from sourcenet.models import Article
 from sourcenet.models import Article_Data
-import sourcenet.views
 from sourcenet.shared.sourcenet_base import SourcenetBase
+import sourcenet.views
 
 # python_utilities imports
 from python_utilities.django_utils.django_view_helper import DjangoViewHelper
@@ -82,6 +88,7 @@ CONFIG_APPLICATION_DATA_SET_MENTIONS_CODE = "sourcenet_datasets-UI-data_set_ment
 
 # form input names
 INPUT_NAME_CITATION_ID = "data_set_citation_id"
+INPUT_NAME_ARTICLE_ID = "article_id"
 INPUT_NAME_SOURCE = "source"
 INPUT_NAME_TAGS_IN_LIST = "tags_in_list"
 
@@ -151,6 +158,336 @@ def output_debug( message_IN, method_IN = "", indent_with_IN = "", logger_name_I
 
 
 @login_required
+def article_code_citations( request_IN ):
+
+    '''
+    View for coding a single article.  Form accepts article ID.  If article ID
+        present, looks up coding for that article for current user.  If found,
+        loads it, if not, initializes to empty.  Loads article, loads coding
+        form, then if existing coding, pre-populates coding form.
+    '''
+
+    # return reference
+    response_OUT = None
+
+    # declare variables
+    me = "article_code"
+    logger_name = ""
+    debug_message = ""
+    page_status_message = ""
+    page_status_message_list = []
+
+    
+    # declare variables - exception handling
+    exception_message = ""
+    is_exception = False
+    do_cleanup_post_exception = False
+    
+    # declare variables - config properties
+    config_application = None
+    config_prop_name = None
+    config_prop_default = None
+    config_prop_list_delimiter = None
+    config_prop_value = None
+    
+    # declare variables - processing request
+    response_dictionary = {}
+    response_prop_name = None
+    default_template = ''
+    article_lookup_form = None
+    is_form_ready = False
+    request_data = None
+    manual_coder = None
+    source = None
+    tags_in_list = None
+    article_id = -1
+    article_qs = None
+    article_count = -1
+    article_instance = None
+    article_paragraph_list = None
+
+    # declare variables - retrieving data set citations.
+    data_set_citation_qs = None
+    data_set_citation_count = -1
+    data_set_instance_list = None
+
+    # declare variables - article coding
+    person_lookup_form = None
+    
+    # declare variables - submit coding back to server
+    coding_submit_form = None
+
+    # set logger_name
+    logger_name = "sourcenet.views." + me
+    
+    # ! ---- initialize response dictionary
+
+    response_dictionary = {}
+    response_dictionary.update( csrf( request_IN ) )
+    response_dictionary[ 'base_simple_navigation' ] = True
+    response_dictionary[ 'base_post_login_redirect' ] = reverse( dataset_code_mentions )
+    response_dictionary[ 'page_title' ] = "Article DataSetCitations"
+    response_dictionary[ 'article_instance' ] = None
+    response_dictionary[ 'article_text' ] = None
+    response_dictionary[ 'article_text_custom' ] = None
+    response_dictionary[ 'article_text_type' ] = None
+    
+    # ! ---- load configuration
+    config_application = ManualDataSetCitationsCoder.CONFIG_APPLICATION
+    
+    # 'article_text_render_type'
+    response_prop_name = SourcenetBase.VIEW_RESPONSE_KEY_ARTICLE_TEXT_RENDER_TYPE
+    config_prop_name = SourcenetBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_RENDER_TYPE
+    config_prop_default = SourcenetBase.DJANGO_CONFIG_ARTICLE_TEXT_RENDER_TYPE_DEFAULT  # one of "table", "raw", "custom", "pdf"
+    config_prop_value = Config_Property.get_property_value( config_application, config_prop_name, default_IN = config_prop_default )
+    response_dictionary[ response_prop_name ] = config_prop_value
+
+    # 'article_text_is_preformatted'
+    response_prop_name = SourcenetBase.VIEW_RESPONSE_KEY_ARTICLE_TEXT_IS_PREFORMATTED
+    config_prop_name = SourcenetBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_IS_PREFORMATTED
+    config_prop_default = False
+    config_prop_value = Config_Property.get_property_boolean_value( config_application, config_prop_name, default_IN = config_prop_default )
+    response_dictionary[ response_prop_name ] = config_prop_value
+
+    # 'article_text_wrap_in_p'
+    response_prop_name = SourcenetBase.VIEW_RESPONSE_KEY_ARTICLE_TEXT_WRAP_IN_P
+    config_prop_name = SourcenetBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_WRAP_IN_P
+    config_prop_default = True
+    config_prop_value = Config_Property.get_property_boolean_value( config_application, config_prop_name, default_IN = config_prop_default )
+    response_dictionary[ response_prop_name ] = config_prop_value
+
+    # 'do_output_table_html'
+    response_prop_name = SourcenetBase.VIEW_RESPONSE_KEY_DO_OUTPUT_TABLE_HTML
+    config_prop_name = SourcenetBase.DJANGO_CONFIG_PROP_DO_OUTPUT_TABLE_HTML
+    config_prop_default = False
+    config_prop_value = Config_Property.get_property_boolean_value( config_application, config_prop_name, default_IN = config_prop_default )
+    response_dictionary[ response_prop_name ] = config_prop_value
+
+    response_dictionary[ 'data_set_citation_qs' ] = None
+    response_dictionary[ 'existing_data_store_json' ] = ""
+    response_dictionary[ 'highlight_data_set_in_text' ] = False
+    response_dictionary[ SourcenetBase.VIEW_RESPONSE_KEY_PAGE_STATUS_MESSAGE_LIST ] = page_status_message_list
+
+    # ! -------- find in article text (FIT) config
+    
+    # 'include_find_in_article_text'
+    response_prop_name = SourcenetBase.VIEW_RESPONSE_KEY_INCLUDE_FIND_IN_ARTICLE_TEXT
+    config_prop_name = SourcenetBase.DJANGO_CONFIG_NAME_INCLUDE_FIND_IN_ARTICLE_TEXT
+    config_prop_default = True
+    config_prop_value = Config_Property.get_property_boolean_value( config_application, config_prop_name, default_IN = config_prop_default )
+    response_dictionary[ response_prop_name ] = config_prop_value
+
+    #response_dictionary[ 'fit_extra_html' ] = '<input type="button" id="find-mention-in-article-text" name="find-mention-in-article-text" value="<== Mention" />'
+
+    # 'default_find_location'
+    response_prop_name = SourcenetBase.VIEW_RESPONSE_KEY_DEFAULT_FIND_LOCATION
+    config_prop_name = SourcenetBase.DJANGO_CONFIG_NAME_DEFAULT_FIND_LOCATION
+    config_prop_default = "html"  # what are the values?
+    config_prop_value = Config_Property.get_property_value( config_application, config_prop_name, default_IN = config_prop_default )
+    response_dictionary[ response_prop_name ] = config_prop_value
+
+    # 'ignore_word_list'
+    response_prop_name = SourcenetBase.VIEW_RESPONSE_KEY_IGNORE_WORD_LIST
+    config_prop_name = SourcenetBase.DJANGO_CONFIG_NAME_IGNORE_WORD_LIST
+    config_prop_default = None
+    config_prop_list_delimiter = ","
+    config_prop_value = Config_Property.get_property_list_value( config_application, config_prop_name, default_IN = config_prop_default, delimiter_IN = config_prop_list_delimiter )
+    response_dictionary[ response_prop_name ] = config_prop_value
+
+    # 'highlight_word_list'
+    response_prop_name = SourcenetBase.VIEW_RESPONSE_KEY_HIGHLIGHT_WORD_LIST
+    config_prop_name = SourcenetBase.DJANGO_CONFIG_NAME_HIGHLIGHT_WORD_LIST
+    config_prop_default = None
+    config_prop_list_delimiter = ","
+    config_prop_value = Config_Property.get_property_list_value( config_application, config_prop_name, default_IN = config_prop_default, delimiter_IN = config_prop_list_delimiter )
+    response_dictionary[ response_prop_name ] = config_prop_value
+
+    # 'be_case_sensitive'
+    response_prop_name = SourcenetBase.VIEW_RESPONSE_KEY_BE_CASE_SENSITIVE
+    config_prop_name = SourcenetBase.DJANGO_CONFIG_NAME_BE_CASE_SENSITIVE
+    config_prop_default = False
+    config_prop_value = Config_Property.get_property_boolean_value( config_application, config_prop_name, default_IN = config_prop_default )
+    response_dictionary[ response_prop_name ] = config_prop_value
+
+    # 'process_found_synonyms'
+    response_prop_name = SourcenetDataSetsBase.VIEW_RESPONSE_KEY_PROCESS_FOUND_SYNONYMS
+    config_prop_name = SourcenetDataSetsBase.DJANGO_CONFIG_NAME_PROCESS_FOUND_SYNONYMS
+    config_prop_default = False
+    config_prop_value = Config_Property.get_property_boolean_value( config_application, config_prop_name, default_IN = config_prop_default )
+    response_dictionary[ response_prop_name ] = config_prop_value
+    
+    # create manual coder and place in response so we can access constants-ish.
+    manual_coder = ManualDataSetCitationsCoder()
+    response_dictionary[ 'manual_coder' ] = manual_coder
+
+    # set my default rendering template
+    default_template = 'sourcenet_datasets/data_sets/article-data_set_citations-code.html'
+
+    # init coding status variables
+    # start with it being OK to process coding.
+    is_ok_to_process_coding = True
+    
+    # do we have input parameters?
+    request_data = get_request_data( request_IN )
+    if ( request_data is not None ):
+
+        # get information needed from request, add to response dictionary.
+
+        # ==> source (passed by article_code_list).
+        source = request_data.get( INPUT_NAME_SOURCE, "" )
+        response_dictionary[ INPUT_NAME_SOURCE ] = source
+        
+        # ==> tags_in_list (passed by article_code_list).
+        tags_in_list = request_data.get( INPUT_NAME_TAGS_IN_LIST, [] )
+        response_dictionary[ INPUT_NAME_TAGS_IN_LIST ] = tags_in_list
+
+        # OK to process.
+        is_form_ready = True
+        
+    #-- END check to see if we have request data. --#
+    
+    # set up form objects.
+
+    # make instance of person_lookup_form.
+    person_lookup_form = ArticleCodingForm()
+    
+    # make instance of article coding submission form.
+    coding_submit_form = CodingSubmitForm( request_data )
+
+    # make instance of ArticleLookupForm
+    article_lookup_form = ArticleLookupForm( request_data )
+
+    # store the article ID if passed in.
+    article_id = request_data.get( INPUT_NAME_ARTICLE_ID, -1 )
+
+    # check to see if ""
+    if ( article_id == "" ):
+    
+        article_id = -1
+        
+    #-- END check to see if article_id = "" --#
+
+    # retrieve QuerySet that contains that article.
+    article_qs = Article.objects.filter( pk = article_id )
+
+    # get count of articles
+    article_count = article_qs.count()
+
+    # should only be one.
+    if ( article_count == 1 ):
+    
+        # get article instance
+        article_instance = article_qs.get()
+
+    #-- END check if single article. --#
+
+    # get current user.
+    current_user = request_IN.user
+
+    # ! <---- Article_Data
+
+    # form ready?
+    if ( is_form_ready == True ):
+    
+        # ! ---- process coding submission
+        if ( coding_submit_form.is_valid() == True ):
+
+            # ! <---- coding submit
+            pass
+            
+        #-- END check to see if coding form is valid. --#
+
+        # ! ---- figure out if and which data store JSON we return
+
+        # ! <---- check if exception        
+
+        # process article lookup?
+        if ( article_lookup_form.is_valid() == True ):
+
+            # ! ---- render Article body
+            # retrieve article specified by the input parameter, then create
+            #   HTML output of article plus Article_Text.
+            status_message = sourcenet.views.render_article_to_response(
+                article_id,
+                response_dictionary,
+                config_application_IN = ManualDataSetCitationsCoder.CONFIG_APPLICATION
+            )
+            
+            # got a status message?
+            if ( status_message is not None ):
+            
+                # ERROR - not sure what to do here.  Error should have been
+                #     stored in page_status_message_list.  Output debug.
+                debug_message = "ERROR - status from call to sourcenet.views.render_article_to_response(): {}".format( status_message )
+                output_debug( debug_message, me, indent_with_IN = "====> ", logger_name_IN = logger_name )
+
+            #-- END check to see if status message. --#
+                
+            # seed response dictionary.
+            response_dictionary[ 'article_lookup_form' ] = article_lookup_form
+            response_dictionary[ 'person_lookup_form' ] = person_lookup_form
+            response_dictionary[ 'coding_submit_form' ] = coding_submit_form
+            response_dictionary[ 'base_include_django_ajax_selects' ] = True
+            
+            # !---- get existing DataSetCitations
+            
+            # get DataSetCitations that refer to this Article.
+            if ( article_instance is not None ):
+            
+                # check to see if there are any data set citations.
+                data_set_citation_qs = article_instance.datasetcitation_set.all()
+                data_set_citation_count = data_set_citation_qs.count()
+                
+                # got any?
+                data_set_instance_list = []
+                if ( data_set_citation_count > 0 ):
+                
+                    # yes. Make a list of data sets and store in response.
+                    for data_set_citation in data_set_citation_qs:
+                        
+                        # get data set
+                        data_set = data_set_citation.data_set
+                        
+                        # add to list.
+                        data_set_instance_list.append( data_set )
+                    
+                    #-- END loop over citations. --#
+                    
+                #-- END check to see if citations. --#
+                
+                # add data set list to response.
+                response_dictionary[ 'data_set_citation_qs' ] = data_set_citation_qs
+                response_dictionary[ 'data_set_instance_list' ] = data_set_instance_list
+                
+            #-- END check to see if article instance --#
+        
+        else:
+
+            # not valid - render the form again
+            response_dictionary[ 'article_lookup_form' ] = article_lookup_form
+
+        #-- END check to see whether or not form is valid. --#
+
+    else:
+    
+        # new request, make an empty instance of network output form.
+        article_lookup_form = ArticleLookupForm()
+        response_dictionary[ 'article_lookup_form' ] = article_lookup_form
+
+    #-- END check to see if new request or POST --#
+    
+    # add on the "me" property.
+    response_dictionary[ 'current_view' ] = me        
+
+    # render response
+    response_OUT = render( request_IN, default_template, response_dictionary )
+
+    return response_OUT
+
+#-- END view method article_code_citations() --#
+
+
+@login_required
 def dataset_code_mentions( request_IN ):
 
     '''
@@ -201,7 +538,6 @@ def dataset_code_mentions( request_IN ):
     article_data_id = -1
     article_data_id_list = []
     is_ok_to_process_coding = True
-    manual_article_coder = None
     result_article_data = None
     coding_status = ""
     new_data_store_json = None
@@ -247,7 +583,6 @@ def dataset_code_mentions( request_IN ):
     # ! ---- initialize response dictionary
     response_dictionary = {}
     response_dictionary.update( csrf( request_IN ) )
-    response_dictionary[ 'manual_article_coder' ] = None
     response_dictionary[ 'article_instance' ] = None
     response_dictionary[ 'article_text' ] = None
     response_dictionary[ 'article_text_custom' ] = None
@@ -261,6 +596,7 @@ def dataset_code_mentions( request_IN ):
     response_dictionary[ 'base_simple_navigation' ] = True
     response_dictionary[ 'base_post_login_redirect' ] = reverse( dataset_code_mentions )
     response_dictionary[ 'existing_data_store_json' ] = ""
+    response_dictionary[ 'highlight_data_set_in_text' ] = True
     response_dictionary[ SourcenetBase.VIEW_RESPONSE_KEY_PAGE_STATUS_MESSAGE_LIST ] = page_status_message_list
 
     # find in article text (fit)

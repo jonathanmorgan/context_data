@@ -45,5 +45,6 @@ urlpatterns = [
     # data set mention coding pages
     url( r'^dataset/code_mentions/list/', sourcenet_datasets.views.dataset_mention_coding_list, name = "sourcenet_datasets-dataset_mention_coding_list" ),
     url( r'^dataset/code_mentions/', sourcenet_datasets.views.dataset_code_mentions, name = "sourcenet_datasets-dataset_code_mentions" ),
+    url( r'^dataset/code_citations/', sourcenet_datasets.views.article_code_citations, name = "sourcenet_datasets-article-code_data_set_mentions" ),
 
 ]

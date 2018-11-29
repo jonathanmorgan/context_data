@@ -67,7 +67,6 @@ from sourcenet.article_coding.article_coder import ArticleCoder
 # sourcenet_datasets classes
 from sourcenet_datasets.models import DataSetMention
 from sourcenet_datasets.models import DataSetCitationData
-from sourcenet_datasets.shared.sourcenet_datasets_base import SourcenetDataSetsBase
 
 
 #================================================================================
@@ -76,10 +75,10 @@ from sourcenet_datasets.shared.sourcenet_datasets_base import SourcenetDataSetsB
 
 
 #================================================================================
-# ManualDataSetMentionsCoder class
+# ManualDataSetCitationsCoder class
 #================================================================================
 
-class ManualDataSetMentionsCoder( ArticleCoder ):
+class ManualDataSetCitationsCoder( ArticleCoder ):
 
     '''
     This class is a helper for coding articles manually.
@@ -95,21 +94,21 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
     # STATUS_ERROR_PREFIX = "Error: "
     
     # logging
-    LOGGER_NAME = "sourcenet_datasets.coding.data_set_mentions.manual.manual_data_set_mentions_coder"
+    LOGGER_NAME = "sourcenet_datasets.coding.data_set_citations.manual.manual_data_set_citations_coder"
     
     # config application
-    CONFIG_APPLICATION = "Manual_Data_Set_Mentions_Coding"
+    CONFIG_APPLICATION = "Manual_Data_Set_Citation_Coding"
     CONFIG_NAME_ARTICLE_TEXT_RENDER_TYPE = SourcenetBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_RENDER_TYPE
     CONFIG_NAME_ARTICLE_TEXT_IS_PREFORMATTED = SourcenetBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_IS_PREFORMATTED
     CONFIG_NAME_ARTICLE_TEXT_WRAP_IN_P = SourcenetBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_WRAP_IN_P
     CONFIG_NAME_MENTION_TEXT_READ_ONLY = "mention_text_read_only"
-    CONFIG_NAME_INCLUDE_FIND_IN_ARTICLE_TEXT = SourcenetBase.DJANGO_CONFIG_NAME_INCLUDE_FIND_IN_ARTICLE_TEXT  # "include_find_in_article_text"
-    CONFIG_NAME_DEFAULT_FIND_LOCATION = SourcenetBase.DJANGO_CONFIG_NAME_DEFAULT_FIND_LOCATION
-    CONFIG_NAME_IGNORE_WORD_LIST = SourcenetBase.DJANGO_CONFIG_NAME_IGNORE_WORD_LIST
-    CONFIG_NAME_HIGHLIGHT_WORD_LIST = SourcenetBase.DJANGO_CONFIG_NAME_HIGHLIGHT_WORD_LIST
-    CONFIG_NAME_DEFAULT_FIND_LOCATION = SourcenetBase.DJANGO_CONFIG_NAME_DEFAULT_FIND_LOCATION
-    CONFIG_NAME_BE_CASE_SENSITIVE = SourcenetBase.DJANGO_CONFIG_NAME_BE_CASE_SENSITIVE
-    CONFIG_NAME_PROCESS_FOUND_SYNONYMS = SourcenetDataSetsBase.DJANGO_CONFIG_NAME_PROCESS_FOUND_SYNONYMS
+    CONFIG_NAME_INCLUDE_FIND_IN_ARTICLE_TEXT = "include_find_in_article_text"
+    CONFIG_NAME_DEFAULT_FIND_LOCATION = "default_find_location"
+    CONFIG_NAME_IGNORE_WORD_LIST = "ignore_word_list"
+    CONFIG_NAME_HIGHLIGHT_WORD_LIST = "highlight_word_list"
+    CONFIG_NAME_DEFAULT_FIND_LOCATION = "default_find_location"
+    CONFIG_NAME_BE_CASE_SENSITIVE = "be_case_sensitive"
+    CONFIG_NAME_PROCESS_FOUND_SYNONYMS = "process_found_synonyms"
     CONFIG_NAME_SYNCHRONIZE_DATA_SET_FAMILIES = "synchronize_data_set_families"
 
     # kwarg parameter names
@@ -187,7 +186,7 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
     def __init__( self ):
 
         # call parent's __init__() - I think...
-        super( ManualDataSetMentionsCoder, self ).__init__()
+        super( ManualDataSetCitationsCoder, self ).__init__()
         
         # declare variables
         
@@ -213,7 +212,7 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
 
 
     @classmethod
-    def convert_article_data_to_data_store_json( cls, article_data_IN, citation_instance_IN, return_string_IN = False ):
+    def convert_article_data_to_data_store_json( cls, article_data_IN, return_string_IN = False ):
 
         '''
         Accepts Article_Data instance we want to convert to data store JSON and
@@ -268,8 +267,8 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
             # we have Article_Data - do we have a citation instance?
             if ( citation_instance_IN is not None ):
             
-                # we have Article_Data - First get DataSetCitationData
-                get_citation_data_result = cls.get_data_set_citation_data( article_data_IN, citation_instance_IN, create_if_no_match_IN = False )
+                # we have Article_Data - First get DataSetCitation Data
+                get_citation_data_result = cls.get_article_data_set_citation_data( article_data_IN, create_if_no_match_IN = False )
                 
                 # retrieve results
                 if ( get_citation_data_result is not None ):
@@ -394,11 +393,10 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
 
 
     @classmethod
-    def get_data_set_citation_data( cls, article_data_IN, citation_IN, citation_type_IN = None, create_if_no_match_IN = True, *args, **kwargs ):
+    def get_article_data_set_citation_data( cls, article_data_IN, create_if_no_match_IN = True, *args, **kwargs ):
         
         '''
-        Accepts article_data, citation.  Tries to retrieve DataSetCitationData
-            from Article_Data.  If multiple found, error.
+        Accepts article_data.  Tries to retrieve DataSetCitations for article.
            
         Returns a dictionary that contains:
         - PROP_CITATION_DATA = "citation_data" - either matching
@@ -436,7 +434,7 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
         exception_OUT = None
         
         # declare variables
-        me = "ManualDataSetMentionsCoder.get_data_set_citation_data()"
+        me = "ManualDataSetCitationsCoder.get_data_set_citation_data()"
         local_debug_flag = False
         current_article_data = None
         citation_instance = None
@@ -1344,4 +1342,4 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
     #-- END method winnow_orphaned_records() --#
     
 
-#-- END class ManualDataSetMentionsCoder --#
+#-- END class ManualDataSetCitationsCoder --#

@@ -1,14 +1,22 @@
 {% if data_set_instance %}
-<h3>Data Set {{ data_set_instance.id }} - {{ data_set_instance.name }}</h3>
+<h3>Data Set {{ data_set_instance.id }} - {{ data_set_instance.name | safe }}</h3>
+
+    {% if highlight_data_set_in_text %}
 <script>
     SOURCENET.data_set_string_list.push( "{{ data_set_instance.name }}".trim() );
 </script>
+    {% endif %}
+
 <ul>
     {% if data_set_instance.title %}
         <li><em>Title:</em> {{ data_set_instance.title }}</li>
+        
+        {% if highlight_data_set_in_text %}
         <script>
             SOURCENET.data_set_string_list.push( "{{ data_set_instance.title }}".trim() );
         </script>
+        {% endif %}
+
     {% endif %}
     {% if data_set_instance.date %}<li><em>Date:</em> {{ data_set_instance.date }}</li>{% endif %}
     {% if data_set_instance.description %}<li><em>Description:</em> {{ data_set_instance.description }}</li>{% endif %}
@@ -36,9 +44,13 @@
         <ul>
             {% for data_set_identifier in data_set_instance.datasetidentifier_set.all %}
             <li>{{ data_set_identifier.name }} - <a href="#" onclick="SOURCENET.send_text_to_find_input( $( this ).text() ); return false;">{{ data_set_identifier.identifier }}</a></li>
+            
+                {% if highlight_data_set_in_text %}
             <script>
                 SOURCENET.data_set_string_list.push( "{{ data_set_identifier.identifier }}".trim() );
             </script>
+                {% endif %}
+
             {% endfor %}
         </ul>
     </li>
@@ -48,9 +60,13 @@
         <ul>
             {% for mention in data_set_mention_list %}
             <li><a href="#" onclick="SOURCENET.send_text_to_find_input( $( this ).text() ); return false;">{{ mention }}</a></li>
+
+                {% if highlight_data_set_in_text %}
             <script>
                 SOURCENET.data_set_mention_list.push( "{{ mention }}".trim() );
             </script>
+                {% endif %}
+
             {% endfor %}
         </ul>
     </li>

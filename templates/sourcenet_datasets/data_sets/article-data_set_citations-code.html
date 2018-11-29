@@ -1,0 +1,231 @@
+{% extends "sourcenet/base.html" %}
+{% load staticfiles %}
+
+{% block title %}{{page_title}}{% endblock %}
+
+{% block inside-head %}
+<script src="https://code.jquery.com/jquery-latest.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.selection/1.0.1/jquery.selection.min.js"></script>
+<link rel="stylesheet" type="text/css" href="{% static "sourcenet_datasets/css/citation-coding/citation-coding.css" %}" />
+<script src="{% static "sourcenet/js/sourcenet.js" %}"></script>
+<script src="{% static "sourcenet/js/find-in-text.js" %}"></script>
+<script src="{% static "sourcenet_datasets/js/citation-coding/citation-coding.js" %}"></script>
+<script>SOURCENET.text_finder.be_case_sensitive = {% if be_case_sensitive %}true{% else %}false{% endif %};</script>
+<script>SOURCENET.process_found_synonyms = {% if process_found_synonyms %}true{% else %}false{% endif %};</script>
+{% if article_text_type == "text" and article_text_render_type == "raw" %}
+<script>
+    SOURCENET.article_text_ignore_p_tags = true;
+    SOURCENET.text_finder.ignore_wrapper_element = true;
+</script>
+{% else %}
+<script>
+    SOURCENET.article_text_ignore_p_tags = false;
+    SOURCENET.text_finder.ignore_wrapper_element = false;
+</script>
+{% endif %}
+{% if default_find_location != "" %}<script>SOURCENET.text_finder.default_find_location = "{{ default_find_location }}";</script>{% endif %}
+{% if existing_data_store_json %}<script>SOURCENET.data_store_json = '{{ existing_data_store_json }}';</script>{% endif %}
+
+{# got ignore word list? #}
+{% if ignore_word_list %}
+<script>
+    var ignore_word_list = [];
+    {% for ignore_word in ignore_word_list %}
+    ignore_word_list.push( "{{ ignore_word }}" );
+    {% endfor %}
+    SOURCENET.FindInText.add_to_ignore_list( ignore_word_list );
+</script>
+{% endif %}
+
+{# got highlight word list? #}
+{% if highlight_word_list %}
+<script>
+    var highlight_word_list = [];
+    {% for highlight_word in highlight_word_list %}
+    highlight_word_list.push( "{{ highlight_word }}" );
+    {% endfor %}
+    SOURCENET.data_set_string_list = SOURCENET.data_set_string_list.concat( highlight_word_list );
+</script>
+{% endif %}
+
+{% endblock %}
+
+{% block content %}
+
+<div class="contentBox">
+    <article class="contentLeft">
+        
+        <!-- ! include render status messages -->
+        {# if status message(s), output? #}
+        {% include "sourcenet/shared/render_page_status_message_list.html" %}
+
+        <!--
+        <div id="return-to-source" class="returnToSource">
+            <ul>
+                {# if source, persist tag list for return to coding list page #}
+                <li>
+                    <a href="{% url 'sourcenet_datasets-dataset_mention_coding_list' %}{% if source %}?tags_in_list={{ tags_in_list }}{% endif %}">
+                        {% if source %}Return to {% endif %}DataSetCitation mention coding List
+                    </a>
+                </li>
+            </ul>
+        </div>
+        -->
+        <hr />
+
+        <h1>{{page_title}}</h1>
+        
+        <div id="article_form" name="article_form">
+            
+            <form action="" method="post">
+        
+                {# always include CSRF token #}
+                {% csrf_token %}
+                    
+                <p>
+                    <table class="gridtable">
+                        {# output Article lookup form #}
+                        {{ article_lookup_form.as_table }}
+                    </table>
+                </p>
+                
+                {% if source %}
+                    <input type="hidden" name="source" value="{{ source }}" />
+                {% else %}
+                    <input type="hidden" name="source" value="" />
+                {% endif %}
+                
+                {% if tags_in_list %}
+                    <input type="hidden" name="tags_in_list" value="{{ tags_in_list }}" />
+                {% else %}
+                    <input type="hidden" name="tags_in_list" value="" />
+                {% endif %}
+                            
+                <p>
+                    <input type="submit" value="Load Article" />
+                </p>
+                
+            </form>
+            
+        </div>
+        
+        <!-- ! include render article -->
+        {% if article_instance %}
+        
+            <hr />
+            
+            {% include "sourcenet/articles/render_article.html" %}            
+
+            <hr />
+            
+        {% endif %}
+    </article>
+
+    <aside class="sidebarBox">
+        <div class="scrollingBox">
+
+            <h2>Data Set Citations</h2>
+    
+            <!-- ! include FIT -->
+            {# Include find in article text? #}
+            {% if include_find_in_article_text %}
+    
+                {% include "sourcenet/articles/render_find_in_article_text.html" %}  
+                
+            {% endif %}
+    
+            <hr />
+
+<!--
+            <div name="citation-coding" id="citation-coding">
+                <p class="inputContainer" id="input-mention-text" name="input-mention-text">
+                    <input type="button" id="store-mention" name="store-mention" value="Mention ==>" />: 
+                    {% if mention_text_read_only %}
+                    <textarea id="{{ manual_coder.INPUT_ID_MENTION_TEXT }}" name="{{ manual_coder.INPUT_ID_MENTION_TEXT }}" readonly="readonly"></textarea>
+                    {% else %}
+                    <textarea id="{{ manual_coder.INPUT_ID_MENTION_TEXT }}" name="{{ manual_coder.INPUT_ID_MENTION_TEXT }}"></textarea>
+                    {% endif %}
+                </p>
+                {% if include_fix_mention_text %}
+                    <p class="inputContainer" id="fix-mention-text-link" name="fix-mention-text-link">
+                        <a href="#" onclick="SOURCENET.fix_mention_text(); return false;">Fix Mention Text</a>
+                    </p>
+                    <p class="inputContainer hidden" id="fix-mention-text" name="fix-mention-text">
+                        <a href="#" onclick="SOURCENET.cancel_fix_mention_text(); return false;"><-- Cancel Fix Mention Text</a>
+                        <br />
+                        <input type="button" id="fix-mention-text" name="fix-mention-text" value="==> Fix Mention Text" />: <textarea id="{{ manual_coder.INPUT_ID_FIXED_MENTION_TEXT }}" name="{{ manual_coder.INPUT_ID_FIXED_MENTION_TEXT }}"></textarea>
+                    </p>
+                {% else %}
+                    <input type="hidden" name="{{ manual_coder.INPUT_ID_FIXED_MENTION_TEXT }}" id="{{ manual_coder.INPUT_ID_FIXED_MENTION_TEXT }}" />
+                {% endif %}
+                
+                <p class="inputContainer" id="select-mention-type">
+                    &nbsp;&nbsp;Mention Type: <select name="{{ manual_coder.INPUT_ID_MENTION_TYPE }}" id="{{ manual_coder.INPUT_ID_MENTION_TYPE }}" onchange="SOURCENET.process_selected_mention_type()">
+                        <option value="" selected="selected" disabled="disabled">Choose Mention Type</option>
+                        <option value="{{ manual_coder.MENTION_TYPE_CITED }}">{{ manual_coder.MENTION_TYPE_CITED }}</option>
+                        <option value="{{ manual_coder.MENTION_TYPE_ANALYZED }}">{{ manual_coder.MENTION_TYPE_ANALYZED }}</option>
+                    </select>
+                </p>
+
+                <p class="inputContainer" id="process-mention-container">
+                    <input type="button" id="process-mention" name="process-mention" value="Process Mention" onclick="SOURCENET.process_mention_coding()" />&nbsp;&nbsp;|&nbsp;&nbsp;<input type="button" id="clear-mention-coding" name="clear-mention-coding" value="Clear Mention Coding" onclick="SOURCENET.clear_coding_form( 'Mention Coding Cleared' )" />
+                </p>
+            </div>
+            <hr class="fieldSeparator" />
+            <div id="status-message-area" class="statusMessageArea">
+                <h4>Status Messages</h4>
+            </div>
+            <h3>DataSetCitation List</h3>
+            <div id="mention-list" class="mentionList">
+                <table id="mention-list-table" class="mentionListTable"></table>
+                <form method="post" name="submit-article-coding" id="submit-article-coding" class="submitArticleCoding" onsubmit="do_submit = SOURCENET.render_coding_form_inputs( this ); return do_submit;">
+                    {# always include CSRF token #}
+                    {% csrf_token %}
+                    {# output coding_submit_form if present #}
+                    {% if coding_submit_form %}
+                        {{ coding_submit_form }}
+                    {% endif %}
+                    <input type="hidden" name="data_set_citation_id" id="submit-article-coding-data-set-citation-id" value="{{ citation_instance.id }}" />
+
+                    {% if source %}
+                        <input type="hidden" name="source" value="{{ source }}" />
+                    {% else %}
+                        <input type="hidden" name="source" value="" />
+                    {% endif %}
+                    
+                    {% if tags_in_list %}
+                        <input type="hidden" name="tags_in_list" value="{{ tags_in_list }}" />
+                    {% else %}
+                        <input type="hidden" name="tags_in_list" value="" />
+                    {% endif %}
+                            
+                    <input type="submit" value="Submit Article Coding" name="input-submit-article-coding" id="input-submit-article-coding" />
+                </form>
+            </div>
+-->
+
+            <!--
+                <script>
+                    // initialized in mention-coding.js
+                    //SOURCENET.data_set_string_list = [];
+                </script>
+            -->
+
+            {% for data_set_citation in data_set_citation_qs %}
+            
+                <h2>DataSetCitation ID: {{data_set_citation.id}}</h2>
+
+                {% with data_set_instance=data_set_citation.data_set %}
+                
+                    <!-- ! include render data set -->
+                    {% include "sourcenet_datasets/data_sets/render_data_set.html" %}
+                    
+                {% endwith %}
+
+            {% endfor %}
+
+        </div>
+    </aside>
+</div>
+
+{% endblock %}
