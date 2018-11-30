@@ -177,7 +177,6 @@ def article_code_citations( request_IN ):
     page_status_message = ""
     page_status_message_list = []
 
-    
     # declare variables - exception handling
     exception_message = ""
     is_exception = False
@@ -231,6 +230,7 @@ def article_code_citations( request_IN ):
     response_dictionary[ 'article_text' ] = None
     response_dictionary[ 'article_text_custom' ] = None
     response_dictionary[ 'article_text_type' ] = None
+    response_dictionary[ 'article_text_link_to_pdf' ] = True
     
     # ! ---- load configuration
     config_application = ManualDataSetCitationsCoder.CONFIG_APPLICATION
@@ -241,6 +241,7 @@ def article_code_citations( request_IN ):
     config_prop_default = SourcenetBase.DJANGO_CONFIG_ARTICLE_TEXT_RENDER_TYPE_DEFAULT  # one of "table", "raw", "custom", "pdf"
     config_prop_value = Config_Property.get_property_value( config_application, config_prop_name, default_IN = config_prop_default )
     response_dictionary[ response_prop_name ] = config_prop_value
+    #page_status_message_list.append( "initial {}.{}: {}".format( config_application, config_prop_name, config_prop_value ) )
 
     # 'article_text_is_preformatted'
     response_prop_name = SourcenetBase.VIEW_RESPONSE_KEY_ARTICLE_TEXT_IS_PREFORMATTED
@@ -410,7 +411,7 @@ def article_code_citations( request_IN ):
             status_message = sourcenet.views.render_article_to_response(
                 article_id,
                 response_dictionary,
-                config_application_IN = ManualDataSetCitationsCoder.CONFIG_APPLICATION
+                config_application_IN = config_application
             )
             
             # got a status message?

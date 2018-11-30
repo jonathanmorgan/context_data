@@ -97,7 +97,7 @@ class ManualDataSetCitationsCoder( ArticleCoder ):
     LOGGER_NAME = "sourcenet_datasets.coding.data_set_citations.manual.manual_data_set_citations_coder"
     
     # config application
-    CONFIG_APPLICATION = "Manual_Data_Set_Citation_Coding"
+    CONFIG_APPLICATION = "Manual_Data_Set_Citations_Coding"
     CONFIG_NAME_ARTICLE_TEXT_RENDER_TYPE = SourcenetBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_RENDER_TYPE
     CONFIG_NAME_ARTICLE_TEXT_IS_PREFORMATTED = SourcenetBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_IS_PREFORMATTED
     CONFIG_NAME_ARTICLE_TEXT_WRAP_IN_P = SourcenetBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_WRAP_IN_P
