@@ -3390,6 +3390,32 @@ $( document ).ready(
 ); //-- END document.ready( button - #find-mention-in-article-text ) --//
 
 
+// ! document.ready( button - #find-selection-in-article-text )
+// javascript to copy selected text to the Find in Article Text text
+//     input.
+$( document ).ready(
+    function()
+    {
+        $( '#find-selection-in-article-text' ).click(        
+            function()
+            {
+                // declare variables
+                var selected_text = "";
+    
+                // get selection
+                selected_text = $.selection();
+                //SOURCENET.log_message( "selected text : " + selected_text );
+                
+                // send to find input.
+                SOURCENET.send_text_to_find_input( selected_text );
+                
+                SOURCENET.log_message( "In document.ready( button - #find-mention-in-article-text ) - match text : " + selected_text );
+            }
+        )
+    }
+); //-- END document.ready( button - #find-mention-in-article-text ) --//
+
+
 // ! document.ready( button - #find-in-article-text )
 // javascript to look for whatever is in the <input> with
 //     id="text-to-find-in-article" inside the article's text, and highlight any

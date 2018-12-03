@@ -277,8 +277,7 @@ def article_code_citations( request_IN ):
     config_prop_default = True
     config_prop_value = Config_Property.get_property_boolean_value( config_application, config_prop_name, default_IN = config_prop_default )
     response_dictionary[ response_prop_name ] = config_prop_value
-
-    #response_dictionary[ 'fit_extra_html' ] = '<input type="button" id="find-mention-in-article-text" name="find-mention-in-article-text" value="<== Mention" />'
+    response_dictionary[ 'fit_extra_html' ] = '<input type="button" id="find-selection-in-article-text" name="find-selection-in-article-text" value="<== Selection" />'
 
     # 'default_find_location'
     response_prop_name = SourcenetBase.VIEW_RESPONSE_KEY_DEFAULT_FIND_LOCATION
