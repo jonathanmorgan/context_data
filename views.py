@@ -436,6 +436,7 @@ def article_code_citations( request_IN ):
             
                 # check to see if there are any data set citations.
                 data_set_citation_qs = article_instance.datasetcitation_set.all()
+                data_set_citation_qs = data_set_citation_qs.order_by( 'data_set' )
                 data_set_citation_count = data_set_citation_qs.count()
                 
                 # got any?
