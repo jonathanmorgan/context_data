@@ -13,12 +13,22 @@ from ajax_select.admin import AjaxSelectAdmin
 from sourcenet_datasets.models import DataSet
 from sourcenet_datasets.models import DataSetIdentifier
 from sourcenet_datasets.models import DataSetCitation
+from sourcenet_datasets.models import DataSetCitationData
 from sourcenet_datasets.models import DataSetMention
+from sourcenet_datasets.models import WorkDataSetCitation
+from sourcenet_datasets.models import WorkDataSetMention
+from sourcenet_datasets.models import WorkResearchField
+from sourcenet_datasets.models import WorkResearchMethod
 
 #admin.site.register( DataSet )
 admin.site.register( DataSetIdentifier )
 #admin.site.register( DataSetCitation )
+admin.site.register( DataSetCitationData )
 admin.site.register( DataSetMention )
+admin.site.register( WorkDataSetCitation )
+admin.site.register( WorkDataSetMention )
+admin.site.register( WorkResearchField )
+admin.site.register( WorkResearchMethod )
 
 #-------------------------------------------------------------------------------
 # DataSet admin definition

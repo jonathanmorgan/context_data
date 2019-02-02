@@ -33,10 +33,14 @@ import six
 # python_utilties
 from python_utilities.strings.string_helper import StringHelper
 
+# context imports
+from context.models import Work_Log
+
 # sourcenet imports
 from sourcenet.models import Article
 from sourcenet.models import Article_Data
 from sourcenet.models import Abstract_Selected_Text
+from sourcenet.models import AbstractArticleText
 
 
 #================================================================================
@@ -237,9 +241,9 @@ class DataSetIdentifier( models.Model ):
 #= End Person_External_UUID Model ======================================================
 
 
-# ArticleDataSet model
+# AbstractDataSetCitation model
 @python_2_unicode_compatible
-class DataSetCitation( models.Model ):
+class AbstractDataSetCitation( models.Model ):
 
 
     #----------------------------------------------------------------------
@@ -280,6 +284,9 @@ class DataSetCitation( models.Model ):
     # notes
     notes = models.TextField( blank = True, null = True )
 
+    # work log reference.
+    work_log = models.ForeignKey( Work_Log, on_delete = models.SET_NULL, blank = True, null = True )
+        
     # tags!
     tags = TaggableManager( blank = True )
 
@@ -287,6 +294,17 @@ class DataSetCitation( models.Model ):
     create_date = models.DateTimeField( auto_now_add = True )
     last_modified = models.DateTimeField( auto_now = True )
 
+
+    #----------------------------------------------------------------------
+    # Meta
+    #----------------------------------------------------------------------
+
+    # Meta-data for this class.
+    class Meta:
+
+        abstract = True
+        
+    #-- END class Meta --#
 
     #----------------------------------------------------------------------------
     # instance methods
@@ -296,7 +314,7 @@ class DataSetCitation( models.Model ):
     def __init__( self, *args, **kwargs ):
         
         # call parent __init()__ first.
-        super( DataSetCitation, self ).__init__( *args, **kwargs )
+        super( AbstractDataSetCitation, self ).__init__( *args, **kwargs )
 
     #-- END method __init__() --#
 
@@ -458,10 +476,23 @@ class DataSetCitation( models.Model ):
 
     #-- END method get_unique_mention_list() --#
 
-#= End DataSet Model ======================================================
-
-
 #= END DataSetCitation Model ======================================================
+
+
+# AbstractDataSetCitation model
+@python_2_unicode_compatible
+class DataSetCitation( AbstractDataSetCitation ):
+    
+    def __init__( self, *args, **kwargs ):
+        
+        # call parent __init()__ first.
+        super( DataSetCitation, self ).__init__( *args, **kwargs )
+
+    #-- END method __init__() --#
+
+    # just use the stuff in the parent class.
+    
+#-- END class DataSetCitation --#
 
 
 # DataSetCitationData model
@@ -492,6 +523,10 @@ class DataSetCitationData( models.Model ):
     
     # meta-data about mention
     citation_type = models.CharField( max_length = 255, choices = MENTION_TYPE_CHOICES, default = MENTION_TYPE_DEFAULT )
+
+    # work log reference.
+    work_log = models.ForeignKey( Work_Log, on_delete = models.SET_NULL, blank = True, null = True )
+
 
     #----------------------------------------------------------------------
     # instance methods
@@ -533,9 +568,9 @@ class DataSetCitationData( models.Model ):
 #= End DataSetCitationData Model ======================================================
 
 
-# DataSetMention model
+# AbstractDataSetMention model
 @python_2_unicode_compatible
-class DataSetMention( Abstract_Selected_Text ):
+class AbstractDataSetMention( Abstract_Selected_Text ):
 
     # mention types
     MENTION_TYPE_MENTION = DataSetCitation.CITATION_TYPE_MENTION
@@ -552,7 +587,9 @@ class DataSetMention( Abstract_Selected_Text ):
     # model fields and meta
     #----------------------------------------------------------------------------
 
-
+    # associated article
+    publication = models.ForeignKey( Article, on_delete = models.CASCADE, blank = True, null = True )
+    
     # associated citation
     data_set_citation = models.ForeignKey( 'DataSetCitation', on_delete = models.CASCADE, blank = True, null = True )
     
@@ -565,11 +602,33 @@ class DataSetMention( Abstract_Selected_Text ):
     # meta-data about mention
     mention_type = models.CharField( max_length = 255, choices = MENTION_TYPE_CHOICES, default = MENTION_TYPE_DEFAULT )
 
+    # work log reference.
+    work_log = models.ForeignKey( Work_Log, on_delete = models.SET_NULL, blank = True, null = True )
+        
+    # tags!
+    tags = TaggableManager( blank = True )
+
+    # Meta-data for this class.
+    class Meta:
+
+        abstract = True
+        
+    #-- END class Meta --#
+
+
     #----------------------------------------------------------------------
     # instance methods
     #----------------------------------------------------------------------
 
 
+    def __init__( self, *args, **kwargs ):
+        
+        # call parent __init()__ first.
+        super( AbstractDataSetMention, self ).__init__( *args, **kwargs )
+
+    #-- END method __init__() --#
+
+    
     def __str__( self ):
         
         # return reference
@@ -602,6 +661,143 @@ class DataSetMention( Abstract_Selected_Text ):
 
     #-- END __str__() method --#
     
+#= End AbstractDataSetMention Model ======================================================
+
+
+# DataSetMention model
+@python_2_unicode_compatible
+class DataSetMention( AbstractDataSetMention ):
+
+    def __init__( self, *args, **kwargs ):
+        
+        # call parent __init()__ first.
+        super( DataSetMention, self ).__init__( *args, **kwargs )
+
+    #-- END method __init__() --#
+
+    # just use the stuff in the parent class.
+    
 #= End DataSetMention Model ======================================================
 
+
+# WorkDataSetCitation model
+@python_2_unicode_compatible
+class WorkDataSetCitation( AbstractDataSetCitation ):
+    
+    def __init__( self, *args, **kwargs ):
+        
+        # call parent __init()__ first.
+        super( WorkDataSetCitation, self ).__init__( *args, **kwargs )
+
+    #-- END method __init__() --#
+
+    # just use the stuff in the parent class.
+    
+#-- END WorkDataSetCitation Model --#
+
+
+# WorkDataSetMention model
+@python_2_unicode_compatible
+class WorkDataSetMention( AbstractArticleText ):
+
+    #----------------------------------------------------------------------------
+    # model fields and meta
+    #----------------------------------------------------------------------------
+
+    # associated article
+    article = models.ForeignKey( Article, on_delete = models.CASCADE )
+    
+    # associated WorkDataSetCitation
+    work_data_set_citation = models.ForeignKey( 'WorkDataSetCitation', on_delete = models.CASCADE, blank = True, null = True )
+
+
+    #----------------------------------------------------------------------
+    # instance methods
+    #----------------------------------------------------------------------
+
+
+    def __init__( self, *args, **kwargs ):
+        
+        # call parent __init()__ first.
+        super( WorkDataSetMention, self ).__init__( *args, **kwargs )
+
+    #-- END method __init__() --#
+
+    # just use the stuff in the parent class.
+    
+    def __str__( self ):
+        
+        # return reference
+        string_OUT = ""
+        
+        # declare variables
+        details_list = []
+        
+        # got id?
+        if ( self.id ):
+        
+            string_OUT = str( self.id )
+            
+        #-- END check for ID. --#
+
+        if ( self.publication ):
+        
+            string_OUT += " - pub. ID: {}".format( self.publication.id )
+        
+        #-- END check to see if article_subject. --#
+        
+        # got associated text?...
+        if ( self.value ):
+        
+            string_OUT += ": {}".format( self.value )
+                
+        #-- END check to see if we have a text. --#
+        
+        return string_OUT
+
+    #-- END __str__() method --#
+
+#= End WorkDataSetMention Model ======================================================
+
+
+# WorkResearchField model
+@python_2_unicode_compatible
+class WorkResearchField( AbstractArticleText ):
+
+    #----------------------------------------------------------------------
+    # instance methods
+    #----------------------------------------------------------------------
+
+
+    def __init__( self, *args, **kwargs ):
+        
+        # call parent __init()__ first.
+        super( WorkResearchField, self ).__init__( *args, **kwargs )
+
+    #-- END method __init__() --#
+
+    # just use the stuff in the parent class.
+    
+#= End WorkResearchField Model ======================================================
+
+
+# WorkResearchMethod model
+@python_2_unicode_compatible
+class WorkResearchMethod( AbstractArticleText ):
+
+    #----------------------------------------------------------------------
+    # instance methods
+    #----------------------------------------------------------------------
+
+
+    def __init__( self, *args, **kwargs ):
+        
+        # call parent __init()__ first.
+        super( WorkResearchMethod, self ).__init__( *args, **kwargs )
+
+    #-- END method __init__() --#
+
+    # just use the stuff in the parent class.
+    
+#= End WorkResearchMethod Model ================================================
 
