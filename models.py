@@ -53,6 +53,44 @@ from sourcenet.models import AbstractSelectedArticleText
 #================================================================================
 
 
+# AbstractScoredTeamTextData model
+@python_2_unicode_compatible
+class AbstractScoredTeamTextData( AbstractSelectedArticleText ):
+
+    #----------------------------------------------------------------------------
+    # model fields and meta
+    #----------------------------------------------------------------------------
+
+    # score of match
+    score = models.FloatField( blank = True, null = True )
+    
+    # team name
+    team_name = models.CharField( max_length = 255, null = True, blank = True )
+
+    # Meta-data for this class.
+    class Meta:
+
+        abstract = True
+        
+    #-- END class Meta --#
+
+    #----------------------------------------------------------------------
+    # instance methods
+    #----------------------------------------------------------------------
+
+
+    def __init__( self, *args, **kwargs ):
+        
+        # call parent __init()__ first.
+        super( AbstractScoredTeamTextData, self ).__init__( *args, **kwargs )
+
+    #-- END method __init__() --#
+
+    # just use the stuff in the parent class.
+    
+#= End WorkResearchMethod Model ================================================
+
+
 # Data Set model
 @python_2_unicode_compatible
 class DataSet( models.Model ):
@@ -573,7 +611,7 @@ class DataSetCitationData( models.Model ):
 
 # AbstractDataSetMention model
 @python_2_unicode_compatible
-class AbstractDataSetMention( AbstractSelectedArticleText ):
+class AbstractDataSetMention( AbstractScoredTeamTextData ):
 
     # mention types
     MENTION_TYPE_MENTION = DataSetCitation.CITATION_TYPE_MENTION
@@ -690,6 +728,17 @@ class DataSetMention( AbstractDataSetMention ):
 @python_2_unicode_compatible
 class WorkDataSetCitation( AbstractDataSetCitation ):
     
+    #----------------------------------------------------------------------------
+    # model fields and meta
+    #----------------------------------------------------------------------------
+
+    # team name
+    team_name = models.CharField( max_length = 255, null = True, blank = True )
+
+    #----------------------------------------------------------------------------
+    # instance methods
+    #----------------------------------------------------------------------------
+
     def __init__( self, *args, **kwargs ):
         
         # call parent __init()__ first.
@@ -768,10 +817,7 @@ class WorkDataSetMention( AbstractDataSetMention ):
 
 # WorkResearchField model
 @python_2_unicode_compatible
-class WorkResearchField( AbstractSelectedArticleText ):
-
-    # score of match
-    score = models.FloatField( blank = True, null = True )
+class WorkResearchField( AbstractScoredTeamTextData ):
 
     #----------------------------------------------------------------------
     # instance methods
@@ -792,10 +838,7 @@ class WorkResearchField( AbstractSelectedArticleText ):
 
 # WorkResearchMethod model
 @python_2_unicode_compatible
-class WorkResearchMethod( AbstractSelectedArticleText ):
-
-    # score of match
-    score = models.FloatField( blank = True, null = True )
+class WorkResearchMethod( AbstractScoredTeamTextData ):
 
     #----------------------------------------------------------------------
     # instance methods
