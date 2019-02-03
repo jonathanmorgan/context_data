@@ -290,6 +290,9 @@ class AbstractDataSetCitation( models.Model ):
     # tags!
     tags = TaggableManager( blank = True )
 
+    # score of match
+    score = models.FloatField( blank = True, null = True )
+
     # time stamps.
     create_date = models.DateTimeField( auto_now_add = True )
     last_modified = models.DateTimeField( auto_now = True )
@@ -601,6 +604,9 @@ class AbstractDataSetMention( AbstractSelectedArticleText ):
     
     # meta-data about mention
     mention_type = models.CharField( max_length = 255, choices = MENTION_TYPE_CHOICES, default = MENTION_TYPE_DEFAULT )
+    
+    # score of match
+    score = models.FloatField( blank = True, null = True )
 
     # work log reference.
     work_log = models.ForeignKey( Work_Log, on_delete = models.SET_NULL, blank = True, null = True )
@@ -764,6 +770,9 @@ class WorkDataSetMention( AbstractDataSetMention ):
 @python_2_unicode_compatible
 class WorkResearchField( AbstractSelectedArticleText ):
 
+    # score of match
+    score = models.FloatField( blank = True, null = True )
+
     #----------------------------------------------------------------------
     # instance methods
     #----------------------------------------------------------------------
@@ -784,6 +793,9 @@ class WorkResearchField( AbstractSelectedArticleText ):
 # WorkResearchMethod model
 @python_2_unicode_compatible
 class WorkResearchMethod( AbstractSelectedArticleText ):
+
+    # score of match
+    score = models.FloatField( blank = True, null = True )
 
     #----------------------------------------------------------------------
     # instance methods
