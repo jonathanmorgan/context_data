@@ -40,7 +40,7 @@ from context.models import Work_Log
 from sourcenet.models import Article
 from sourcenet.models import Article_Data
 from sourcenet.models import Abstract_Selected_Text
-from sourcenet.models import AbstractArticleText
+from sourcenet.models import AbstractSelectedArticleText
 
 
 #================================================================================
@@ -570,7 +570,7 @@ class DataSetCitationData( models.Model ):
 
 # AbstractDataSetMention model
 @python_2_unicode_compatible
-class AbstractDataSetMention( Abstract_Selected_Text ):
+class AbstractDataSetMention( AbstractSelectedArticleText ):
 
     # mention types
     MENTION_TYPE_MENTION = DataSetCitation.CITATION_TYPE_MENTION
@@ -588,7 +588,7 @@ class AbstractDataSetMention( Abstract_Selected_Text ):
     #----------------------------------------------------------------------------
 
     # associated article
-    publication = models.ForeignKey( Article, on_delete = models.CASCADE, blank = True, null = True )
+    article = models.ForeignKey( Article, on_delete = models.CASCADE, blank = True, null = True )
     
     # associated citation
     data_set_citation = models.ForeignKey( 'DataSetCitation', on_delete = models.CASCADE, blank = True, null = True )
@@ -698,7 +698,7 @@ class WorkDataSetCitation( AbstractDataSetCitation ):
 
 # WorkDataSetMention model
 @python_2_unicode_compatible
-class WorkDataSetMention( AbstractArticleText ):
+class WorkDataSetMention( AbstractDataSetMention ):
 
     #----------------------------------------------------------------------------
     # model fields and meta
@@ -762,7 +762,7 @@ class WorkDataSetMention( AbstractArticleText ):
 
 # WorkResearchField model
 @python_2_unicode_compatible
-class WorkResearchField( AbstractArticleText ):
+class WorkResearchField( AbstractSelectedArticleText ):
 
     #----------------------------------------------------------------------
     # instance methods
@@ -783,7 +783,7 @@ class WorkResearchField( AbstractArticleText ):
 
 # WorkResearchMethod model
 @python_2_unicode_compatible
-class WorkResearchMethod( AbstractArticleText ):
+class WorkResearchMethod( AbstractSelectedArticleText ):
 
     #----------------------------------------------------------------------
     # instance methods
