@@ -753,7 +753,7 @@ class WorkDataSetCitation( AbstractDataSetCitation ):
 
 # WorkDataSetMention model
 @python_2_unicode_compatible
-class WorkDataSetMention( AbstractDataSetMention ):
+class WorkDataSetCitationMention( AbstractDataSetMention ):
 
     #----------------------------------------------------------------------------
     # model fields and meta
@@ -765,6 +765,68 @@ class WorkDataSetMention( AbstractDataSetMention ):
     # associated WorkDataSetCitation
     work_data_set_citation = models.ForeignKey( 'WorkDataSetCitation', on_delete = models.CASCADE, blank = True, null = True )
 
+
+    #----------------------------------------------------------------------
+    # instance methods
+    #----------------------------------------------------------------------
+
+
+    def __init__( self, *args, **kwargs ):
+        
+        # call parent __init()__ first.
+        super( WorkDataSetCitationMention, self ).__init__( *args, **kwargs )
+
+    #-- END method __init__() --#
+
+    # just use the stuff in the parent class.
+    
+    def __str__( self ):
+        
+        # return reference
+        string_OUT = ""
+        
+        # declare variables
+        details_list = []
+        
+        # got id?
+        if ( self.id ):
+        
+            string_OUT = str( self.id )
+            
+        #-- END check for ID. --#
+
+        if ( self.publication ):
+        
+            string_OUT += " - pub. ID: {}".format( self.publication.id )
+        
+        #-- END check to see if article_subject. --#
+        
+        # got associated text?...
+        if ( self.value ):
+        
+            string_OUT += ": {}".format( self.value )
+                
+        #-- END check to see if we have a text. --#
+        
+        return string_OUT
+
+    #-- END __str__() method --#
+
+#= End WorkDataSetCitationMention Model ======================================================
+
+
+# WorkDataSetMention model
+@python_2_unicode_compatible
+class WorkDataSetMention( AbstractDataSetMention ):
+
+    #----------------------------------------------------------------------------
+    # model fields and meta
+    #----------------------------------------------------------------------------
+
+
+    # associated article
+    article = models.ForeignKey( Article, on_delete = models.CASCADE )
+    
 
     #----------------------------------------------------------------------
     # instance methods

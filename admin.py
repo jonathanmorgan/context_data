@@ -16,6 +16,7 @@ from sourcenet_datasets.models import DataSetCitation
 from sourcenet_datasets.models import DataSetCitationData
 from sourcenet_datasets.models import DataSetMention
 from sourcenet_datasets.models import WorkDataSetCitation
+from sourcenet_datasets.models import WorkDataSetCitationMention
 from sourcenet_datasets.models import WorkDataSetMention
 from sourcenet_datasets.models import WorkResearchField
 from sourcenet_datasets.models import WorkResearchMethod
@@ -26,6 +27,7 @@ admin.site.register( DataSetIdentifier )
 admin.site.register( DataSetCitationData )
 admin.site.register( DataSetMention )
 admin.site.register( WorkDataSetCitation )
+admin.site.register( WorkDataSetCitationMention )
 admin.site.register( WorkDataSetMention )
 admin.site.register( WorkResearchField )
 admin.site.register( WorkResearchMethod )
