@@ -688,6 +688,12 @@ class AbstractDataSetMention( AbstractScoredTeamTextData ):
             
         #-- END check for ID. --#
 
+        if ( self.article ):
+        
+            string_OUT += " - pub. ID: {}".format( self.article.id )
+        
+        #-- END check to see if article. --#
+        
         if ( self.data_set_citation ):
         
             string_OUT += " - " + str( self.data_set_citation )
@@ -780,38 +786,7 @@ class WorkDataSetCitationMention( AbstractDataSetMention ):
 
     # just use the stuff in the parent class.
     
-    def __str__( self ):
-        
-        # return reference
-        string_OUT = ""
-        
-        # declare variables
-        details_list = []
-        
-        # got id?
-        if ( self.id ):
-        
-            string_OUT = str( self.id )
-            
-        #-- END check for ID. --#
-
-        if ( self.publication ):
-        
-            string_OUT += " - pub. ID: {}".format( self.publication.id )
-        
-        #-- END check to see if article_subject. --#
-        
-        # got associated text?...
-        if ( self.value ):
-        
-            string_OUT += ": {}".format( self.value )
-                
-        #-- END check to see if we have a text. --#
-        
-        return string_OUT
-
-    #-- END __str__() method --#
-
+    
 #= End WorkDataSetCitationMention Model ======================================================
 
 
@@ -842,37 +817,6 @@ class WorkDataSetMention( AbstractDataSetMention ):
 
     # just use the stuff in the parent class.
     
-    def __str__( self ):
-        
-        # return reference
-        string_OUT = ""
-        
-        # declare variables
-        details_list = []
-        
-        # got id?
-        if ( self.id ):
-        
-            string_OUT = str( self.id )
-            
-        #-- END check for ID. --#
-
-        if ( self.publication ):
-        
-            string_OUT += " - pub. ID: {}".format( self.publication.id )
-        
-        #-- END check to see if article_subject. --#
-        
-        # got associated text?...
-        if ( self.value ):
-        
-            string_OUT += ": {}".format( self.value )
-                
-        #-- END check to see if we have a text. --#
-        
-        return string_OUT
-
-    #-- END __str__() method --#
 
 #= End WorkDataSetMention Model ======================================================
 
