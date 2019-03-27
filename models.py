@@ -13,11 +13,12 @@ sourcenet_dataset is distributed in the hope that it will be useful, but WITHOUT
 You should have received a copy of the GNU Lesser General Public License along with http://github.com/jonathanmorgan/sourcenet_dataset. If not, see http://www.gnu.org/licenses/.
 '''
 
-#================================================================================
+#===============================================================================
 # ! ==> Imports
-#================================================================================
+#===============================================================================
 
 # django imports
+from django.contrib.auth.models import User
 from django.db import models
 
 # django encoding imports (for supporting 2 and 3).
@@ -43,23 +44,36 @@ from sourcenet.models import Abstract_Selected_Text
 from sourcenet.models import AbstractSelectedArticleText
 
 
-#================================================================================
+#===============================================================================
 # ! ==> Shared variables and functions
-#================================================================================
+#===============================================================================
 
 
-#================================================================================
+#===============================================================================
 # ! ==> Models
-#================================================================================
+#===============================================================================
 
 
 # AbstractScoredTeamTextData model
 @python_2_unicode_compatible
 class AbstractScoredTeamTextData( AbstractSelectedArticleText ):
 
-    #----------------------------------------------------------------------------
+    #---------------------------------------------------------------------------
     # model fields and meta
-    #----------------------------------------------------------------------------
+    #---------------------------------------------------------------------------
+
+    # inherits from sourcenet.models.AbstractSelectedText:
+    # basics - value, text before and after the value, length and index of value.
+    #value = models.TextField( blank = True, null = True )
+    #value_in_context = models.TextField( blank = True, null = True )
+    #value_index = models.IntegerField( blank = True, null = True, default = 0 )
+    #value_length = models.IntegerField( blank = True, null = True, default = 0 )
+    #canonical_index = models.IntegerField( blank = True, null = True, default = 0 )
+    #value_word_number_start = models.IntegerField( blank = True, null = True, default = 0 )
+    #value_word_number_end = models.IntegerField( blank = True, null = True, default = 0 )
+    #paragraph_number = models.IntegerField( blank = True, null = True, default = 0 )
+    #context_before = models.TextField( blank = True, null = True )
+    #context_after = models.TextField( blank = True, null = True )
 
     # score of match
     score = models.FloatField( blank = True, null = True )
@@ -291,11 +305,15 @@ class AbstractDataSetCitation( models.Model ):
     # citation types
     CITATION_TYPE_MENTION = "mention"
     CITATION_TYPE_ANALYSIS = "analysis"
+    CITATION_TYPE_PROJECT = "project"
+    CITATION_TYPE_STATISTIC = "statistic"
     CITATION_TYPE_DEFAULT = CITATION_TYPE_MENTION
 
     CITATION_TYPE_CHOICES = (
         ( CITATION_TYPE_MENTION, CITATION_TYPE_MENTION ),
         ( CITATION_TYPE_ANALYSIS, CITATION_TYPE_ANALYSIS ),
+        ( CITATION_TYPE_PROJECT, CITATION_TYPE_PROJECT ),
+        ( CITATION_TYPE_STATISTIC, CITATION_TYPE_STATISTIC )
     )
 
 
@@ -520,7 +538,7 @@ class AbstractDataSetCitation( models.Model ):
 #= END DataSetCitation Model ======================================================
 
 
-# AbstractDataSetCitation model
+# DataSetCitation model
 @python_2_unicode_compatible
 class DataSetCitation( AbstractDataSetCitation ):
     
@@ -609,9 +627,9 @@ class DataSetCitationData( models.Model ):
 #= End DataSetCitationData Model ======================================================
 
 
-# AbstractDataSetMention model
+# AbstractDataMention model
 @python_2_unicode_compatible
-class AbstractDataSetMention( AbstractScoredTeamTextData ):
+class AbstractDataMention( AbstractScoredTeamTextData ):
 
     # mention types
     MENTION_TYPE_MENTION = DataSetCitation.CITATION_TYPE_MENTION
@@ -628,17 +646,18 @@ class AbstractDataSetMention( AbstractScoredTeamTextData ):
     # model fields and meta
     #----------------------------------------------------------------------------
 
+    # inherited from AbstractSelectedArticleText:
     # associated article
-    article = models.ForeignKey( Article, on_delete = models.CASCADE, blank = True, null = True )
+    #article = models.ForeignKey( Article, on_delete = models.CASCADE, blank = True, null = True )
+    
+    # optional - who captured this at the article level?
+    #article_data = models.ForeignKey( Article_Data, on_delete = models.CASCADE, blank = True, null = True )
     
     # associated citation
     data_set_citation = models.ForeignKey( 'DataSetCitation', on_delete = models.CASCADE, blank = True, null = True )
     
     # associated citation data
     data_set_citation_data = models.ForeignKey( 'DataSetCitationData', on_delete = models.CASCADE, blank = True, null = True )
-    
-    # optional - who captured this at the article level?
-    article_data = models.ForeignKey( Article_Data, on_delete = models.CASCADE, blank = True, null = True )
     
     # meta-data about mention
     mention_type = models.CharField( max_length = 255, choices = MENTION_TYPE_CHOICES, default = MENTION_TYPE_DEFAULT )
@@ -668,7 +687,7 @@ class AbstractDataSetMention( AbstractScoredTeamTextData ):
     def __init__( self, *args, **kwargs ):
         
         # call parent __init()__ first.
-        super( AbstractDataSetMention, self ).__init__( *args, **kwargs )
+        super( AbstractDataMention, self ).__init__( *args, **kwargs )
 
     #-- END method __init__() --#
 
@@ -711,12 +730,12 @@ class AbstractDataSetMention( AbstractScoredTeamTextData ):
 
     #-- END __str__() method --#
     
-#= End AbstractDataSetMention Model ======================================================
+#= End AbstractDataMention Model ======================================================
 
 
 # DataSetMention model
 @python_2_unicode_compatible
-class DataSetMention( AbstractDataSetMention ):
+class DataSetMention( AbstractDataMention ):
 
     def __init__( self, *args, **kwargs ):
         
@@ -759,7 +778,7 @@ class WorkDataSetCitation( AbstractDataSetCitation ):
 
 # WorkDataSetMention model
 @python_2_unicode_compatible
-class WorkDataSetCitationMention( AbstractDataSetMention ):
+class WorkDataSetCitationMention( AbstractDataMention ):
 
     #----------------------------------------------------------------------------
     # model fields and meta
@@ -792,7 +811,7 @@ class WorkDataSetCitationMention( AbstractDataSetMention ):
 
 # WorkDataSetMention model
 @python_2_unicode_compatible
-class WorkDataSetMention( AbstractDataSetMention ):
+class WorkDataSetMention( AbstractDataMention ):
 
     #----------------------------------------------------------------------------
     # model fields and meta
@@ -861,4 +880,216 @@ class WorkResearchMethod( AbstractScoredTeamTextData ):
     # just use the stuff in the parent class.
     
 #= End WorkResearchMethod Model ================================================
+
+
+# DataReference model
+@python_2_unicode_compatible
+class DataReference( AbstractDataSetCitation ):
+
+    #----------------------------------------------------------------------------
+    # model fields and meta
+    #----------------------------------------------------------------------------
+
+
+    # title
+    title = models.TextField( blank = True, null = True )
+    
+    # data set link is optional, and want to keep reference if data set deleted.
+    data_set = models.ForeignKey( 'DataSet', on_delete = models.SET_NULL, blank = True, null = True )
+    related_data_sets = models.ManyToManyField( DataSet, related_name = "related_data_set_set" )
+    
+    # key terms
+    key_terms = models.TextField( blank = True, null = True )
+    
+    # context text
+    context_text = models.TextField( blank = True, null = True )
+    
+    # optional coder information - try to track coder through Article_Data.
+    coder = models.ForeignKey( User, on_delete = models.CASCADE, blank = True, null = True )
+    coder_type = models.CharField( max_length = 255, blank = True, null = True )
+    
+
+    #----------------------------------------------------------------------
+    # instance methods
+    #----------------------------------------------------------------------
+
+
+    def __init__( self, *args, **kwargs ):
+        
+        # call parent __init()__ first.
+        super( DataReference, self ).__init__( *args, **kwargs )
+
+    #-- END method __init__() --#
+
+    # just use the stuff in the parent class.
+    
+#-- END class DataReference --#
+
+
+# DataMention model
+@python_2_unicode_compatible
+class DataReferenceMention( AbstractDataMention ):
+
+    #----------------------------------------------------------------------------
+    # inheritance
+    #----------------------------------------------------------------------------
+
+    # we inherit from sourcenet.models.AbstractSelectedText:
+    # basics - value, text before and after the value, length and index of value.
+    #value = models.TextField( blank = True, null = True )
+    #value_in_context = models.TextField( blank = True, null = True )
+    #value_index = models.IntegerField( blank = True, null = True, default = 0 )
+    #value_length = models.IntegerField( blank = True, null = True, default = 0 )
+    #canonical_index = models.IntegerField( blank = True, null = True, default = 0 )
+    #value_word_number_start = models.IntegerField( blank = True, null = True, default = 0 )
+    #value_word_number_end = models.IntegerField( blank = True, null = True, default = 0 )
+    #paragraph_number = models.IntegerField( blank = True, null = True, default = 0 )
+    #context_before = models.TextField( blank = True, null = True )
+    #context_after = models.TextField( blank = True, null = True )
+
+    # inherited from AbstractSelectedArticleText:
+    # associated article
+    #article = models.ForeignKey( Article, on_delete = models.CASCADE, blank = True, null = True )
+    
+    # optional - who captured this at the article level?
+    #article_data = models.ForeignKey( Article_Data, on_delete = models.CASCADE, blank = True, null = True )
+    
+    
+    # associated citation
+    #data_set_citation = models.ForeignKey( 'DataSetCitation', on_delete = models.CASCADE, blank = True, null = True )
+    
+    # associated citation data
+    #data_set_citation_data = models.ForeignKey( 'DataSetCitationData', on_delete = models.CASCADE, blank = True, null = True )
+    
+    # optional - who captured this at the article level?
+    #article_data = models.ForeignKey( Article_Data, on_delete = models.CASCADE, blank = True, null = True )
+    
+    # meta-data about mention
+    #mention_type = models.CharField( max_length = 255, choices = MENTION_TYPE_CHOICES, default = MENTION_TYPE_DEFAULT )
+    
+    # score of match
+    #score = models.FloatField( blank = True, null = True )
+
+    # work log reference.
+    #work_log = models.ForeignKey( Work_Log, on_delete = models.SET_NULL, blank = True, null = True )
+        
+    # tags!
+    #tags = TaggableManager( blank = True )
+    
+
+    #----------------------------------------------------------------------------
+    # model fields and meta
+    #----------------------------------------------------------------------------
+
+    
+    # data reference link, want to delete mentions if linked reference is
+    #    deleted.
+    data_reference = models.ForeignKey( "DataReference", on_delete = models.CASCADE, blank = True, null = True )
+    
+    # ==> need some way to pinpoint location
+    
+    # in addition to inheritance from sourcenet.models.AbstractSelectedText:
+    start_index = models.IntegerField( blank = True, null = True )
+    occurrence_number = models.IntegerField( blank = True, null = True )
+    
+
+    #----------------------------------------------------------------------
+    # instance methods
+    #----------------------------------------------------------------------
+
+
+    def __init__( self, *args, **kwargs ):
+        
+        # call parent __init()__ first.
+        super( DataReferenceMention, self ).__init__( *args, **kwargs )
+
+    #-- END method __init__() --#
+
+    # just use the stuff in the parent class.
+    
+#= End DataReferenceMention Model ======================================================
+
+
+# DataMention model
+@python_2_unicode_compatible
+class DataReferenceContext( AbstractDataMention ):
+
+    #----------------------------------------------------------------------------
+    # inheritance
+    #----------------------------------------------------------------------------
+
+    # we inherit from sourcenet.models.AbstractSelectedText:
+    # basics - value, text before and after the value, length and index of value.
+    #value = models.TextField( blank = True, null = True )
+    #value_in_context = models.TextField( blank = True, null = True )
+    #value_index = models.IntegerField( blank = True, null = True, default = 0 )
+    #value_length = models.IntegerField( blank = True, null = True, default = 0 )
+    #canonical_index = models.IntegerField( blank = True, null = True, default = 0 )
+    #value_word_number_start = models.IntegerField( blank = True, null = True, default = 0 )
+    #value_word_number_end = models.IntegerField( blank = True, null = True, default = 0 )
+    #paragraph_number = models.IntegerField( blank = True, null = True, default = 0 )
+    #context_before = models.TextField( blank = True, null = True )
+    #context_after = models.TextField( blank = True, null = True )
+
+    # inherited from AbstractSelectedArticleText:
+    # associated article
+    #article = models.ForeignKey( Article, on_delete = models.CASCADE, blank = True, null = True )
+    
+    # optional - who captured this at the article level?
+    #article_data = models.ForeignKey( Article_Data, on_delete = models.CASCADE, blank = True, null = True )
+    
+    
+    # associated citation
+    #data_set_citation = models.ForeignKey( 'DataSetCitation', on_delete = models.CASCADE, blank = True, null = True )
+    
+    # associated citation data
+    #data_set_citation_data = models.ForeignKey( 'DataSetCitationData', on_delete = models.CASCADE, blank = True, null = True )
+    
+    # optional - who captured this at the article level?
+    #article_data = models.ForeignKey( Article_Data, on_delete = models.CASCADE, blank = True, null = True )
+    
+    # meta-data about mention
+    #mention_type = models.CharField( max_length = 255, choices = MENTION_TYPE_CHOICES, default = MENTION_TYPE_DEFAULT )
+    
+    # score of match
+    #score = models.FloatField( blank = True, null = True )
+
+    # work log reference.
+    #work_log = models.ForeignKey( Work_Log, on_delete = models.SET_NULL, blank = True, null = True )
+        
+    # tags!
+    #tags = TaggableManager( blank = True )
+    
+
+    #----------------------------------------------------------------------------
+    # model fields and meta
+    #----------------------------------------------------------------------------
+
+    
+    # data reference link, want to delete mentions if linked reference is
+    #    deleted.
+    data_reference = models.ForeignKey( "DataReference", on_delete = models.CASCADE, blank = True, null = True )
+    
+    # ==> need some way to pinpoint location
+    
+    # in addition to inheritance from sourcenet.models.AbstractSelectedText:
+    start_index = models.IntegerField( blank = True, null = True )
+    occurrence_number = models.IntegerField( blank = True, null = True )
+    
+
+    #----------------------------------------------------------------------
+    # instance methods
+    #----------------------------------------------------------------------
+
+
+    def __init__( self, *args, **kwargs ):
+        
+        # call parent __init()__ first.
+        super( DataReferenceContext, self ).__init__( *args, **kwargs )
+
+    #-- END method __init__() --#
+
+    # just use the stuff in the parent class.
+    
+#= End DataReferenceContext Model ======================================================
 
