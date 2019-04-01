@@ -20,6 +20,9 @@ from sourcenet_datasets.models import WorkDataSetCitationMention
 from sourcenet_datasets.models import WorkDataSetMention
 from sourcenet_datasets.models import WorkResearchField
 from sourcenet_datasets.models import WorkResearchMethod
+from sourcenet_datasets.models import DataReference
+from sourcenet_datasets.models import DataReferenceMention
+from sourcenet_datasets.models import DataReferenceContext
 
 #admin.site.register( DataSet )
 admin.site.register( DataSetIdentifier )
@@ -31,6 +34,9 @@ admin.site.register( WorkDataSetCitationMention )
 admin.site.register( WorkDataSetMention )
 admin.site.register( WorkResearchField )
 admin.site.register( WorkResearchMethod )
+#admin.site.register( DataReference )
+admin.site.register( DataReferenceMention )
+admin.site.register( DataReferenceContext )
 
 #-------------------------------------------------------------------------------
 # DataSet admin definition
@@ -118,4 +124,54 @@ class DataSetCitationAdmin( admin.ModelAdmin ):
     date_hierarchy = 'create_date'
 
 admin.site.register( DataSetCitation, DataSetCitationAdmin )
+
+
+#-------------------------------------------------------------------------------
+# DataReference admin definition
+#-------------------------------------------------------------------------------
+
+class DataReferenceAdmin( admin.ModelAdmin ):
+
+    # set up ajax-selects - for make_ajax_form, 1st argument is the model you
+    #    are looking to make ajax selects form fields for; 2nd argument is a
+    #    dict of pairs of field names in the model in argument 1 (with no quotes
+    #    around them) mapped to lookup channels used to service them (lookup
+    #    channels are defined in settings.py, implenented in a separate module -
+    #    in this case, implemented in sourcenet.ajax-select-lookups.py
+    form = make_ajax_form( DataReference, dict( article = 'article', related_data_sets = 'datasets', data_set = 'datasets', article_data = 'article_data' ) )
+
+    fieldsets = [
+        (
+            None,
+            {
+                'fields' : [ 'article', 'citation_type', 'related_data_sets', 'title', 'key_terms', 'tags' ]
+            }
+        ),
+        (
+            "More details (Optional)",
+            {
+                'fields' : [
+                    'score',
+                    'match_confidence_level',
+                    'match_status',
+                    'capture_method',
+                    'notes',
+                    'context_text',
+                    'article_data',
+                    'work_log',
+                    'coder',
+                    'coder_type',
+                    'data_set'
+                ],
+                'classes' : ( "collapse", )
+            }
+        ),
+    ]
+
+    list_display = ( 'id', 'citation_type', 'article', 'key_terms', 'create_date' )
+    list_display_links = ( 'id', 'citation_type' )
+    search_fields = [ 'id' ]
+    date_hierarchy = 'create_date'
+
+admin.site.register( DataReference, DataReferenceAdmin )
 
