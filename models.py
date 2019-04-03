@@ -921,6 +921,69 @@ class DataReference( AbstractDataSetCitation ):
 
     #-- END method __init__() --#
 
+
+    def __str__( self ):
+        
+        # return reference
+        string_OUT = ""
+        related_data_set_qs = None
+        data_set = None
+        data_set_id_list = None
+        
+        if ( self.id ):
+        
+            string_OUT += str( self.id )
+            
+        #-- END check to see if id --#
+        
+        if ( self.article is not None ):
+        
+            string_OUT += " - article: {}".format( self.article.id )
+        
+        else:
+        
+            string_OUT += ' - no article?'
+        
+        #-- END check to see if article. --#
+        
+        # related_data_sets
+        related_data_set_qs = self.related_data_sets.all()
+        if ( related_data_set_qs.count() > 0 ):
+            
+            string_OUT += "- related_data_sets:"
+            data_set_id_list = []
+            for data_set in related_data_set_qs:
+            
+                # get id and add to list.
+                data_set_id = data_set.id
+                data_set_id_list.append( str( data_set_id ) )
+                
+            #-- END loop over related data sets. --#
+            
+            # append list to string_OUT
+            string_OUT += ", ".join( data_set_id_list )
+        
+        else:
+        
+            string_OUT += " - no related_data_sets"
+        
+        #-- END check to see if data sets --#
+        
+        if ( self.data_set is not None ):
+        
+            string_OUT += " - data set: {}".format( self.data_set.id )
+        
+        else:
+        
+            string_OUT += ' - no data_set'
+        
+        #-- END check to see if data set. --#
+        
+        return string_OUT
+    
+    #-- END method __str__() --#
+
+
     # just use the stuff in the parent class.
     
 #-- END class DataReference --#
