@@ -64,10 +64,10 @@ from sourcenet.models import Article_Text
 # parent abstract class.
 from sourcenet.article_coding.article_coder import ArticleCoder
 
-# sourcenet_datasets classes
-from sourcenet_datasets.models import DataSetMention
-from sourcenet_datasets.models import DataSetCitationData
-from sourcenet_datasets.shared.sourcenet_datasets_base import SourcenetDataSetsBase
+# context_datasets classes
+from context_datasets.models import DataSetMention
+from context_datasets.models import DataSetCitationData
+from context_datasets.shared.context_datasets_base import ContextDataSetsBase
 
 
 #================================================================================
@@ -95,7 +95,7 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
     # STATUS_ERROR_PREFIX = "Error: "
     
     # logging
-    LOGGER_NAME = "sourcenet_datasets.coding.data_set_mentions.manual.manual_data_set_mentions_coder"
+    LOGGER_NAME = "context_datasets.coding.data_set_mentions.manual.manual_data_set_mentions_coder"
     
     # config application
     CONFIG_APPLICATION = "Manual_Data_Set_Mentions_Coding"
@@ -109,7 +109,7 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
     CONFIG_NAME_HIGHLIGHT_WORD_LIST = SourcenetBase.DJANGO_CONFIG_NAME_HIGHLIGHT_WORD_LIST
     CONFIG_NAME_DEFAULT_FIND_LOCATION = SourcenetBase.DJANGO_CONFIG_NAME_DEFAULT_FIND_LOCATION
     CONFIG_NAME_BE_CASE_SENSITIVE = SourcenetBase.DJANGO_CONFIG_NAME_BE_CASE_SENSITIVE
-    CONFIG_NAME_PROCESS_FOUND_SYNONYMS = SourcenetDataSetsBase.DJANGO_CONFIG_NAME_PROCESS_FOUND_SYNONYMS
+    CONFIG_NAME_PROCESS_FOUND_SYNONYMS = ContextDataSetsBase.DJANGO_CONFIG_NAME_PROCESS_FOUND_SYNONYMS
     CONFIG_NAME_SYNCHRONIZE_DATA_SET_FAMILIES = "synchronize_data_set_families"
 
     # kwarg parameter names

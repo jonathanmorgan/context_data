@@ -36,7 +36,7 @@ class Migration(migrations.Migration):
                 ('last_modified', models.DateTimeField(auto_now=True)),
                 ('article', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sourcenet.Article')),
                 ('article_data', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='sourcenet.Article_Data')),
-                ('data_set', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sourcenet_datasets.DataSet')),
+                ('data_set', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='context_datasets.DataSet')),
             ],
         ),
         migrations.CreateModel(
@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
                 ('identifier', models.TextField(blank=True, null=True)),
                 ('source', models.CharField(blank=True, max_length=255, null=True)),
                 ('notes', models.TextField(blank=True, null=True)),
-                ('dataset', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sourcenet_datasets.DataSet')),
+                ('dataset', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='context_datasets.DataSet')),
             ],
         ),
         migrations.CreateModel(
@@ -72,7 +72,7 @@ class Migration(migrations.Migration):
                 ('last_modified', models.DateTimeField(auto_now=True)),
                 ('mention_type', models.CharField(choices=[('mention', 'mention'), ('analysis', 'analysis')], default='mention', max_length=255)),
                 ('article_data', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='sourcenet.Article_Data')),
-                ('data_set_citation', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='sourcenet_datasets.DataSetCitation')),
+                ('data_set_citation', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='context_datasets.DataSetCitation')),
             ],
             options={
                 'ordering': ['paragraph_number', 'last_modified', 'create_date'],

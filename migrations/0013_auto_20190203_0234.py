@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('sourcenet_datasets', '0012_auto_20190202_2156'),
+        ('context_datasets', '0012_auto_20190202_2156'),
     ]
 
     operations = [
@@ -19,12 +19,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='workdatasetmention',
             name='data_set_citation',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='sourcenet_datasets.DataSetCitation'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='context_datasets.DataSetCitation'),
         ),
         migrations.AddField(
             model_name='workdatasetmention',
             name='data_set_citation_data',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='sourcenet_datasets.DataSetCitationData'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='context_datasets.DataSetCitationData'),
         ),
         migrations.AddField(
             model_name='workdatasetmention',

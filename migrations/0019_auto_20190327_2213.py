@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
         ('taggit', '0003_taggeditem_add_unique_index'),
         ('sourcenet', '0022_article_data_work_log'),
         ('context', '0004_auto_20190305_1858'),
-        ('sourcenet_datasets', '0018_auto_20190327_1819'),
+        ('context_datasets', '0018_auto_20190327_1819'),
     ]
 
     operations = [
@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='datareference',
             name='related_data_sets',
-            field=models.ManyToManyField(related_name='related_data_set_set', to='sourcenet_datasets.DataSet'),
+            field=models.ManyToManyField(related_name='related_data_set_set', to='context_datasets.DataSet'),
         ),
         migrations.AlterField(
             model_name='datareference',

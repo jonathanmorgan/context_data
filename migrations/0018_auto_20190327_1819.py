@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
         ('sourcenet', '0022_article_data_work_log'),
         ('taggit', '0003_taggeditem_add_unique_index'),
         ('context', '0004_auto_20190305_1858'),
-        ('sourcenet_datasets', '0017_auto_20190327_1657'),
+        ('context_datasets', '0017_auto_20190327_1657'),
     ]
 
     operations = [
@@ -70,17 +70,17 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='datacontext',
             name='data_reference',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='sourcenet_datasets.DataReference'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='context_datasets.DataReference'),
         ),
         migrations.AddField(
             model_name='datacontext',
             name='data_set_citation',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='sourcenet_datasets.DataSetCitation'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='context_datasets.DataSetCitation'),
         ),
         migrations.AddField(
             model_name='datacontext',
             name='data_set_citation_data',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='sourcenet_datasets.DataSetCitationData'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='context_datasets.DataSetCitationData'),
         ),
         migrations.AddField(
             model_name='datacontext',

@@ -21,7 +21,7 @@ from django.conf.urls import url
 from django.contrib.auth import views as auth_views
 
 # import sourcent_datasets views
-import sourcenet_datasets.views
+import context_datasets.views
 
 '''
 # !tastypie API
@@ -40,11 +40,11 @@ v1_api.register( ArticleResource() )
 urlpatterns = [
 
     # index page
-    url( r'^index$', sourcenet_datasets.views.index, name = "sourcenet_datasets-index" ),
+    url( r'^index$', context_datasets.views.index, name = "context_datasets-index" ),
 
     # data set mention coding pages
-    url( r'^dataset/code_mentions/list/', sourcenet_datasets.views.dataset_mention_coding_list, name = "sourcenet_datasets-dataset_mention_coding_list" ),
-    url( r'^dataset/code_mentions/', sourcenet_datasets.views.dataset_code_mentions, name = "sourcenet_datasets-dataset_code_mentions" ),
-    url( r'^dataset/code_citations/', sourcenet_datasets.views.article_code_citations, name = "sourcenet_datasets-article-code_data_set_mentions" ),
+    url( r'^dataset/code_mentions/list/', context_datasets.views.dataset_mention_coding_list, name = "context_datasets-dataset_mention_coding_list" ),
+    url( r'^dataset/code_mentions/', context_datasets.views.dataset_code_mentions, name = "context_datasets-dataset_code_mentions" ),
+    url( r'^dataset/code_citations/', context_datasets.views.article_code_citations, name = "context_datasets-article-code_data_set_mentions" ),
 
 ]

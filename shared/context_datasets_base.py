@@ -37,7 +37,7 @@ from sourcenet.shared.sourcenet_base import SourcenetBase
 # classes (in alphabetical order by name)
 #===============================================================================
 
-class SourcenetDataSetsBase( SourcenetBase ):
+class ContextDataSetsBase( SourcenetBase ):
 
 
     #---------------------------------------------------------------------------
@@ -65,10 +65,10 @@ class SourcenetDataSetsBase( SourcenetBase ):
     def __init__( self ):
 
         # call parent's __init__()
-        super( SourcenetDataSetsBase, self ).__init__()
+        super( ContextDataSetsBase, self ).__init__()
 
         # set logger name (for LoggingHelper parent class: (LoggingHelper --> BasicRateLimited --> SourcenetBase).
-        self.set_logger_name( "sourcenet.shared.sourcenet_datasets_base" )
+        self.set_logger_name( "context_datasets.shared.context_datasets_base" )
         
     #-- END method __init__() --#
 
@@ -78,4 +78,4 @@ class SourcenetDataSetsBase( SourcenetBase ):
     #---------------------------------------------------------------------------
 
 
-#-- END class SourcenetDataSetsBase --#
+#-- END class ContextDataSetsBase --#

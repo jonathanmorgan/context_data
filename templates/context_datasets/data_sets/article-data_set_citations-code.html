@@ -6,10 +6,10 @@
 {% block inside-head %}
 <script src="https://code.jquery.com/jquery-latest.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.selection/1.0.1/jquery.selection.min.js"></script>
-<link rel="stylesheet" type="text/css" href="{% static "sourcenet_datasets/css/citation-coding/citation-coding.css" %}" />
+<link rel="stylesheet" type="text/css" href="{% static "context_datasets/css/citation-coding/citation-coding.css" %}" />
 <script src="{% static "sourcenet/js/sourcenet.js" %}"></script>
 <script src="{% static "sourcenet/js/find-in-text.js" %}"></script>
-<script src="{% static "sourcenet_datasets/js/citation-coding/citation-coding.js" %}"></script>
+<script src="{% static "context_datasets/js/citation-coding/citation-coding.js" %}"></script>
 <script>SOURCENET.text_finder.be_case_sensitive = {% if be_case_sensitive %}true{% else %}false{% endif %};</script>
 <script>SOURCENET.process_found_synonyms = {% if process_found_synonyms %}true{% else %}false{% endif %};</script>
 {% if article_text_type == "text" and article_text_render_type == "raw" %}
@@ -64,7 +64,7 @@
             <ul>
                 {# if source, persist tag list for return to coding list page #}
                 <li>
-                    <a href="{% url 'sourcenet_datasets-dataset_mention_coding_list' %}{% if source %}?tags_in_list={{ tags_in_list }}{% endif %}">
+                    <a href="{% url 'context_datasets-dataset_mention_coding_list' %}{% if source %}?tags_in_list={{ tags_in_list }}{% endif %}">
                         {% if source %}Return to {% endif %}DataSetCitation mention coding List
                     </a>
                 </li>
@@ -218,7 +218,7 @@
                 {% with data_set_instance=data_set_citation.data_set %}
                 
                     <!-- ! include render data set -->
-                    {% include "sourcenet_datasets/data_sets/render_data_set.html" %}
+                    {% include "context_datasets/data_sets/render_data_set.html" %}
                     
                 {% endwith %}
 

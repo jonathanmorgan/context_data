@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('taggit', '0002_auto_20150616_2121'),
-        ('sourcenet_datasets', '0002_datasetcitation_notes'),
+        ('context_datasets', '0002_datasetcitation_notes'),
     ]
 
     operations = [

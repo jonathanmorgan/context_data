@@ -7,7 +7,7 @@ import django.utils.timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('sourcenet_datasets', '0003_datasetcitation_tags'),
+        ('context_datasets', '0003_datasetcitation_tags'),
     ]
 
     operations = [

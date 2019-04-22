@@ -7,13 +7,13 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('sourcenet_datasets', '0009_dataset_family_identifier'),
+        ('context_datasets', '0009_dataset_family_identifier'),
     ]
 
     operations = [
         migrations.AddField(
             model_name='dataset',
             name='parent_data_set',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='sourcenet_datasets.DataSet'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='context_datasets.DataSet'),
         ),
     ]

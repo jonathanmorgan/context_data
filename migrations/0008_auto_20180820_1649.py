@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('sourcenet', '0021_article_file_path'),
-        ('sourcenet_datasets', '0007_auto_20180808_0326'),
+        ('context_datasets', '0007_auto_20180808_0326'),
     ]
 
     operations = [
@@ -18,12 +18,12 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('citation_type', models.CharField(choices=[('mention', 'mention'), ('analysis', 'analysis')], default='analysis', max_length=255)),
                 ('article_data', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='sourcenet.Article_Data')),
-                ('data_set_citation', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='sourcenet_datasets.DataSetCitation')),
+                ('data_set_citation', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='context_datasets.DataSetCitation')),
             ],
         ),
         migrations.AddField(
             model_name='datasetmention',
             name='data_set_citation_data',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='sourcenet_datasets.DataSetCitationData'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='context_datasets.DataSetCitationData'),
         ),
     ]
