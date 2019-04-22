@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('sourcenet', '0021_article_file_path'),
+        ('context_text', '0021_article_file_path'),
         ('context_data', '0007_auto_20180808_0326'),
     ]
 
@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('citation_type', models.CharField(choices=[('mention', 'mention'), ('analysis', 'analysis')], default='analysis', max_length=255)),
-                ('article_data', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='sourcenet.Article_Data')),
+                ('article_data', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='context_text.Article_Data')),
                 ('data_set_citation', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='context_data.DataSetCitation')),
             ],
         ),

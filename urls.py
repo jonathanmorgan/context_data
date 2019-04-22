@@ -3,13 +3,13 @@ from __future__ import unicode_literals
 '''
 Copyright 2010-2016 Jonathan Morgan
 
-This file is part of http://github.com/jonathanmorgan/sourcenet_analysis.
+This file is part of http://github.com/jonathanmorgan/context_data.
 
-sourcenet_analysis is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+context_data is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-sourcenet_analysis is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+context_data is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public License along with http://github.com/jonathanmorgan/sourcenet_analysis. If not, see http://www.gnu.org/licenses/.
+You should have received a copy of the GNU Lesser General Public License along with http://github.com/jonathanmorgan/context_data. If not, see http://www.gnu.org/licenses/.
 '''
 
 # import djanfgo.conf.urls.defaults stuff.
@@ -27,9 +27,9 @@ import context_data.views
 # !tastypie API
 # import tastypie stuff, so we can make REST-ful API
 from tastypie.api import Api
-from sourcenet.tastypie_api.sourcenet_api import ArticleResource
+from context_text.tastypie_api.context_text_api import ArticleResource
 
-# initialize sourcenet API, v1
+# initialize context_text API, v1
 v1_api = Api( api_name='v1' )
 
 # register resources

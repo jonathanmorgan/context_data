@@ -11,7 +11,7 @@
                 label = "<new_name>"
                 verbose_name = "<new_name>"
 
-    Key among these is label which is going to change things.  Also, you don't need to have all of these.  If you just set label, the others will default to that value as well.
+    Key among these is name which is going to change things.  Also, you don't need to have all of these.  If you just set name, the others will default to that value as well.
 
 3. In __init__.py in the <new_name> sub-directory, put:
 

@@ -8,7 +8,7 @@ import taggit.managers
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('sourcenet', '0022_article_data_work_log'),
+        ('context_text', '0022_article_data_work_log'),
         ('taggit', '0003_taggeditem_add_unique_index'),
         ('context', '0004_auto_20190305_1858'),
         ('context_data', '0017_auto_20190327_1657'),
@@ -40,8 +40,8 @@ class Migration(migrations.Migration):
                 ('score', models.FloatField(blank=True, null=True)),
                 ('start_index', models.IntegerField(blank=True, null=True)),
                 ('occurrence_number', models.IntegerField(blank=True, null=True)),
-                ('article', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='sourcenet.Article')),
-                ('article_data', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='sourcenet.Article_Data')),
+                ('article', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='context_text.Article')),
+                ('article_data', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='context_text.Article_Data')),
             ],
             options={
                 'abstract': False,

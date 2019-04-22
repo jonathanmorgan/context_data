@@ -1,4 +1,4 @@
-{% extends "sourcenet/base.html" %}
+{% extends "context_text/base.html" %}
 {% load staticfiles %}
 
 {% block title %}DataSetCitation mentions coding list{% endblock %}
@@ -7,10 +7,10 @@
 <script src="https://code.jquery.com/jquery-latest.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.selection/1.0.1/jquery.selection.min.js"></script>
 <link rel="stylesheet" type="text/css" href="{% static "context_data/css/mention-coding/mention-coding.css" %}" />
-<script src="{% static "sourcenet/js/sourcenet.js" %}"></script>
-<script src="{% static "sourcenet/js/find-in-text.js" %}"></script>
+<script src="{% static "context_text/js/context_text.js" %}"></script>
+<script src="{% static "context_text/js/find-in-text.js" %}"></script>
 <script src="{% static "context_data/js/mention-coding/mention-coding.js" %}"></script>
-{% if existing_data_store_json %}<script>SOURCENET.data_store_json = '{{ existing_data_store_json }}';</script>{% endif %}
+{% if existing_data_store_json %}<script>CONTEXT_TEXT.data_store_json = '{{ existing_data_store_json }}';</script>{% endif %}
 {% endblock %}
 
 {% block content %}

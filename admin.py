@@ -57,7 +57,7 @@ class DataSetAdmin( admin.ModelAdmin ):
     #    dict of pairs of field names in the model in argument 1 (with no quotes
     #    around them) mapped to lookup channels used to service them (lookup
     #    channels are defined in settings.py, implenented in a separate module -
-    #    in this case, implemented in sourcenet.ajax-select-lookups.py
+    #    in this case, implemented in context_text.lookups.py
     form = make_ajax_form( DataSet, dict( parent_data_set = 'datasets' ) )
 
     fieldsets = [
@@ -99,7 +99,7 @@ class DataSetCitationAdmin( admin.ModelAdmin ):
     #    dict of pairs of field names in the model in argument 1 (with no quotes
     #    around them) mapped to lookup channels used to service them (lookup
     #    channels are defined in settings.py, implenented in a separate module -
-    #    in this case, implemented in sourcenet.ajax-select-lookups.py
+    #    in this case, implemented in context_text.lookups.py
     form = make_ajax_form( DataSetCitation, dict( article = 'article', data_set = 'datasets', article_data = 'article_data' ) )
 
     fieldsets = [
@@ -137,7 +137,7 @@ class DataReferenceAdmin( admin.ModelAdmin ):
     #    dict of pairs of field names in the model in argument 1 (with no quotes
     #    around them) mapped to lookup channels used to service them (lookup
     #    channels are defined in settings.py, implenented in a separate module -
-    #    in this case, implemented in sourcenet.ajax-select-lookups.py
+    #    in this case, implemented in context_text.lookups.py
     form = make_ajax_form( DataReference, dict( article = 'article', related_data_sets = 'datasets', data_set = 'datasets', article_data = 'article_data' ) )
 
     fieldsets = [

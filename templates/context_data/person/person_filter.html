@@ -1,4 +1,4 @@
-{% extends "sourcenet/base.html" %}
+{% extends "context_text/base.html" %}
 
 {% block title %}Filter Person records{% endblock %}
 
@@ -7,7 +7,7 @@
     <h1>Filter Person records</h1>
     
     {# include standard status message output #}
-    {% include "sourcenet/shared/output_status_message.html" %}
+    {% include "context_text/shared/output_status_message.html" %}
     
     <table>
         <tr>
@@ -20,7 +20,7 @@
             {# always include CSRF token #}
             {% csrf_token %}
 
-            {% include "sourcenet/shared/form-filter_person.html" %}
+            {% include "context_text/shared/form-filter_person.html" %}
                 
             <p>
                 <input type="submit" />
@@ -61,7 +61,7 @@
                     <tr>
 
                         {# output standard person detail <td>s #}
-                        {% include "sourcenet/shared/td-person_detail.html" %}
+                        {% include "context_text/shared/td-person_detail.html" %}
 
                     </tr>
                 {% empty %}
@@ -70,7 +70,7 @@
             </table>
 
             <p>
-                <form action="{% url 'sourcenet-person_merge' %}" method="post">
+                <form action="{% url 'context_text-person_merge' %}" method="post">
                     {# always include CSRF token #}
                     {% csrf_token %}
                     

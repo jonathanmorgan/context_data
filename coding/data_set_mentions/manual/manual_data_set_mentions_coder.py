@@ -51,18 +51,18 @@ from python_utilities.network.http_helper import Http_Helper
 from python_utilities.sequences.sequence_helper import SequenceHelper
 from python_utilities.strings.string_helper import StringHelper
 
-# sourcenet classes
+# context_text classes
 
 # shared
-from sourcenet.shared.sourcenet_base import SourcenetBase
+from context_text.shared.context_text_base import ContextTextBase
 
 # models
-from sourcenet.models import Article_Data
-from sourcenet.models import Article_Data_Notes
-from sourcenet.models import Article_Text
+from context_text.models import Article_Data
+from context_text.models import Article_Data_Notes
+from context_text.models import Article_Text
 
 # parent abstract class.
-from sourcenet.article_coding.article_coder import ArticleCoder
+from context_text.article_coding.article_coder import ArticleCoder
 
 # context_data classes
 from context_data.models import DataSetMention
@@ -99,16 +99,16 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
     
     # config application
     CONFIG_APPLICATION = "Manual_Data_Set_Mentions_Coding"
-    CONFIG_NAME_ARTICLE_TEXT_RENDER_TYPE = SourcenetBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_RENDER_TYPE
-    CONFIG_NAME_ARTICLE_TEXT_IS_PREFORMATTED = SourcenetBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_IS_PREFORMATTED
-    CONFIG_NAME_ARTICLE_TEXT_WRAP_IN_P = SourcenetBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_WRAP_IN_P
+    CONFIG_NAME_ARTICLE_TEXT_RENDER_TYPE = ContextTextBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_RENDER_TYPE
+    CONFIG_NAME_ARTICLE_TEXT_IS_PREFORMATTED = ContextTextBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_IS_PREFORMATTED
+    CONFIG_NAME_ARTICLE_TEXT_WRAP_IN_P = ContextTextBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_WRAP_IN_P
     CONFIG_NAME_MENTION_TEXT_READ_ONLY = "mention_text_read_only"
-    CONFIG_NAME_INCLUDE_FIND_IN_ARTICLE_TEXT = SourcenetBase.DJANGO_CONFIG_NAME_INCLUDE_FIND_IN_ARTICLE_TEXT  # "include_find_in_article_text"
-    CONFIG_NAME_DEFAULT_FIND_LOCATION = SourcenetBase.DJANGO_CONFIG_NAME_DEFAULT_FIND_LOCATION
-    CONFIG_NAME_IGNORE_WORD_LIST = SourcenetBase.DJANGO_CONFIG_NAME_IGNORE_WORD_LIST
-    CONFIG_NAME_HIGHLIGHT_WORD_LIST = SourcenetBase.DJANGO_CONFIG_NAME_HIGHLIGHT_WORD_LIST
-    CONFIG_NAME_DEFAULT_FIND_LOCATION = SourcenetBase.DJANGO_CONFIG_NAME_DEFAULT_FIND_LOCATION
-    CONFIG_NAME_BE_CASE_SENSITIVE = SourcenetBase.DJANGO_CONFIG_NAME_BE_CASE_SENSITIVE
+    CONFIG_NAME_INCLUDE_FIND_IN_ARTICLE_TEXT = ContextTextBase.DJANGO_CONFIG_NAME_INCLUDE_FIND_IN_ARTICLE_TEXT  # "include_find_in_article_text"
+    CONFIG_NAME_DEFAULT_FIND_LOCATION = ContextTextBase.DJANGO_CONFIG_NAME_DEFAULT_FIND_LOCATION
+    CONFIG_NAME_IGNORE_WORD_LIST = ContextTextBase.DJANGO_CONFIG_NAME_IGNORE_WORD_LIST
+    CONFIG_NAME_HIGHLIGHT_WORD_LIST = ContextTextBase.DJANGO_CONFIG_NAME_HIGHLIGHT_WORD_LIST
+    CONFIG_NAME_DEFAULT_FIND_LOCATION = ContextTextBase.DJANGO_CONFIG_NAME_DEFAULT_FIND_LOCATION
+    CONFIG_NAME_BE_CASE_SENSITIVE = ContextTextBase.DJANGO_CONFIG_NAME_BE_CASE_SENSITIVE
     CONFIG_NAME_PROCESS_FOUND_SYNONYMS = ContextDataBase.DJANGO_CONFIG_NAME_PROCESS_FOUND_SYNONYMS
     CONFIG_NAME_SYNCHRONIZE_DATA_SET_FAMILIES = "synchronize_data_set_families"
 

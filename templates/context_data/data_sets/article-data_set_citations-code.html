@@ -1,4 +1,4 @@
-{% extends "sourcenet/base.html" %}
+{% extends "context_text/base.html" %}
 {% load staticfiles %}
 
 {% block title %}{{page_title}}{% endblock %}
@@ -7,24 +7,24 @@
 <script src="https://code.jquery.com/jquery-latest.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.selection/1.0.1/jquery.selection.min.js"></script>
 <link rel="stylesheet" type="text/css" href="{% static "context_data/css/citation-coding/citation-coding.css" %}" />
-<script src="{% static "sourcenet/js/sourcenet.js" %}"></script>
-<script src="{% static "sourcenet/js/find-in-text.js" %}"></script>
+<script src="{% static "context_text/js/context_text.js" %}"></script>
+<script src="{% static "context_text/js/find-in-text.js" %}"></script>
 <script src="{% static "context_data/js/citation-coding/citation-coding.js" %}"></script>
-<script>SOURCENET.text_finder.be_case_sensitive = {% if be_case_sensitive %}true{% else %}false{% endif %};</script>
-<script>SOURCENET.process_found_synonyms = {% if process_found_synonyms %}true{% else %}false{% endif %};</script>
+<script>CONTEXT_TEXT.text_finder.be_case_sensitive = {% if be_case_sensitive %}true{% else %}false{% endif %};</script>
+<script>CONTEXT_TEXT.process_found_synonyms = {% if process_found_synonyms %}true{% else %}false{% endif %};</script>
 {% if article_text_type == "text" and article_text_render_type == "raw" %}
 <script>
-    SOURCENET.article_text_ignore_p_tags = true;
-    SOURCENET.text_finder.ignore_wrapper_element = true;
+    CONTEXT_TEXT.article_text_ignore_p_tags = true;
+    CONTEXT_TEXT.text_finder.ignore_wrapper_element = true;
 </script>
 {% else %}
 <script>
-    SOURCENET.article_text_ignore_p_tags = false;
-    SOURCENET.text_finder.ignore_wrapper_element = false;
+    CONTEXT_TEXT.article_text_ignore_p_tags = false;
+    CONTEXT_TEXT.text_finder.ignore_wrapper_element = false;
 </script>
 {% endif %}
-{% if default_find_location != "" %}<script>SOURCENET.text_finder.default_find_location = "{{ default_find_location }}";</script>{% endif %}
-{% if existing_data_store_json %}<script>SOURCENET.data_store_json = '{{ existing_data_store_json }}';</script>{% endif %}
+{% if default_find_location != "" %}<script>CONTEXT_TEXT.text_finder.default_find_location = "{{ default_find_location }}";</script>{% endif %}
+{% if existing_data_store_json %}<script>CONTEXT_TEXT.data_store_json = '{{ existing_data_store_json }}';</script>{% endif %}
 
 {# got ignore word list? #}
 {% if ignore_word_list %}
@@ -33,7 +33,7 @@
     {% for ignore_word in ignore_word_list %}
     ignore_word_list.push( "{{ ignore_word }}" );
     {% endfor %}
-    SOURCENET.FindInText.add_to_ignore_list( ignore_word_list );
+    CONTEXT_TEXT.FindInText.add_to_ignore_list( ignore_word_list );
 </script>
 {% endif %}
 
@@ -44,7 +44,7 @@
     {% for highlight_word in highlight_word_list %}
     highlight_word_list.push( "{{ highlight_word }}" );
     {% endfor %}
-    SOURCENET.data_set_string_list = SOURCENET.data_set_string_list.concat( highlight_word_list );
+    CONTEXT_TEXT.data_set_string_list = CONTEXT_TEXT.data_set_string_list.concat( highlight_word_list );
 </script>
 {% endif %}
 
@@ -57,7 +57,7 @@
         
         <!-- ! include render status messages -->
         {# if status message(s), output? #}
-        {% include "sourcenet/shared/render_page_status_message_list.html" %}
+        {% include "context_text/shared/render_page_status_message_list.html" %}
 
         <!--
         <div id="return-to-source" class="returnToSource">
@@ -114,7 +114,7 @@
         
             <hr />
             
-            {% include "sourcenet/articles/render_article.html" %}            
+            {% include "context_text/articles/render_article.html" %}            
 
             <hr />
             
@@ -130,7 +130,7 @@
             {# Include find in article text? #}
             {% if include_find_in_article_text %}
     
-                {% include "sourcenet/articles/render_find_in_article_text.html" %}  
+                {% include "context_text/articles/render_find_in_article_text.html" %}  
                 
             {% endif %}
     
@@ -148,10 +148,10 @@
                 </p>
                 {% if include_fix_mention_text %}
                     <p class="inputContainer" id="fix-mention-text-link" name="fix-mention-text-link">
-                        <a href="#" onclick="SOURCENET.fix_mention_text(); return false;">Fix Mention Text</a>
+                        <a href="#" onclick="CONTEXT_TEXT.fix_mention_text(); return false;">Fix Mention Text</a>
                     </p>
                     <p class="inputContainer hidden" id="fix-mention-text" name="fix-mention-text">
-                        <a href="#" onclick="SOURCENET.cancel_fix_mention_text(); return false;"><-- Cancel Fix Mention Text</a>
+                        <a href="#" onclick="CONTEXT_TEXT.cancel_fix_mention_text(); return false;"><-- Cancel Fix Mention Text</a>
                         <br />
                         <input type="button" id="fix-mention-text" name="fix-mention-text" value="==> Fix Mention Text" />: <textarea id="{{ manual_coder.INPUT_ID_FIXED_MENTION_TEXT }}" name="{{ manual_coder.INPUT_ID_FIXED_MENTION_TEXT }}"></textarea>
                     </p>
@@ -160,7 +160,7 @@
                 {% endif %}
                 
                 <p class="inputContainer" id="select-mention-type">
-                    &nbsp;&nbsp;Mention Type: <select name="{{ manual_coder.INPUT_ID_MENTION_TYPE }}" id="{{ manual_coder.INPUT_ID_MENTION_TYPE }}" onchange="SOURCENET.process_selected_mention_type()">
+                    &nbsp;&nbsp;Mention Type: <select name="{{ manual_coder.INPUT_ID_MENTION_TYPE }}" id="{{ manual_coder.INPUT_ID_MENTION_TYPE }}" onchange="CONTEXT_TEXT.process_selected_mention_type()">
                         <option value="" selected="selected" disabled="disabled">Choose Mention Type</option>
                         <option value="{{ manual_coder.MENTION_TYPE_CITED }}">{{ manual_coder.MENTION_TYPE_CITED }}</option>
                         <option value="{{ manual_coder.MENTION_TYPE_ANALYZED }}">{{ manual_coder.MENTION_TYPE_ANALYZED }}</option>
@@ -168,7 +168,7 @@
                 </p>
 
                 <p class="inputContainer" id="process-mention-container">
-                    <input type="button" id="process-mention" name="process-mention" value="Process Mention" onclick="SOURCENET.process_mention_coding()" />&nbsp;&nbsp;|&nbsp;&nbsp;<input type="button" id="clear-mention-coding" name="clear-mention-coding" value="Clear Mention Coding" onclick="SOURCENET.clear_coding_form( 'Mention Coding Cleared' )" />
+                    <input type="button" id="process-mention" name="process-mention" value="Process Mention" onclick="CONTEXT_TEXT.process_mention_coding()" />&nbsp;&nbsp;|&nbsp;&nbsp;<input type="button" id="clear-mention-coding" name="clear-mention-coding" value="Clear Mention Coding" onclick="CONTEXT_TEXT.clear_coding_form( 'Mention Coding Cleared' )" />
                 </p>
             </div>
             <hr class="fieldSeparator" />
@@ -178,7 +178,7 @@
             <h3>DataSetCitation List</h3>
             <div id="mention-list" class="mentionList">
                 <table id="mention-list-table" class="mentionListTable"></table>
-                <form method="post" name="submit-article-coding" id="submit-article-coding" class="submitArticleCoding" onsubmit="do_submit = SOURCENET.render_coding_form_inputs( this ); return do_submit;">
+                <form method="post" name="submit-article-coding" id="submit-article-coding" class="submitArticleCoding" onsubmit="do_submit = CONTEXT_TEXT.render_coding_form_inputs( this ); return do_submit;">
                     {# always include CSRF token #}
                     {% csrf_token %}
                     {# output coding_submit_form if present #}
@@ -207,7 +207,7 @@
             <!--
                 <script>
                     // initialized in mention-coding.js
-                    //SOURCENET.data_set_string_list = [];
+                    //CONTEXT_TEXT.data_set_string_list = [];
                 </script>
             -->
 

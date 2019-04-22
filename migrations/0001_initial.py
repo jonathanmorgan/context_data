@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('sourcenet', '0019_auto_20171216_0518'),
+        ('context_text', '0019_auto_20171216_0518'),
         ('taggit', '0002_auto_20150616_2121'),
     ]
 
@@ -34,8 +34,8 @@ class Migration(migrations.Migration):
                 ('capture_method', models.CharField(blank=True, max_length=255, null=True)),
                 ('create_date', models.DateTimeField(auto_now_add=True)),
                 ('last_modified', models.DateTimeField(auto_now=True)),
-                ('article', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sourcenet.Article')),
-                ('article_data', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='sourcenet.Article_Data')),
+                ('article', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='context_text.Article')),
+                ('article_data', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='context_text.Article_Data')),
                 ('data_set', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='context_data.DataSet')),
             ],
         ),
@@ -71,7 +71,7 @@ class Migration(migrations.Migration):
                 ('create_date', models.DateTimeField(auto_now_add=True)),
                 ('last_modified', models.DateTimeField(auto_now=True)),
                 ('mention_type', models.CharField(choices=[('mention', 'mention'), ('analysis', 'analysis')], default='mention', max_length=255)),
-                ('article_data', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='sourcenet.Article_Data')),
+                ('article_data', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='context_text.Article_Data')),
                 ('data_set_citation', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='context_data.DataSetCitation')),
             ],
             options={

@@ -9,7 +9,7 @@ import taggit.managers
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('sourcenet', '0022_article_data_work_log'),
+        ('context_text', '0022_article_data_work_log'),
         ('taggit', '0003_taggeditem_add_unique_index'),
         ('context', '0004_auto_20190305_1858'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
@@ -42,8 +42,8 @@ class Migration(migrations.Migration):
                 ('score', models.FloatField(blank=True, null=True)),
                 ('start_index', models.IntegerField(blank=True, null=True)),
                 ('occurrence_number', models.IntegerField(blank=True, null=True)),
-                ('article', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='sourcenet.Article')),
-                ('article_data', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='sourcenet.Article_Data')),
+                ('article', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='context_text.Article')),
+                ('article_data', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='context_text.Article_Data')),
             ],
             options={
                 'abstract': False,
@@ -64,8 +64,8 @@ class Migration(migrations.Migration):
                 ('key_terms', models.TextField(blank=True, null=True)),
                 ('context_text', models.TextField(blank=True, null=True)),
                 ('coder_type', models.CharField(blank=True, max_length=255, null=True)),
-                ('article', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sourcenet.Article')),
-                ('article_data', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='sourcenet.Article_Data')),
+                ('article', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='context_text.Article')),
+                ('article_data', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='context_text.Article_Data')),
                 ('coder', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
                 ('data_set', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='context_data.DataSet')),
                 ('tags', taggit.managers.TaggableManager(blank=True, help_text='A comma-separated list of tags.', through='taggit.TaggedItem', to='taggit.Tag', verbose_name='Tags')),

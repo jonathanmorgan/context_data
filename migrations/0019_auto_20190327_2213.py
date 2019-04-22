@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('taggit', '0003_taggeditem_add_unique_index'),
-        ('sourcenet', '0022_article_data_work_log'),
+        ('context_text', '0022_article_data_work_log'),
         ('context', '0004_auto_20190305_1858'),
         ('context_data', '0018_auto_20190327_1819'),
     ]

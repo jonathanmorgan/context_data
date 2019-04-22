@@ -13,7 +13,7 @@ You should have received a copy of the GNU Lesser General Public License along w
 
 Configuration properties for it are stored in django's admins, in the
    django_config application.  The properties for the article_code view are stored in Application
-   "sourcenet-UI-article-code":
+   "context_text-UI-article-code":
    - include_fix_person_name - boolean flag, if true outputs additional field to correct name text from article.
 '''
 
@@ -63,13 +63,13 @@ from context_data.forms import CodingSubmitForm
 from context_data.forms import DataSetMentionsCodingListForm
 from context_data.forms import DataSetCitationLookupForm
 
-# sourcenet imports
-from sourcenet.forms import ArticleCodingForm
-from sourcenet.forms import ArticleLookupForm
-from sourcenet.models import Article
-from sourcenet.models import Article_Data
-from sourcenet.shared.sourcenet_base import SourcenetBase
-import sourcenet.views
+# context_text imports
+from context_text.forms import ArticleCodingForm
+from context_text.forms import ArticleLookupForm
+from context_text.models import Article
+from context_text.models import Article_Data
+from context_text.shared.context_text_base import ContextTextBase
+import context_text.views
 
 # python_utilities imports
 from python_utilities.django_utils.django_view_helper import DjangoViewHelper
@@ -121,7 +121,7 @@ debugging code, shared across all models.
 '''
 
 DEBUG = False
-LOGGER_NAME = "sourcenet.views"
+LOGGER_NAME = "context_text.views"
 
 def output_debug( message_IN, method_IN = "", indent_with_IN = "", logger_name_IN = "" ):
     
@@ -217,7 +217,7 @@ def article_code_citations( request_IN ):
     coding_submit_form = None
 
     # set logger_name
-    logger_name = "sourcenet.views." + me
+    logger_name = "context_text.views." + me
     
     # ! ---- initialize response dictionary
 
@@ -236,30 +236,30 @@ def article_code_citations( request_IN ):
     config_application = ManualDataSetCitationsCoder.CONFIG_APPLICATION
     
     # 'article_text_render_type'
-    response_prop_name = SourcenetBase.VIEW_RESPONSE_KEY_ARTICLE_TEXT_RENDER_TYPE
-    config_prop_name = SourcenetBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_RENDER_TYPE
-    config_prop_default = SourcenetBase.DJANGO_CONFIG_ARTICLE_TEXT_RENDER_TYPE_DEFAULT  # one of "table", "raw", "custom", "pdf"
+    response_prop_name = ContextTextBase.VIEW_RESPONSE_KEY_ARTICLE_TEXT_RENDER_TYPE
+    config_prop_name = ContextTextBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_RENDER_TYPE
+    config_prop_default = ContextTextBase.DJANGO_CONFIG_ARTICLE_TEXT_RENDER_TYPE_DEFAULT  # one of "table", "raw", "custom", "pdf"
     config_prop_value = Config_Property.get_property_value( config_application, config_prop_name, default_IN = config_prop_default )
     response_dictionary[ response_prop_name ] = config_prop_value
     #page_status_message_list.append( "initial {}.{}: {}".format( config_application, config_prop_name, config_prop_value ) )
 
     # 'article_text_is_preformatted'
-    response_prop_name = SourcenetBase.VIEW_RESPONSE_KEY_ARTICLE_TEXT_IS_PREFORMATTED
-    config_prop_name = SourcenetBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_IS_PREFORMATTED
+    response_prop_name = ContextTextBase.VIEW_RESPONSE_KEY_ARTICLE_TEXT_IS_PREFORMATTED
+    config_prop_name = ContextTextBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_IS_PREFORMATTED
     config_prop_default = False
     config_prop_value = Config_Property.get_property_boolean_value( config_application, config_prop_name, default_IN = config_prop_default )
     response_dictionary[ response_prop_name ] = config_prop_value
 
     # 'article_text_wrap_in_p'
-    response_prop_name = SourcenetBase.VIEW_RESPONSE_KEY_ARTICLE_TEXT_WRAP_IN_P
-    config_prop_name = SourcenetBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_WRAP_IN_P
+    response_prop_name = ContextTextBase.VIEW_RESPONSE_KEY_ARTICLE_TEXT_WRAP_IN_P
+    config_prop_name = ContextTextBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_WRAP_IN_P
     config_prop_default = True
     config_prop_value = Config_Property.get_property_boolean_value( config_application, config_prop_name, default_IN = config_prop_default )
     response_dictionary[ response_prop_name ] = config_prop_value
 
     # 'do_output_table_html'
-    response_prop_name = SourcenetBase.VIEW_RESPONSE_KEY_DO_OUTPUT_TABLE_HTML
-    config_prop_name = SourcenetBase.DJANGO_CONFIG_PROP_DO_OUTPUT_TABLE_HTML
+    response_prop_name = ContextTextBase.VIEW_RESPONSE_KEY_DO_OUTPUT_TABLE_HTML
+    config_prop_name = ContextTextBase.DJANGO_CONFIG_PROP_DO_OUTPUT_TABLE_HTML
     config_prop_default = False
     config_prop_value = Config_Property.get_property_boolean_value( config_application, config_prop_name, default_IN = config_prop_default )
     response_dictionary[ response_prop_name ] = config_prop_value
@@ -267,44 +267,44 @@ def article_code_citations( request_IN ):
     response_dictionary[ 'data_set_citation_qs' ] = None
     response_dictionary[ 'existing_data_store_json' ] = ""
     response_dictionary[ 'highlight_data_set_in_text' ] = False
-    response_dictionary[ SourcenetBase.VIEW_RESPONSE_KEY_PAGE_STATUS_MESSAGE_LIST ] = page_status_message_list
+    response_dictionary[ ContextTextBase.VIEW_RESPONSE_KEY_PAGE_STATUS_MESSAGE_LIST ] = page_status_message_list
 
     # ! -------- find in article text (FIT) config
     
     # 'include_find_in_article_text'
-    response_prop_name = SourcenetBase.VIEW_RESPONSE_KEY_INCLUDE_FIND_IN_ARTICLE_TEXT
-    config_prop_name = SourcenetBase.DJANGO_CONFIG_NAME_INCLUDE_FIND_IN_ARTICLE_TEXT
+    response_prop_name = ContextTextBase.VIEW_RESPONSE_KEY_INCLUDE_FIND_IN_ARTICLE_TEXT
+    config_prop_name = ContextTextBase.DJANGO_CONFIG_NAME_INCLUDE_FIND_IN_ARTICLE_TEXT
     config_prop_default = True
     config_prop_value = Config_Property.get_property_boolean_value( config_application, config_prop_name, default_IN = config_prop_default )
     response_dictionary[ response_prop_name ] = config_prop_value
     response_dictionary[ 'fit_extra_html' ] = '<input type="button" id="find-selection-in-article-text" name="find-selection-in-article-text" value="<== Selection" />'
 
     # 'default_find_location'
-    response_prop_name = SourcenetBase.VIEW_RESPONSE_KEY_DEFAULT_FIND_LOCATION
-    config_prop_name = SourcenetBase.DJANGO_CONFIG_NAME_DEFAULT_FIND_LOCATION
+    response_prop_name = ContextTextBase.VIEW_RESPONSE_KEY_DEFAULT_FIND_LOCATION
+    config_prop_name = ContextTextBase.DJANGO_CONFIG_NAME_DEFAULT_FIND_LOCATION
     config_prop_default = "html"  # what are the values?
     config_prop_value = Config_Property.get_property_value( config_application, config_prop_name, default_IN = config_prop_default )
     response_dictionary[ response_prop_name ] = config_prop_value
 
     # 'ignore_word_list'
-    response_prop_name = SourcenetBase.VIEW_RESPONSE_KEY_IGNORE_WORD_LIST
-    config_prop_name = SourcenetBase.DJANGO_CONFIG_NAME_IGNORE_WORD_LIST
+    response_prop_name = ContextTextBase.VIEW_RESPONSE_KEY_IGNORE_WORD_LIST
+    config_prop_name = ContextTextBase.DJANGO_CONFIG_NAME_IGNORE_WORD_LIST
     config_prop_default = None
     config_prop_list_delimiter = ","
     config_prop_value = Config_Property.get_property_list_value( config_application, config_prop_name, default_IN = config_prop_default, delimiter_IN = config_prop_list_delimiter )
     response_dictionary[ response_prop_name ] = config_prop_value
 
     # 'highlight_word_list'
-    response_prop_name = SourcenetBase.VIEW_RESPONSE_KEY_HIGHLIGHT_WORD_LIST
-    config_prop_name = SourcenetBase.DJANGO_CONFIG_NAME_HIGHLIGHT_WORD_LIST
+    response_prop_name = ContextTextBase.VIEW_RESPONSE_KEY_HIGHLIGHT_WORD_LIST
+    config_prop_name = ContextTextBase.DJANGO_CONFIG_NAME_HIGHLIGHT_WORD_LIST
     config_prop_default = None
     config_prop_list_delimiter = ","
     config_prop_value = Config_Property.get_property_list_value( config_application, config_prop_name, default_IN = config_prop_default, delimiter_IN = config_prop_list_delimiter )
     response_dictionary[ response_prop_name ] = config_prop_value
 
     # 'be_case_sensitive'
-    response_prop_name = SourcenetBase.VIEW_RESPONSE_KEY_BE_CASE_SENSITIVE
-    config_prop_name = SourcenetBase.DJANGO_CONFIG_NAME_BE_CASE_SENSITIVE
+    response_prop_name = ContextTextBase.VIEW_RESPONSE_KEY_BE_CASE_SENSITIVE
+    config_prop_name = ContextTextBase.DJANGO_CONFIG_NAME_BE_CASE_SENSITIVE
     config_prop_default = False
     config_prop_value = Config_Property.get_property_boolean_value( config_application, config_prop_name, default_IN = config_prop_default )
     response_dictionary[ response_prop_name ] = config_prop_value
@@ -407,7 +407,7 @@ def article_code_citations( request_IN ):
             # ! ---- render Article body
             # retrieve article specified by the input parameter, then create
             #   HTML output of article plus Article_Text.
-            status_message = sourcenet.views.render_article_to_response(
+            status_message = context_text.views.render_article_to_response(
                 article_id,
                 response_dictionary,
                 config_application_IN = config_application
@@ -418,7 +418,7 @@ def article_code_citations( request_IN ):
             
                 # ERROR - not sure what to do here.  Error should have been
                 #     stored in page_status_message_list.  Output debug.
-                debug_message = "ERROR - status from call to sourcenet.views.render_article_to_response(): {}".format( status_message )
+                debug_message = "ERROR - status from call to context_text.views.render_article_to_response(): {}".format( status_message )
                 output_debug( debug_message, me, indent_with_IN = "====> ", logger_name_IN = logger_name )
 
             #-- END check to see if status message. --#
@@ -576,7 +576,7 @@ def dataset_code_mentions( request_IN ):
     # Basic initialization:
     
     # set logger_name
-    logger_name = "sourcenet.views." + me
+    logger_name = "context_text.views." + me
     
     # see if we are synchronizing information across data set families.
     synchronize_data_set_families = Config_Property.get_property_boolean_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_SYNCHRONIZE_DATA_SET_FAMILIES, default_IN = False )
@@ -598,7 +598,7 @@ def dataset_code_mentions( request_IN ):
     response_dictionary[ 'base_post_login_redirect' ] = reverse( dataset_code_mentions )
     response_dictionary[ 'existing_data_store_json' ] = ""
     response_dictionary[ 'highlight_data_set_in_text' ] = True
-    response_dictionary[ SourcenetBase.VIEW_RESPONSE_KEY_PAGE_STATUS_MESSAGE_LIST ] = page_status_message_list
+    response_dictionary[ ContextTextBase.VIEW_RESPONSE_KEY_PAGE_STATUS_MESSAGE_LIST ] = page_status_message_list
 
     # find in article text (fit)
     response_dictionary[ 'include_find_in_article_text' ] = Config_Property.get_property_boolean_value( ManualDataSetMentionsCoder.CONFIG_APPLICATION, ManualDataSetMentionsCoder.CONFIG_NAME_INCLUDE_FIND_IN_ARTICLE_TEXT, default_IN = True )
@@ -997,7 +997,7 @@ def dataset_code_mentions( request_IN ):
 
             # retrieve article specified by the input parameter, then
             #   create HTML output of article plus Article_Text.
-            status_message = sourcenet.views.render_article_to_response(
+            status_message = context_text.views.render_article_to_response(
                 article_id,
                 response_dictionary,
                 config_application_IN = ManualDataSetMentionsCoder.CONFIG_APPLICATION
@@ -1008,7 +1008,7 @@ def dataset_code_mentions( request_IN ):
             
                 # ERROR - not sure what to do here.  Error should have been
                 #     stored in page_status_message_list.  Output debug.
-                debug_message = "ERROR - status from call to sourcenet.views.render_article_to_response(): {}".format( status_message )
+                debug_message = "ERROR - status from call to context_text.views.render_article_to_response(): {}".format( status_message )
                 output_debug( debug_message, me, indent_with_IN = "====> ", logger_name_IN = logger_name )
 
             #-- END check to see if status message. --#

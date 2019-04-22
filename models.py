@@ -4,13 +4,13 @@ from __future__ import division
 '''
 Copyright 2018 Jonathan Morgan
 
-This file is part of http://github.com/jonathanmorgan/sourcenet_dataset.
+This file is part of http://github.com/jonathanmorgan/context_dataset.
 
-sourcenet_dataset is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+context_dataset is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-sourcenet_dataset is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+context_dataset is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public License along with http://github.com/jonathanmorgan/sourcenet_dataset. If not, see http://www.gnu.org/licenses/.
+You should have received a copy of the GNU Lesser General Public License along with http://github.com/jonathanmorgan/context_dataset. If not, see http://www.gnu.org/licenses/.
 '''
 
 #===============================================================================
@@ -37,11 +37,11 @@ from python_utilities.strings.string_helper import StringHelper
 # context imports
 from context.models import Work_Log
 
-# sourcenet imports
-from sourcenet.models import Article
-from sourcenet.models import Article_Data
-from sourcenet.models import Abstract_Selected_Text
-from sourcenet.models import AbstractSelectedArticleText
+# context_text imports
+from context_text.models import Article
+from context_text.models import Article_Data
+from context_text.models import Abstract_Selected_Text
+from context_text.models import AbstractSelectedArticleText
 
 
 #===============================================================================
@@ -62,7 +62,7 @@ class AbstractScoredTeamTextData( AbstractSelectedArticleText ):
     # model fields and meta
     #---------------------------------------------------------------------------
 
-    # inherits from sourcenet.models.AbstractSelectedText:
+    # inherits from context_text.models.AbstractSelectedText:
     # basics - value, text before and after the value, length and index of value.
     #value = models.TextField( blank = True, null = True )
     #value_in_context = models.TextField( blank = True, null = True )
@@ -997,7 +997,7 @@ class DataReferenceMention( AbstractDataMention ):
     # inheritance
     #----------------------------------------------------------------------------
 
-    # we inherit from sourcenet.models.AbstractSelectedText:
+    # we inherit from context_text.models.AbstractSelectedText:
     # basics - value, text before and after the value, length and index of value.
     #value = models.TextField( blank = True, null = True )
     #value_in_context = models.TextField( blank = True, null = True )
@@ -1051,7 +1051,7 @@ class DataReferenceMention( AbstractDataMention ):
     
     # ==> need some way to pinpoint location
     
-    # in addition to inheritance from sourcenet.models.AbstractSelectedText:
+    # in addition to inheritance from context_text.models.AbstractSelectedText:
     start_index = models.IntegerField( blank = True, null = True )
     occurrence_number = models.IntegerField( blank = True, null = True )
     
@@ -1081,7 +1081,7 @@ class DataReferenceContext( AbstractDataMention ):
     # inheritance
     #----------------------------------------------------------------------------
 
-    # we inherit from sourcenet.models.AbstractSelectedText:
+    # we inherit from context_text.models.AbstractSelectedText:
     # basics - value, text before and after the value, length and index of value.
     #value = models.TextField( blank = True, null = True )
     #value_in_context = models.TextField( blank = True, null = True )
@@ -1135,7 +1135,7 @@ class DataReferenceContext( AbstractDataMention ):
     
     # ==> need some way to pinpoint location
     
-    # in addition to inheritance from sourcenet.models.AbstractSelectedText:
+    # in addition to inheritance from context_text.models.AbstractSelectedText:
     start_index = models.IntegerField( blank = True, null = True )
     occurrence_number = models.IntegerField( blank = True, null = True )
     

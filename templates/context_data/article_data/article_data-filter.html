@@ -1,4 +1,4 @@
-{% extends "sourcenet/base.html" %}
+{% extends "context_text/base.html" %}
 
 {% block title %}Filter and process Article_Data{% endblock %}
 
@@ -7,7 +7,7 @@
     <h1>Filter and process Article_Data</h1>
     
     {# got an output_string? #}
-    {% include "sourcenet/shared/output_status_message.html" %}
+    {% include "context_text/shared/output_status_message.html" %}
     
     <div id="article_data_form" name="article_data_form">
         
@@ -84,7 +84,7 @@
                             No tags!
                             {% endif %}
                         </td>
-                        <td><a href="{% url 'sourcenet-article_view_article_data_with_text' %}?article_id={{ current_article_data.instance.article.id }}">{{ current_article_data.instance.article }}</a></td>
+                        <td><a href="{% url 'context_text-article_view_article_data_with_text' %}?article_id={{ current_article_data.instance.article.id }}">{{ current_article_data.instance.article }}</a></td>
                         <td>{{ current_article_data.instance.create_date }}</td>
                     </tr>
                 {% empty %}

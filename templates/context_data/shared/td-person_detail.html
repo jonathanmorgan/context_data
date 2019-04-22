@@ -35,7 +35,7 @@
     {% if current_person.article_id_set %}
         <ul>
             {% for article_id in current_person.article_id_set %}
-                <li><a href="{% url 'sourcenet-article_view' %}?article_id={{ article_id }}">{{ article_id }}</a></li>
+                <li><a href="{% url 'context_text-article_view' %}?article_id={{ article_id }}">{{ article_id }}</a></li>
             {% endfor %}
         </ul>
     {% else %}

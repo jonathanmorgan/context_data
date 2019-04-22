@@ -3,13 +3,13 @@ from __future__ import unicode_literals
 '''
 Copyright 2010-2015 Jonathan Morgan
 
-This file is part of http://github.com/jonathanmorgan/sourcenet.
+This file is part of http://github.com/jonathanmorgan/context_data.
 
-sourcenet is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+context_data is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-sourcenet is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+context_data is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public License along with http://github.com/jonathanmorgan/sourcenet. If not, see http://www.gnu.org/licenses/.
+You should have received a copy of the GNU Lesser General Public License along with http://github.com/jonathanmorgan/context_data. If not, see http://www.gnu.org/licenses/.
 '''
 
 '''
@@ -51,18 +51,18 @@ from python_utilities.network.http_helper import Http_Helper
 from python_utilities.sequences.sequence_helper import SequenceHelper
 from python_utilities.strings.string_helper import StringHelper
 
-# sourcenet classes
+# context_text classes
 
 # shared
-from sourcenet.shared.sourcenet_base import SourcenetBase
+from context_text.shared.context_text_base import ContextTextBase
 
 # models
-from sourcenet.models import Article_Data
-from sourcenet.models import Article_Data_Notes
-from sourcenet.models import Article_Text
+from context_text.models import Article_Data
+from context_text.models import Article_Data_Notes
+from context_text.models import Article_Text
 
 # parent abstract class.
-from sourcenet.article_coding.article_coder import ArticleCoder
+from context_text.article_coding.article_coder import ArticleCoder
 
 # context_data classes
 from context_data.models import DataSetMention
@@ -98,9 +98,9 @@ class ManualDataSetCitationsCoder( ArticleCoder ):
     
     # config application
     CONFIG_APPLICATION = "Manual_Data_Set_Citations_Coding"
-    CONFIG_NAME_ARTICLE_TEXT_RENDER_TYPE = SourcenetBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_RENDER_TYPE
-    CONFIG_NAME_ARTICLE_TEXT_IS_PREFORMATTED = SourcenetBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_IS_PREFORMATTED
-    CONFIG_NAME_ARTICLE_TEXT_WRAP_IN_P = SourcenetBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_WRAP_IN_P
+    CONFIG_NAME_ARTICLE_TEXT_RENDER_TYPE = ContextTextBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_RENDER_TYPE
+    CONFIG_NAME_ARTICLE_TEXT_IS_PREFORMATTED = ContextTextBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_IS_PREFORMATTED
+    CONFIG_NAME_ARTICLE_TEXT_WRAP_IN_P = ContextTextBase.DJANGO_CONFIG_PROP_ARTICLE_TEXT_WRAP_IN_P
     CONFIG_NAME_MENTION_TEXT_READ_ONLY = "mention_text_read_only"
     CONFIG_NAME_INCLUDE_FIND_IN_ARTICLE_TEXT = "include_find_in_article_text"
     CONFIG_NAME_DEFAULT_FIND_LOCATION = "default_find_location"

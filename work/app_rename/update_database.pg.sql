@@ -4,7 +4,7 @@ UPDATE django_migrations SET app='context_data' WHERE app='sourcenet_datasets';
 /*
 -- Get the index names of all the indexes for tables in this application.
 --     (and get each twice for ease of making ALTER INDEX statements)
-SELECT index_name, index_name
+SELECT indexname, indexname
 FROM pg_indexes
 WHERE tablename LIKE 'sourcenet_datasets_%';
 */

@@ -3,23 +3,23 @@ from __future__ import unicode_literals
 '''
 Copyright 2010-2016 Jonathan Morgan
 
-This file is part of http://github.com/jonathanmorgan/sourcenet.
+This file is part of http://github.com/jonathanmorgan/context_data.
 
-sourcenet is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+context_data is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-sourcenet is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+context_data is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public License along with http://github.com/jonathanmorgan/sourcenet. If not, see http://www.gnu.org/licenses/.
+You should have received a copy of the GNU Lesser General Public License along with http://github.com/jonathanmorgan/context_data. If not, see http://www.gnu.org/licenses/.
 '''
 
 '''
-How to add a value to one of these sourcenet forms and then get that value
+How to add a value to one of these context_data forms and then get that value
 properly passed through to all the things that might use it:
 
 - 1) If your form input will have a set of values from which the user will
     choose, figure out what those values will be and make variables to hold the
     specific values and to hold a dictionary that maps values to display names
-    in the appropriate class in sourcenet.  For example:
+    in the appropriate class in context_data.  For example:
     - add parameters related to network output to the class NetworkOutput in
         file /export/network_output.py (though if those parameters will also be
         used by NetworkDataOutput, you should declare them there, then just
@@ -77,7 +77,7 @@ properly passed through to all the things that might use it:
 - 5) Into what function or method do I then update processing to include the
     new field?:
     - For network output, method that creates QuerySets from form parameters is
-        create_query_set(), in sourcenet/export/network_output.py,
+        create_query_set(), in context_data/export/network_output.py,
         NetworkOutput.create_query_set().  This method is called by both
         create_person_query_set() and create_network_query_set().  If you add
         a parameter to the article select and the person select, make sure

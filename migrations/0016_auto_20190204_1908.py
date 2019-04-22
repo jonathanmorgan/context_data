@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('taggit', '0002_auto_20150616_2121'),
         ('context', '0002_work_log_worker'),
-        ('sourcenet', '0022_article_data_work_log'),
+        ('context_text', '0022_article_data_work_log'),
         ('context_data', '0015_auto_20190203_1723'),
     ]
 
@@ -38,8 +38,8 @@ class Migration(migrations.Migration):
                 ('team_name', models.CharField(blank=True, max_length=255, null=True)),
                 ('mention_type', models.CharField(choices=[('mention', 'mention'), ('analysis', 'analysis')], default='mention', max_length=255)),
                 ('score', models.FloatField(blank=True, null=True)),
-                ('article', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sourcenet.Article')),
-                ('article_data', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='sourcenet.Article_Data')),
+                ('article', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='context_text.Article')),
+                ('article_data', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='context_text.Article_Data')),
                 ('data_set_citation', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='context_data.DataSetCitation')),
                 ('data_set_citation_data', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='context_data.DataSetCitationData')),
                 ('tags', taggit.managers.TaggableManager(blank=True, help_text='A comma-separated list of tags.', through='taggit.TaggedItem', to='taggit.Tag', verbose_name='Tags')),

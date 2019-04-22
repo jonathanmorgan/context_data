@@ -3,13 +3,13 @@ from __future__ import unicode_literals
 '''
 Copyright 2010-2016 Jonathan Morgan
 
-This file is part of http://github.com/jonathanmorgan/sourcenet.
+This file is part of http://github.com/jonathanmorgan/context_data.
 
-sourcenet is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+context_data is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-sourcenet is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+context_data is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public License along with http://github.com/jonathanmorgan/sourcenet. If not, see http://www.gnu.org/licenses/.
+You should have received a copy of the GNU Lesser General Public License along with http://github.com/jonathanmorgan/context. If not, see http://www.gnu.org/licenses/.
 '''
 
 #===============================================================================
@@ -30,18 +30,18 @@ from django.db.models import Q
 from python_utilities.parameters.param_container import ParamContainer
 from python_utilities.rate_limited.basic_rate_limited import BasicRateLimited
 
-# sourcenet
-from sourcenet.shared.sourcenet_base import SourcenetBase
+# context_text
+from context_text.shared.context_text_base import ContextTextBase
 
 #===============================================================================
 # classes (in alphabetical order by name)
 #===============================================================================
 
-class ContextDataBase( SourcenetBase ):
+class ContextDataBase( ContextTextBase ):
 
 
     #---------------------------------------------------------------------------
-    # ! ==> CONSTANTS-ish (building on SourcenetBase)
+    # ! ==> CONSTANTS-ish (building on ContextTextBase)
     #---------------------------------------------------------------------------
 
 
@@ -67,7 +67,7 @@ class ContextDataBase( SourcenetBase ):
         # call parent's __init__()
         super( ContextDataBase, self ).__init__()
 
-        # set logger name (for LoggingHelper parent class: (LoggingHelper --> BasicRateLimited --> SourcenetBase).
+        # set logger name (for LoggingHelper parent class: (LoggingHelper --> BasicRateLimited --> ContextTextBase).
         self.set_logger_name( "context_data.shared.context_data_base" )
         
     #-- END method __init__() --#

@@ -3,7 +3,7 @@
 
     {% if highlight_data_set_in_text %}
 <script>
-    SOURCENET.data_set_string_list.push( "{{ data_set_instance.name }}".trim() );
+    CONTEXT_TEXT.data_set_string_list.push( "{{ data_set_instance.name }}".trim() );
 </script>
     {% endif %}
 
@@ -13,7 +13,7 @@
         
         {% if highlight_data_set_in_text %}
         <script>
-            SOURCENET.data_set_string_list.push( "{{ data_set_instance.title }}".trim() );
+            CONTEXT_TEXT.data_set_string_list.push( "{{ data_set_instance.title }}".trim() );
         </script>
         {% endif %}
 
@@ -35,7 +35,7 @@
             for( var i = 0; i < temp_string_list.length; i ++ )
             {
                 temp_item = temp_string_list[ i ];
-                SOURCENET.data_set_string_list.push( temp_item.trim() );
+                CONTEXT_TEXT.data_set_string_list.push( temp_item.trim() );
             }
         </script>
     {% endif %}
@@ -43,11 +43,11 @@
         Identifiers:
         <ul>
             {% for data_set_identifier in data_set_instance.datasetidentifier_set.all %}
-            <li>{{ data_set_identifier.name }} - <a href="#" onclick="SOURCENET.send_text_to_find_input( $( this ).text() ); return false;">{{ data_set_identifier.identifier }}</a></li>
+            <li>{{ data_set_identifier.name }} - <a href="#" onclick="CONTEXT_TEXT.send_text_to_find_input( $( this ).text() ); return false;">{{ data_set_identifier.identifier }}</a></li>
             
                 {% if highlight_data_set_in_text %}
             <script>
-                SOURCENET.data_set_string_list.push( "{{ data_set_identifier.identifier }}".trim() );
+                CONTEXT_TEXT.data_set_string_list.push( "{{ data_set_identifier.identifier }}".trim() );
             </script>
                 {% endif %}
 
@@ -59,11 +59,11 @@
         Synonyms:
         <ul>
             {% for mention in data_set_mention_list %}
-            <li><a href="#" onclick="SOURCENET.send_text_to_find_input( $( this ).text() ); return false;">{{ mention }}</a></li>
+            <li><a href="#" onclick="CONTEXT_TEXT.send_text_to_find_input( $( this ).text() ); return false;">{{ mention }}</a></li>
 
                 {% if highlight_data_set_in_text %}
             <script>
-                SOURCENET.data_set_mention_list.push( "{{ mention }}".trim() );
+                CONTEXT_TEXT.data_set_mention_list.push( "{{ mention }}".trim() );
             </script>
                 {% endif %}
 
