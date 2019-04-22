@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
         ('taggit', '0002_auto_20150616_2121'),
         ('sourcenet', '0022_article_data_work_log'),
         ('context', '0001_initial'),
-        ('context_datasets', '0011_datasetcitationdata_work_log'),
+        ('context_data', '0011_datasetcitationdata_work_log'),
     ]
 
     operations = [
@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 ('last_modified', models.DateTimeField(auto_now=True)),
                 ('article', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sourcenet.Article')),
                 ('article_data', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='sourcenet.Article_Data')),
-                ('data_set', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='context_datasets.DataSet')),
+                ('data_set', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='context_data.DataSet')),
                 ('tags', taggit.managers.TaggableManager(blank=True, help_text='A comma-separated list of tags.', through='taggit.TaggedItem', to='taggit.Tag', verbose_name='Tags')),
                 ('work_log', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='context.Work_Log')),
             ],
@@ -59,7 +59,7 @@ class Migration(migrations.Migration):
                 ('article', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sourcenet.Article')),
                 ('article_data', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='sourcenet.Article_Data')),
                 ('tags', taggit.managers.TaggableManager(blank=True, help_text='A comma-separated list of tags.', through='taggit.TaggedItem', to='taggit.Tag', verbose_name='Tags')),
-                ('work_data_set_citation', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='context_datasets.WorkDataSetCitation')),
+                ('work_data_set_citation', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='context_data.WorkDataSetCitation')),
                 ('work_log', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='context.Work_Log')),
             ],
             options={

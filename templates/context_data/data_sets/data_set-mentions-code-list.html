@@ -6,10 +6,10 @@
 {% block inside-head %}
 <script src="https://code.jquery.com/jquery-latest.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.selection/1.0.1/jquery.selection.min.js"></script>
-<link rel="stylesheet" type="text/css" href="{% static "context_datasets/css/mention-coding/mention-coding.css" %}" />
+<link rel="stylesheet" type="text/css" href="{% static "context_data/css/mention-coding/mention-coding.css" %}" />
 <script src="{% static "sourcenet/js/sourcenet.js" %}"></script>
 <script src="{% static "sourcenet/js/find-in-text.js" %}"></script>
-<script src="{% static "context_datasets/js/mention-coding/mention-coding.js" %}"></script>
+<script src="{% static "context_data/js/mention-coding/mention-coding.js" %}"></script>
 {% if existing_data_store_json %}<script>SOURCENET.data_store_json = '{{ existing_data_store_json }}';</script>{% endif %}
 {% endblock %}
 
@@ -83,7 +83,7 @@
                             <td>{{ citation_details.citation_instance.data_set.title }}</td>
                             <td>{{ citation_details.citation_instance.data_set.family_identifier }}</td>
                             <td>{{ citation_details.citation_status }}</td>
-                            <td><a href="{% url 'context_datasets-dataset_code_mentions' %}?data_set_citation_id={{ citation_details.citation_instance.id }}&source=dataset-mentions-code-list&tags_in_list={{ tags_in_list }}">{% if citation_details.data_set_citation_data %}Edit Coding{% else %}Begin Coding{% endif %}</a></td>
+                            <td><a href="{% url 'context_data-dataset_code_mentions' %}?data_set_citation_id={{ citation_details.citation_instance.id }}&source=dataset-mentions-code-list&tags_in_list={{ tags_in_list }}">{% if citation_details.data_set_citation_data %}Edit Coding{% else %}Begin Coding{% endif %}</a></td>
                         </tr>
     
                     {% empty %}

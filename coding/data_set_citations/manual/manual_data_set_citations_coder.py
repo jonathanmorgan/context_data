@@ -64,9 +64,9 @@ from sourcenet.models import Article_Text
 # parent abstract class.
 from sourcenet.article_coding.article_coder import ArticleCoder
 
-# context_datasets classes
-from context_datasets.models import DataSetMention
-from context_datasets.models import DataSetCitationData
+# context_data classes
+from context_data.models import DataSetMention
+from context_data.models import DataSetCitationData
 
 
 #================================================================================
@@ -94,7 +94,7 @@ class ManualDataSetCitationsCoder( ArticleCoder ):
     # STATUS_ERROR_PREFIX = "Error: "
     
     # logging
-    LOGGER_NAME = "context_datasets.coding.data_set_citations.manual.manual_data_set_citations_coder"
+    LOGGER_NAME = "context_data.coding.data_set_citations.manual.manual_data_set_citations_coder"
     
     # config application
     CONFIG_APPLICATION = "Manual_Data_Set_Citations_Coding"

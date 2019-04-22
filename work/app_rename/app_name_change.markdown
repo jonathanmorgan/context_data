@@ -2,7 +2,7 @@
 
 1. Change the name of your application's directory from <old_name> to <new_name>.
 
-    - a. Ex: from "sourcenet_datasets" to "context_datasets".
+    - a. Ex: from "sourcenet_datasets" to "context_data".
 
 2. Update apps.py in the <old_name> sub-directory. In it put:
 
@@ -11,7 +11,7 @@
                 label = "<new_name>"
                 verbose_name = "<new_name>"
 
-    Key among these is label which is going to change things.
+    Key among these is label which is going to change things.  Also, you don't need to have all of these.  If you just set label, the others will default to that value as well.
 
 3. In __init__.py in the <new_name> sub-directory, put:
 
@@ -21,13 +21,14 @@
 5. In your base urls.py, update to reflect new folder name.
 6. Look for the old name in files and in file and directory names within your project space.
 
-    - Find files with matches: grep -r -i -l "<old_name>" .
+    - Find files with matches: `grep -r -i -l "<old_name>" .`
 
         - Examples
 
                 grep -r -i -l "sourcenet_datasets" .
                 grep -r -i -l --include "*.py" "sourcenet_datasets" . # just python files
                 grep -r -i -l --include "*.ipynb" "sourcenet_datasets" . # just jupyter notebook files
+
         - Once you find files that match, either look at line numbers using grep (b, below), or go into the file and deal with it manually.  To look at just a particular folder:
 
                 grep -r -i -l "sourcenet_datasets" <folder_path>
@@ -48,22 +49,34 @@
     
     - Imports:
     
-            grep -r -i -l "from <old_name>" . | xargs sed -i 's/from <old_name>/from <new_name>/g'
+            # pattern: grep -r -i -l "from <old_name>" . | xargs sed -i 's/from <old_name>/from <new_name>/g'
+            grep -r -i -l "from sourcenet_datasets" . | xargs sed -i 's/from sourcenet_datasets/from context_data/g'
     
     - Update paths in "templates" and "static" folders, if you name-spaced your files with the name of the application (as you should).
 
         - If application is in git, use "git mv", not just "mv".
-    
+        
+    - And, update the contents of templates (paths and labels from urls.py).
     - All of your migrations need to be edited in this step. In the dependencies list, you'll need to change '<old_name>' to '<new_name>'. In the ForeignKeys you'll need to also change '<old_name>.Something' to '<new_name>.Something' for every something in every migration file. Find these under pages/mitrations/nnnn_*.py
     
         - This wasn't so bad - only a few foreign keys and the dependency statement at the top.
+        - For the bold, try, in the migrations directory:
+        
+                # pattern - grep -r -i -l "<old_name>" . | xargs sed -i 's/<old_name>/<new_name>/g'
+                grep -r -i -l "sourcenet_datasets" . | xargs sed -i 's/sourcenet_datasets/context_data/g'
 
     - If you refer to foreign keys in other modules by "from pages.models import Something" and then use ForeignKey(Something), you'll need to update those, as well. If you use ForeignKey('pages.Something') then you need to change those references to ForeignKey('phpages.Something'). I would assume other like-references are the same.
+    - `ContextDataBase` - need to make sure to:
+    
+        - rename the class inside context_data_base.py to `ContextDataBase` from `SourcenetDataSetsBase`.
+        - then, find and fix all references to this class being renamed from `SourcenetDataSetsBase`.
+    
+                grep -r -i -l "SourcenetDataSetsBase" .
 
-8. For the next 4 steps (7, 8, 9 and 10), I built pagestophpages.sql and added it to the pages sub-directory. It's not a standard django thing, but each test copy and each production copy of the database was going to need the same set of steps.
-9. UPDATE django_content_type SET app_label='phpages' WHERE app_label='pages';
-10. UPDATE django_migrations SET app='phpages' WHERE app='pages';
-11. Now... in your database (my is PostgreSQL) there will be a bunch of tables that start with "pages". You need to list all of these. In PostgreSQL, in addition to tables, there will be sequences for each AutoField. For each table construct ALTER TABLE pages_something RENAME TO phpages_something; For each sequence ALTER SEQUENCE pages_something_id_seq RENAME TO phpages_something_id_seq; (Q - Indexes?)
+8. For the next 4 steps (7, 8, 9 and 10), I built update_database.pg.sql and added it to the `work/app_rename` sub-directory. It's not a standard django thing, but each test copy and each production copy of the database was going to need the same set of steps.
+9. `UPDATE django_content_type SET app_label='<new_name>' WHERE app_label='<old_name>';`
+10. `UPDATE django_migrations SET app='<new_name>' WHERE app='<old_name>';
+11. Now... in your database (mine is PostgreSQL) there will be a bunch of tables that start with "<old_name>". You need to list all of these. In PostgreSQL, in addition to tables, there will be sequences for each AutoField, and many related indexes.
 
     - Indexes (do first, since it depends on name of table)
 
@@ -76,6 +89,9 @@
                 WHERE tablename LIKE 'sourcenet_datasets_%';
 
         - Create ALTER TABLE…RENAME TO… using Sublime and multi-cursors.
+        
+            - Example: `ALTER INDEX pages_something_id_seq RENAME TO phpages_something_id_seq;`
+        
         - Notes:
 
             - https://stackoverflow.com/questions/2204058/list-columns-with-indexes-in-postgresql
@@ -92,6 +108,8 @@
                     AND table_type='BASE TABLE';
 
         - Create ALTER TABLE…RENAME TO… using Sublime and multi-cursors.
+        
+            - For each table construct `ALTER TABLE <old_name>_something RENAME TO <new_name>_something;`
     
     - Sequences
         
@@ -104,11 +122,16 @@
                 WHERE sequence_name LIKE 'sourcenet_datasets_%';
 
         - Create ALTER SEQUENCE…RENAME TO… using Sublime and multi-cursors.
+        
+            - For each sequence `ALTER SEQUENCE <old_name>_something_id_seq RENAME TO <new_name>_something_id_seq;`
+        
         - Notes:
 
             - https://stackoverflow.com/questions/38194364/how-to-get-list-of-sequence-names-in-postgres
 
 12. You should probably backup the database. You may need to try this a few times. Run your SQL script through your database shell. Note that all other changes can be propagated by source code control (git, svn, etc). This last step must be run on each and every database.
+
+13. If you have any links that refer to the old URLs, you'll need to update them.
 
 13. If you clone out of github: After everything is working, commit and push all changes.  Then, 
 

@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         ('taggit', '0003_taggeditem_add_unique_index'),
         ('context', '0004_auto_20190305_1858'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('context_datasets', '0016_auto_20190204_1908'),
+        ('context_data', '0016_auto_20190204_1908'),
     ]
 
     operations = [
@@ -67,7 +67,7 @@ class Migration(migrations.Migration):
                 ('article', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sourcenet.Article')),
                 ('article_data', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='sourcenet.Article_Data')),
                 ('coder', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('data_set', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='context_datasets.DataSet')),
+                ('data_set', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='context_data.DataSet')),
                 ('tags', taggit.managers.TaggableManager(blank=True, help_text='A comma-separated list of tags.', through='taggit.TaggedItem', to='taggit.Tag', verbose_name='Tags')),
                 ('work_log', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='context.Work_Log')),
             ],
@@ -78,17 +78,17 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='datamention',
             name='data_reference',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='context_datasets.DataReference'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='context_data.DataReference'),
         ),
         migrations.AddField(
             model_name='datamention',
             name='data_set_citation',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='context_datasets.DataSetCitation'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='context_data.DataSetCitation'),
         ),
         migrations.AddField(
             model_name='datamention',
             name='data_set_citation_data',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='context_datasets.DataSetCitationData'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='context_data.DataSetCitationData'),
         ),
         migrations.AddField(
             model_name='datamention',

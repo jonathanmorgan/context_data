@@ -30,7 +30,7 @@ from django.db.models import Q
 import sourcenet.lookups
 
 # sourcenet_analysis imports
-from context_datasets.models import DataSet
+from context_data.models import DataSet
 
 # python_utilities - logging
 from python_utilities.logging.logging_helper import LoggingHelper
@@ -85,7 +85,7 @@ def output_debug( message_IN, method_IN = "", indent_with_IN = "", logger_name_I
             #print( my_message )
             
             # got a logger name?
-            my_logger_name = "context_datasets.lookups"
+            my_logger_name = "context_data.lookups"
             if ( ( logger_name_IN is not None ) and ( logger_name_IN != "" ) ):
             
                 # use logger name passed in.

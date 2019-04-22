@@ -3,13 +3,13 @@ from __future__ import unicode_literals
 '''
 Copyright 2010-2015 Jonathan Morgan
 
-This file is part of http://github.com/jonathanmorgan/sourcenet.
+This file is part of http://github.com/jonathanmorgan/context_data.
 
-sourcenet is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+context_data is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-sourcenet is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+context_data is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public License along with http://github.com/jonathanmorgan/sourcenet. If not, see http://www.gnu.org/licenses/.
+You should have received a copy of the GNU Lesser General Public License along with http://github.com/jonathanmorgan/context_data. If not, see http://www.gnu.org/licenses/.
 '''
 
 '''
@@ -64,10 +64,10 @@ from sourcenet.models import Article_Text
 # parent abstract class.
 from sourcenet.article_coding.article_coder import ArticleCoder
 
-# context_datasets classes
-from context_datasets.models import DataSetMention
-from context_datasets.models import DataSetCitationData
-from context_datasets.shared.context_datasets_base import ContextDataSetsBase
+# context_data classes
+from context_data.models import DataSetMention
+from context_data.models import DataSetCitationData
+from context_data.shared.context_data_base import ContextDataBase
 
 
 #================================================================================
@@ -95,7 +95,7 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
     # STATUS_ERROR_PREFIX = "Error: "
     
     # logging
-    LOGGER_NAME = "context_datasets.coding.data_set_mentions.manual.manual_data_set_mentions_coder"
+    LOGGER_NAME = "context_data.coding.data_set_mentions.manual.manual_data_set_mentions_coder"
     
     # config application
     CONFIG_APPLICATION = "Manual_Data_Set_Mentions_Coding"
@@ -109,7 +109,7 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
     CONFIG_NAME_HIGHLIGHT_WORD_LIST = SourcenetBase.DJANGO_CONFIG_NAME_HIGHLIGHT_WORD_LIST
     CONFIG_NAME_DEFAULT_FIND_LOCATION = SourcenetBase.DJANGO_CONFIG_NAME_DEFAULT_FIND_LOCATION
     CONFIG_NAME_BE_CASE_SENSITIVE = SourcenetBase.DJANGO_CONFIG_NAME_BE_CASE_SENSITIVE
-    CONFIG_NAME_PROCESS_FOUND_SYNONYMS = ContextDataSetsBase.DJANGO_CONFIG_NAME_PROCESS_FOUND_SYNONYMS
+    CONFIG_NAME_PROCESS_FOUND_SYNONYMS = ContextDataBase.DJANGO_CONFIG_NAME_PROCESS_FOUND_SYNONYMS
     CONFIG_NAME_SYNCHRONIZE_DATA_SET_FAMILIES = "synchronize_data_set_families"
 
     # kwarg parameter names

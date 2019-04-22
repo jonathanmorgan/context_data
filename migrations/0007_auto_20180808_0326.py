@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('context_datasets', '0006_dataset_unique_identifier'),
+        ('context_data', '0006_dataset_unique_identifier'),
     ]
 
     operations = [

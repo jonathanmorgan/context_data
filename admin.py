@@ -10,19 +10,19 @@ from ajax_select import make_ajax_form
 from ajax_select.admin import AjaxSelectAdmin
 
 # Import models
-from context_datasets.models import DataSet
-from context_datasets.models import DataSetIdentifier
-from context_datasets.models import DataSetCitation
-from context_datasets.models import DataSetCitationData
-from context_datasets.models import DataSetMention
-from context_datasets.models import WorkDataSetCitation
-from context_datasets.models import WorkDataSetCitationMention
-from context_datasets.models import WorkDataSetMention
-from context_datasets.models import WorkResearchField
-from context_datasets.models import WorkResearchMethod
-from context_datasets.models import DataReference
-from context_datasets.models import DataReferenceMention
-from context_datasets.models import DataReferenceContext
+from context_data.models import DataSet
+from context_data.models import DataSetIdentifier
+from context_data.models import DataSetCitation
+from context_data.models import DataSetCitationData
+from context_data.models import DataSetMention
+from context_data.models import WorkDataSetCitation
+from context_data.models import WorkDataSetCitationMention
+from context_data.models import WorkDataSetMention
+from context_data.models import WorkResearchField
+from context_data.models import WorkResearchMethod
+from context_data.models import DataReference
+from context_data.models import DataReferenceMention
+from context_data.models import DataReferenceContext
 
 #admin.site.register( DataSet )
 admin.site.register( DataSetIdentifier )

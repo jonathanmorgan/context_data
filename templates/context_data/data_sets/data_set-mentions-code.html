@@ -1,15 +1,15 @@
 {% extends "sourcenet/base.html" %}
 {% load staticfiles %}
 
-{% block title %}{{page_title}}{% endblock %}
+{% block title %}Code DataSetCitation mentions{% endblock %}
 
 {% block inside-head %}
 <script src="https://code.jquery.com/jquery-latest.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.selection/1.0.1/jquery.selection.min.js"></script>
-<link rel="stylesheet" type="text/css" href="{% static "context_datasets/css/citation-coding/citation-coding.css" %}" />
+<link rel="stylesheet" type="text/css" href="{% static "context_data/css/mention-coding/mention-coding.css" %}" />
 <script src="{% static "sourcenet/js/sourcenet.js" %}"></script>
 <script src="{% static "sourcenet/js/find-in-text.js" %}"></script>
-<script src="{% static "context_datasets/js/citation-coding/citation-coding.js" %}"></script>
+<script src="{% static "context_data/js/mention-coding/mention-coding.js" %}"></script>
 <script>SOURCENET.text_finder.be_case_sensitive = {% if be_case_sensitive %}true{% else %}false{% endif %};</script>
 <script>SOURCENET.process_found_synonyms = {% if process_found_synonyms %}true{% else %}false{% endif %};</script>
 {% if article_text_type == "text" and article_text_render_type == "raw" %}
@@ -59,21 +59,19 @@
         {# if status message(s), output? #}
         {% include "sourcenet/shared/render_page_status_message_list.html" %}
 
-        <!--
         <div id="return-to-source" class="returnToSource">
             <ul>
                 {# if source, persist tag list for return to coding list page #}
                 <li>
-                    <a href="{% url 'context_datasets-dataset_mention_coding_list' %}{% if source %}?tags_in_list={{ tags_in_list }}{% endif %}">
+                    <a href="{% url 'context_data-dataset_mention_coding_list' %}{% if source %}?tags_in_list={{ tags_in_list }}{% endif %}">
                         {% if source %}Return to {% endif %}DataSetCitation mention coding List
                     </a>
                 </li>
             </ul>
         </div>
-        -->
         <hr />
 
-        <h1>{{page_title}}</h1>
+        <h1>Code DataSetCitation mentions</h1>
         
         <div id="article_form" name="article_form">
             
@@ -84,8 +82,8 @@
                     
                 <p>
                     <table class="gridtable">
-                        {# output Article lookup form #}
-                        {{ article_lookup_form.as_table }}
+                        {# output DataSetCitation lookup form #}
+                        {{ data_set_citation_lookup_form.as_table }}
                     </table>
                 </p>
                 
@@ -102,7 +100,7 @@
                 {% endif %}
                             
                 <p>
-                    <input type="submit" value="Load Article" />
+                    <input type="submit" value="Load DataSetCitation" />
                 </p>
                 
             </form>
@@ -120,24 +118,23 @@
             
         {% endif %}
     </article>
-
     <aside class="sidebarBox">
         <div class="scrollingBox">
-
-            <h2>Data Set Citations</h2>
-    
-            <!-- ! include FIT -->
-            {# Include find in article text? #}
-            {% if include_find_in_article_text %}
-    
-                {% include "sourcenet/articles/render_find_in_article_text.html" %}  
-                
-            {% endif %}
-    
-            <hr />
-
+            <h2>Record Data Set Mentions</h2>
+            <!-- <form name="person-coding" id="person-coding"> -->
+            <div name="mention-coding" id="mention-coding">
 <!--
-            <div name="citation-coding" id="citation-coding">
+                <input type="hidden" name="{{ manual_article_coder.INPUT_ID_MATCHED_PERSON_ID }}" id="{{ manual_article_coder.INPUT_ID_MATCHED_PERSON_ID }}" />
+                <input type="hidden" name="{{ manual_article_coder.INPUT_ID_ARTICLE_PERSON_ID }}" id="{{ manual_article_coder.INPUT_ID_ARTICLE_PERSON_ID }}" />
+                <input type="hidden" name="{{ manual_article_coder.INPUT_ID_ORIGINAL_PERSON_TYPE }}" id="{{ manual_article_coder.INPUT_ID_ORIGINAL_PERSON_TYPE }}" />
+                <input type="hidden" name="{{ manual_article_coder.INPUT_ID_DATA_STORE_PERSON_INDEX }}" id="{{ manual_article_coder.INPUT_ID_DATA_STORE_PERSON_INDEX }}" />
+-->
+<!--
+                <input type="button" id="select-text" value="Get selected text" />:
+                <br />
+                <textarea id="selected-text" readonly="readonly" rows="4" cols="35"></textarea>
+                <br />
+-->
                 <p class="inputContainer" id="input-mention-text" name="input-mention-text">
                     <input type="button" id="store-mention" name="store-mention" value="Mention ==>" />: 
                     {% if mention_text_read_only %}
@@ -148,7 +145,7 @@
                 </p>
                 {% if include_fix_mention_text %}
                     <p class="inputContainer" id="fix-mention-text-link" name="fix-mention-text-link">
-                        <a href="#" onclick="SOURCENET.fix_mention_text(); return false;">Fix Mention Text</a>
+                        <a href="#" onclick="SOURCENET.fix_mention_text(); return false;">--> Fix Mention Text</a>
                     </p>
                     <p class="inputContainer hidden" id="fix-mention-text" name="fix-mention-text">
                         <a href="#" onclick="SOURCENET.cancel_fix_mention_text(); return false;"><-- Cancel Fix Mention Text</a>
@@ -159,6 +156,7 @@
                     <input type="hidden" name="{{ manual_coder.INPUT_ID_FIXED_MENTION_TEXT }}" id="{{ manual_coder.INPUT_ID_FIXED_MENTION_TEXT }}" />
                 {% endif %}
                 
+<!--
                 <p class="inputContainer" id="select-mention-type">
                     &nbsp;&nbsp;Mention Type: <select name="{{ manual_coder.INPUT_ID_MENTION_TYPE }}" id="{{ manual_coder.INPUT_ID_MENTION_TYPE }}" onchange="SOURCENET.process_selected_mention_type()">
                         <option value="" selected="selected" disabled="disabled">Choose Mention Type</option>
@@ -166,16 +164,19 @@
                         <option value="{{ manual_coder.MENTION_TYPE_ANALYZED }}">{{ manual_coder.MENTION_TYPE_ANALYZED }}</option>
                     </select>
                 </p>
+-->
 
+                <!-- <hr class="fieldSeparator" /> -->
                 <p class="inputContainer" id="process-mention-container">
                     <input type="button" id="process-mention" name="process-mention" value="Process Mention" onclick="SOURCENET.process_mention_coding()" />&nbsp;&nbsp;|&nbsp;&nbsp;<input type="button" id="clear-mention-coding" name="clear-mention-coding" value="Clear Mention Coding" onclick="SOURCENET.clear_coding_form( 'Mention Coding Cleared' )" />
                 </p>
             </div>
+            <!-- </form> -->
             <hr class="fieldSeparator" />
             <div id="status-message-area" class="statusMessageArea">
                 <h4>Status Messages</h4>
             </div>
-            <h3>DataSetCitation List</h3>
+            <h3>Mention List</h3>
             <div id="mention-list" class="mentionList">
                 <table id="mention-list-table" class="mentionListTable"></table>
                 <form method="post" name="submit-article-coding" id="submit-article-coding" class="submitArticleCoding" onsubmit="do_submit = SOURCENET.render_coding_form_inputs( this ); return do_submit;">
@@ -202,8 +203,18 @@
                     <input type="submit" value="Submit Article Coding" name="input-submit-article-coding" id="input-submit-article-coding" />
                 </form>
             </div>
--->
 
+            <!-- ! include FIT -->
+            {# Include find in article text? #}
+            {% if include_find_in_article_text %}
+
+                <hr />
+                {% include "sourcenet/articles/render_find_in_article_text.html" %}  
+                
+            {% endif %}
+
+            <hr />
+            <h2>Data Set Info</h2>
             <!--
                 <script>
                     // initialized in mention-coding.js
@@ -211,19 +222,13 @@
                 </script>
             -->
 
-            {% for data_set_citation in data_set_citation_qs %}
+            <!-- ! include render data set -->
+            {% if data_set_instance %}
+            <input type="button" id="toggle-data-set_highlighting" name="toggle-data-set_highlighting" value="<== highlight OFF" />
             
-                <h2>DataSetCitation ID: {{data_set_citation.id}}</h2>
+                {% include "context_data/data_sets/render_data_set.html" %}
 
-                {% with data_set_instance=data_set_citation.data_set %}
-                
-                    <!-- ! include render data set -->
-                    {% include "context_datasets/data_sets/render_data_set.html" %}
-                    
-                {% endwith %}
-
-            {% endfor %}
-
+            {% endif %}
         </div>
     </aside>
 </div>

@@ -3,13 +3,13 @@ from __future__ import unicode_literals
 '''
 Copyright 2010-2018 Jonathan Morgan
 
-This file is part of http://github.com/jonathanmorgan/context_datasets.
+This file is part of http://github.com/jonathanmorgan/context_data.
 
-context_datasets is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+context_data is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-context_datasets is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+context_data is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public License along with http://github.com/jonathanmorgan/context_datasets. If not, see http://www.gnu.org/licenses/.
+You should have received a copy of the GNU Lesser General Public License along with http://github.com/jonathanmorgan/context_data. If not, see http://www.gnu.org/licenses/.
 
 Configuration properties for it are stored in django's admins, in the
    django_config application.  The properties for the article_code view are stored in Application
@@ -48,20 +48,20 @@ from django.urls import reverse
 from django_config.models import Config_Property
 
 # import shared classes
-from context_datasets.shared.context_datasets_base import ContextDataSetsBase
+from context_data.shared.context_data_base import ContextDataBase
 
 # import model classes
-from context_datasets.models import DataSetCitation
-from context_datasets.models import DataSetCitationData
+from context_data.models import DataSetCitation
+from context_data.models import DataSetCitationData
 
-# other context_datasets classes
-from context_datasets.coding.data_set_mentions.manual.manual_data_set_mentions_coder import ManualDataSetMentionsCoder
-from context_datasets.coding.data_set_citations.manual.manual_data_set_citations_coder import ManualDataSetCitationsCoder
+# other context_data classes
+from context_data.coding.data_set_mentions.manual.manual_data_set_mentions_coder import ManualDataSetMentionsCoder
+from context_data.coding.data_set_citations.manual.manual_data_set_citations_coder import ManualDataSetCitationsCoder
 
 # import form classes
-from context_datasets.forms import CodingSubmitForm
-from context_datasets.forms import DataSetMentionsCodingListForm
-from context_datasets.forms import DataSetCitationLookupForm
+from context_data.forms import CodingSubmitForm
+from context_data.forms import DataSetMentionsCodingListForm
+from context_data.forms import DataSetCitationLookupForm
 
 # sourcenet imports
 from sourcenet.forms import ArticleCodingForm
@@ -84,7 +84,7 @@ from python_utilities.strings.string_helper import StringHelper
 
 # configuration properties
 # article_code view
-CONFIG_APPLICATION_DATA_SET_MENTIONS_CODE = "context_datasets-UI-data_set_mentions-code"
+CONFIG_APPLICATION_DATA_SET_MENTIONS_CODE = "context_data-UI-data_set_mentions-code"
 
 # form input names
 INPUT_NAME_CITATION_ID = "data_set_citation_id"
@@ -310,8 +310,8 @@ def article_code_citations( request_IN ):
     response_dictionary[ response_prop_name ] = config_prop_value
 
     # 'process_found_synonyms'
-    response_prop_name = ContextDataSetsBase.VIEW_RESPONSE_KEY_PROCESS_FOUND_SYNONYMS
-    config_prop_name = ContextDataSetsBase.DJANGO_CONFIG_NAME_PROCESS_FOUND_SYNONYMS
+    response_prop_name = ContextDataBase.VIEW_RESPONSE_KEY_PROCESS_FOUND_SYNONYMS
+    config_prop_name = ContextDataBase.DJANGO_CONFIG_NAME_PROCESS_FOUND_SYNONYMS
     config_prop_default = False
     config_prop_value = Config_Property.get_property_boolean_value( config_application, config_prop_name, default_IN = config_prop_default )
     response_dictionary[ response_prop_name ] = config_prop_value
@@ -321,7 +321,7 @@ def article_code_citations( request_IN ):
     response_dictionary[ 'manual_coder' ] = manual_coder
 
     # set my default rendering template
-    default_template = 'context_datasets/data_sets/article-data_set_citations-code.html'
+    default_template = 'context_data/data_sets/article-data_set_citations-code.html'
 
     # init coding status variables
     # start with it being OK to process coding.
@@ -614,7 +614,7 @@ def dataset_code_mentions( request_IN ):
     response_dictionary[ 'manual_coder' ] = manual_coder
     
     # set my default rendering template
-    default_template = 'context_datasets/data_sets/data_set-mentions-code.html'
+    default_template = 'context_data/data_sets/data_set-mentions-code.html'
 
     # init coding status variables
     # start with it being OK to process coding.
@@ -1091,7 +1091,7 @@ def dataset_mention_coding_list( request_IN ):
     response_dictionary[ 'base_post_login_redirect' ] = reverse( dataset_mention_coding_list )
 
     # set my default rendering template
-    default_template = 'context_datasets/data_sets/data_set-mentions-code-list.html'
+    default_template = 'context_data/data_sets/data_set-mentions-code-list.html'
     
     # get current user
     current_user = request_IN.user
@@ -1322,7 +1322,7 @@ def index( request_IN ):
     response_dictionary.update( csrf( request_IN ) )
 
     # set my default rendering template
-    default_template = 'context_datasets/index.html'
+    default_template = 'context_data/index.html'
 
     # add on the "me" property.
     response_dictionary[ 'current_view' ] = me        

@@ -35,13 +35,13 @@
                     <p><strong>User:</strong> {{ request.user.username }}&nbsp;&nbsp;|&nbsp;&nbsp;<a href="/">Home</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="{% url 'sourcenet-logout' %}{% if base_post_login_redirect %}?post_logout_redirect={{ base_post_login_redirect }}{% endif %}">Logout</a></p>
                     <ul>
                         <li>
-                            Data set mentions: <a href="{% url 'context_datasets-dataset_mention_coding_list' %}">Data set coding List</a> | <a href="{% url 'context_datasets-dataset_code_mentions' %}">Code an article-dataset pair</a>
+                            Data set mentions: <a href="{% url 'context_data-dataset_mention_coding_list' %}">Data set coding List</a> | <a href="{% url 'context_data-dataset_code_mentions' %}">Code an article-dataset pair</a>
                         </li>
                         <li>
-                            Data set citations: <a href="{% url 'context_datasets-article-code_data_set_mentions' %}">View data set citations in an article</a>
+                            Data set citations: <a href="{% url 'context_data-article-code_data_set_mentions' %}">View data set citations in an article</a>
                         </li>
                         <li>
-                            <a href="{% url 'context_datasets-index' %}">Datasets</a> | <a href="{% url 'sourcenet-index' %}">Sourcenet</a>
+                            <a href="{% url 'context_data-index' %}">Datasets</a> | <a href="{% url 'sourcenet-index' %}">Sourcenet</a>
                         </li>
                     </ul>
                     <hr />

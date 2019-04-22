@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('context', '0001_initial'),
-        ('context_datasets', '0010_dataset_parent_data_set'),
+        ('context_data', '0010_dataset_parent_data_set'),
     ]
 
     operations = [

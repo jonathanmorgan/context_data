@@ -2,8 +2,8 @@ from __future__ import unicode_literals
 
 from django.apps import AppConfig
 
-class ContextDatasetsConfig(AppConfig):
+class ContextDataConfig(AppConfig):
 
-    name = 'context_datasets'
+    name = 'context_data'
 
-#-- END class ContextDatasetsConfig --#
+#-- END class ContextDataConfig --#

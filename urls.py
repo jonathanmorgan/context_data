@@ -21,7 +21,7 @@ from django.conf.urls import url
 from django.contrib.auth import views as auth_views
 
 # import sourcent_datasets views
-import context_datasets.views
+import context_data.views
 
 '''
 # !tastypie API
@@ -40,11 +40,11 @@ v1_api.register( ArticleResource() )
 urlpatterns = [
 
     # index page
-    url( r'^index$', context_datasets.views.index, name = "context_datasets-index" ),
+    url( r'^index$', context_data.views.index, name = "context_data-index" ),
 
     # data set mention coding pages
-    url( r'^dataset/code_mentions/list/', context_datasets.views.dataset_mention_coding_list, name = "context_datasets-dataset_mention_coding_list" ),
-    url( r'^dataset/code_mentions/', context_datasets.views.dataset_code_mentions, name = "context_datasets-dataset_code_mentions" ),
-    url( r'^dataset/code_citations/', context_datasets.views.article_code_citations, name = "context_datasets-article-code_data_set_mentions" ),
+    url( r'^dataset/code_mentions/list/', context_data.views.dataset_mention_coding_list, name = "context_data-dataset_mention_coding_list" ),
+    url( r'^dataset/code_mentions/', context_data.views.dataset_code_mentions, name = "context_data-dataset_code_mentions" ),
+    url( r'^dataset/code_citations/', context_data.views.article_code_citations, name = "context_data-article-code_data_set_mentions" ),
 
 ]
