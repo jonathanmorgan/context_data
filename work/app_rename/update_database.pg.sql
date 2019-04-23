@@ -106,8 +106,8 @@ ALTER TABLE sourcenet_datasets_workresearchmethod RENAME TO context_data_workres
 /*
 -- Get the sequence names of all the sequences for this application.
 --     (and get each twice for ease of making ALTER SEQUENCE statements)
-select sequence_name, sequence_name
-from information_schema.sequences
+SELECT sequence_name, sequence_name
+FROM information_schema.sequences
 WHERE sequence_name LIKE 'sourcenet_datasets_%';
 */
 

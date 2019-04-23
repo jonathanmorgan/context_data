@@ -47,11 +47,28 @@
 
 7. Update places that have old name in either file name or inside files.  Common things:
     
+    - base django application files:
+        
+        - models.py
+        - admin.py
+        - forms.py
+        - views.py
+        - urls.py
+    
     - Imports:
     
-            # pattern: grep -r -i -l "from <old_name>" . | xargs sed -i 's/from <old_name>/from <new_name>/g'
-            grep -r -i -l "from sourcenet_datasets" . | xargs sed -i 's/from sourcenet_datasets/from context_data/g'
+            grep -r -i -l "from sourcenet\_datasets\." .
+            grep -r -i -n "from sourcenet\_datasets\." .
+            # pattern: grep -r -i -l "from <old_name>\." . | xargs sed -i 's/from <old_name>\./from <new_name>\./g'
+            grep -r -i -l "from sourcenet\_datasets\." . | xargs sed -i 's/from sourcenet\_datasets\./from context\_data\./g'
     
+    - Table name prefix:
+    
+            grep -r -i -l "sourcenet\_datasets\_" .
+            grep -r -i -n "sourcenet\_datasets\_" .
+            # pattern: grep -r -i -l "<old_name>\_" . | xargs sed -i 's/<old_name>\_/<new_name>\_/g'
+            grep -r -i -l "sourcenet\_datasets\_" . | xargs sed -i 's/sourcenet\_datasets\_/context\_data\_/g'
+        
     - Update paths in "templates" and "static" folders, if you name-spaced your files with the name of the application (as you should).
 
         - If application is in git, use "git mv", not just "mv".
