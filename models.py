@@ -36,6 +36,7 @@ from python_utilities.strings.string_helper import StringHelper
 
 # context imports
 from context.models import Work_Log
+from context.shared.models import Abstract_Context_With_JSON
 
 # context_text imports
 from context_text.models import Article
@@ -107,7 +108,7 @@ class AbstractScoredTeamTextData( AbstractSelectedArticleText ):
 
 # Data Set model
 @python_2_unicode_compatible
-class DataSet( models.Model ):
+class DataSet( Abstract_Context_With_JSON ):
 
     #----------------------------------------------------------------------
     # ! --> model fields
@@ -127,15 +128,22 @@ class DataSet( models.Model ):
     parent_data_set = models.ForeignKey( 'DataSet', blank = True, null = True, on_delete = models.SET_NULL )
 
     # tags!
-    tags = TaggableManager( blank = True )
+    #tags = TaggableManager( blank = True )
 
     # time stamps.
-    create_date = models.DateTimeField( auto_now_add = True )
-    last_modified = models.DateTimeField( auto_now = True )
+    #create_date = models.DateTimeField( auto_now_add = True )
+    #last_modified = models.DateTimeField( auto_now = True )
 
     #----------------------------------------------------------------------
     # methods
     #----------------------------------------------------------------------
+
+    def __init__( self, *args, **kwargs ):
+        
+        # call parent __init()__ first.
+        super( DataSet, self ).__init__( *args, **kwargs )
+
+    #-- END method __init__() --#
 
     def __str__( self ):
         

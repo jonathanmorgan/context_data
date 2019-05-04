@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.postgres import fields
 
 # Register your models here.
 
@@ -8,6 +9,9 @@ from six.moves import range
 # import code for AJAX select
 from ajax_select import make_ajax_form
 from ajax_select.admin import AjaxSelectAdmin
+
+# django_json_widget imports
+from django_json_widget.widgets import JSONEditorWidget
 
 # Import models
 from context_data.models import DataSet
@@ -60,6 +64,10 @@ class DataSetAdmin( admin.ModelAdmin ):
     #    in this case, implemented in context_text.lookups.py
     form = make_ajax_form( DataSet, dict( parent_data_set = 'datasets' ) )
 
+    formfield_overrides = {
+        fields.JSONField: {'widget': JSONEditorWidget},
+    }
+    
     fieldsets = [
         (
             None,
@@ -70,7 +78,7 @@ class DataSetAdmin( admin.ModelAdmin ):
         (
             "More details (Optional)",
             {
-                'fields' : [ 'citation', 'coverages', 'subjects', 'methodology', 'additional_keywords' ],
+                'fields' : [ 'citation', 'coverages', 'subjects', 'methodology', 'additional_keywords', 'details_json' ],
                 'classes' : ( "collapse", )
             }
         ),
