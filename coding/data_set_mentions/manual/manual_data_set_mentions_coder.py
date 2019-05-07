@@ -1019,11 +1019,16 @@ class ManualDataSetMentionsCoder( ArticleCoder ):
                                 json_article_data_note = Article_Data_Notes()
                                 json_article_data_note.article_data = current_article_data
                                 json_article_data_note.content_type = Article_Data_Notes.CONTENT_TYPE_JSON
-                                json_article_data_note.content = data_store_json_string
+                                json_article_data_note.content_json = data_store_json_string
                                 json_article_data_note.source = self.coder_type + " - user " + str( coder_user )
-                                json_article_data_note.content_description = "Data Store JSON (likely from manual coding of mentions via data_set-mentions-code view) - DataSetCitationData: {}".format( citation_data )
+                                json_article_data_note.content_description = "{} Data Store JSON (likely from manual coding of mentions via data_set-mentions-code view) - DataSetCitationData: {}".format( self.CONFIG_APPLICATION, citation_data )
+                                json_article_data_note.note_type = "{}_data_store_json".format( self.CONFIG_APPLICATION )
                                 json_article_data_note.save()
         
+                                # add tags
+                                json_article_data_note.tags.add( "data_store_json" )
+                                json_article_data_note.tags.add( json_article_data_note.note_type )
+
                                 # store current_article_data in article_data_OUT.
                                 article_data_OUT = current_article_data
         
