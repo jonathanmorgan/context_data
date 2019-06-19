@@ -37,6 +37,7 @@ from python_utilities.strings.string_helper import StringHelper
 # context imports
 from context.models import Work_Log
 from context.shared.models import Abstract_Context_With_JSON
+from context.shared.models import Abstract_Related_JSON_Content
 
 # context_text imports
 from context_text.models import Article
@@ -50,255 +51,79 @@ from context_text.models import AbstractSelectedArticleText
 #===============================================================================
 
 
-#===============================================================================
-# ! ==> Models
-#===============================================================================
+#================================================================================
+# ! ==> Abstract Models
+#================================================================================
 
 
-# AbstractScoredTeamTextData model
+# Abstract_Data_Set_Content model
 @python_2_unicode_compatible
-class AbstractScoredTeamTextData( AbstractSelectedArticleText ):
+class Abstract_Data_Set_Content( Abstract_Related_JSON_Content ):
 
-    #---------------------------------------------------------------------------
+    #----------------------------------------------------------------------
     # model fields and meta
-    #---------------------------------------------------------------------------
-
-    # inherits from context_text.models.AbstractSelectedText:
-    # basics - value, text before and after the value, length and index of value.
-    #value = models.TextField( blank = True, null = True )
-    #value_in_context = models.TextField( blank = True, null = True )
-    #value_index = models.IntegerField( blank = True, null = True, default = 0 )
-    #value_length = models.IntegerField( blank = True, null = True, default = 0 )
-    #canonical_index = models.IntegerField( blank = True, null = True, default = 0 )
-    #value_word_number_start = models.IntegerField( blank = True, null = True, default = 0 )
-    #value_word_number_end = models.IntegerField( blank = True, null = True, default = 0 )
-    #paragraph_number = models.IntegerField( blank = True, null = True, default = 0 )
-    #context_before = models.TextField( blank = True, null = True )
-    #context_after = models.TextField( blank = True, null = True )
-
-    # score of match
-    score = models.FloatField( blank = True, null = True )
-    
-    # team name
-    team_name = models.CharField( max_length = 255, null = True, blank = True )
-
-    # Meta-data for this class.
-    class Meta:
-
-        abstract = True
-        
-    #-- END class Meta --#
-
-    #----------------------------------------------------------------------
-    # instance methods
     #----------------------------------------------------------------------
 
-
-    def __init__( self, *args, **kwargs ):
-        
-        # call parent __init()__ first.
-        super( AbstractScoredTeamTextData, self ).__init__( *args, **kwargs )
-
-    #-- END method __init__() --#
-
-    # just use the stuff in the parent class.
-    
-#= End WorkResearchMethod Model ================================================
-
-
-# Data Set model
-@python_2_unicode_compatible
-class DataSet( Abstract_Context_With_JSON ):
-
-    #----------------------------------------------------------------------
-    # ! --> model fields
-    #----------------------------------------------------------------------
-
-    name = models.CharField( max_length = 255 )
-    unique_identifier = models.CharField( max_length = 255, blank = True, null = True )
-    title = models.TextField( blank = True, null = True )
-    description = models.TextField( blank = True, null = True )
-    date = models.DateTimeField( blank = True, null = True )
-    coverages = models.TextField( blank = True, null = True )
-    subjects = models.TextField( blank = True, null = True )
-    methodology = models.TextField( blank = True, null = True )
-    citation = models.TextField( blank = True, null = True )
-    additional_keywords = models.TextField( blank = True, null = True )
-    family_identifier = models.CharField( max_length = 255, blank = True, null = True )
-    parent_data_set = models.ForeignKey( 'DataSet', blank = True, null = True, on_delete = models.SET_NULL )
-
-    # tags!
-    #tags = TaggableManager( blank = True )
-
-    # time stamps.
-    #create_date = models.DateTimeField( auto_now_add = True )
-    #last_modified = models.DateTimeField( auto_now = True )
-
-    #----------------------------------------------------------------------
-    # methods
-    #----------------------------------------------------------------------
-
-    def __init__( self, *args, **kwargs ):
-        
-        # call parent __init()__ first.
-        super( DataSet, self ).__init__( *args, **kwargs )
-
-    #-- END method __init__() --#
-
-    def __str__( self ):
-        
-        # return reference
-        string_OUT = "";
-
-        # declare variables
-        prefix_string = ""
-        
-        if ( self.id ):
-        
-            # yes. output.
-            string_OUT += str( self.id )
-            prefix_string = " - "
-
-        #-- END check to see if ID --#
-
-        if ( self.title ):
-        
-            string_OUT += prefix_string + self.title
-            prefix_string = " - "
-            
-        #-- END check to see if title. --#
-            
-        if ( self.unique_identifier ):
-        
-            string_OUT += prefix_string + " ( " + self.unique_identifier + " )"
-            prefix_string = " - "
-            
-        #-- END check to see if unique_identifier. --#
-            
-        return string_OUT
-        
-    #-- END method __str__() --#
-    
-    
-    def get_unique_mention_string_list( self, replace_white_space_IN = False, *args, **kwargs ):
-
-        '''
-        Retrieves all DataSetMention-s that relate to this DataSet, across
-            all citations.  Builds and returns a set of the distinct strings
-            used to refer to the dataset.
-        '''
-        
-        # return reference
-        mention_list_OUT = []
-        
-        # declare variables
-        my_id = -1
-        mention_set = set()
-        data_set_citation_data_qs = None
-        citation_data = None
-        mention_qs = None
-        mention = None
-        mention_string = None
-        
-        # get citation data
-        data_set_citation_data_qs = DataSetCitationData.objects.filter( data_set_citation__data_set = self )
-        
-        # for each citation data, get all mentions, and add the value of each
-        #     to set.
-        for citation_data in data_set_citation_data_qs:
-        
-            # get mentions
-            mention_qs = citation_data.datasetmention_set.all()
-            
-            # for each mention, grab value and add to set if not already there.
-            for mention in mention_qs:
-            
-                # get value
-                mention_string = mention.value
-                
-                # is it in set?
-                if ( mention_string not in mention_set ):
-                
-                    # are we replacing white space for javascript?
-                    if ( replace_white_space_IN == True ):
-                    
-                        # replace more than one contiguous white space character
-                        #     with a space.
-                        mention_string = StringHelper.replace_white_space( mention_string )
-                        
-                    #-- END check if we unicode_escape --#
-                
-                    # no - add it.
-                    mention_set.add( mention_string )
-                    
-                #-- END check to see if in set. --#
-                
-            #-- END loop over mentions. --#
-            
-        #-- END loop over citation data related to current data set --#
-        
-        # convert set to list.
-        mention_list_OUT = list( mention_set )
-        mention_list_OUT.sort()
-        
-        return mention_list_OUT
-
-    #-- END method get_unique_mention_list() --#
-
-#= End DataSet Model ======================================================
-
-
-# DataSetIdentifier model
-@python_2_unicode_compatible
-class DataSetIdentifier( models.Model ):
-
+    # allow more than one related piece of "Abstract_Data_Set_Content" per article.
     data_set = models.ForeignKey( 'DataSet', on_delete = models.CASCADE )
-    name = models.CharField( max_length = 255, null = True, blank = True )
-    identifier = models.TextField( blank = True, null = True )
-    source = models.CharField( max_length = 255, null = True, blank = True )
-    notes = models.TextField( blank = True, null = True )
 
-    #----------------------------------------------------------------------
-    # methods
-    #----------------------------------------------------------------------
+    # meta class so we know this is an abstract class.
+    class Meta:
+        abstract = True
+        ordering = [ 'data_set', 'last_modified', 'create_date' ]
+
+    #----------------------------------------------------------------------------
+    # instance methods
+    #----------------------------------------------------------------------------
 
 
-    def __str__( self ):
-        
+    def to_string( self ):
+
         # return reference
         string_OUT = ""
         
-        # declare variables
-        prefix_string = ""
-        
         if ( self.id ):
-        
-            # yes. output.
-            string_OUT += str( self.id )
-            prefix_string = " - "
-
+            
+            string_OUT += str( self.id ) + " - "
+            
         #-- END check to see if ID --#
-
-        if ( self.identifier ):
+             
+        if ( self.content_description ):
         
-            string_OUT += prefix_string + self.identifier
-            prefix_string = " - "
+            string_OUT += self.content_description
             
-        #-- END check to see if identifier. --#
-            
-        if ( self.source ):
+        #-- END check to see if content_description --#
         
-            string_OUT += prefix_string + " ( " + self.source + " )"
-            prefix_string = " - "
+        if ( self.content_type ):
             
-        #-- END check to see if source. --#
+            string_OUT += " of type \"" + self.content_type + "\""
             
+        #-- END check to see if there is a type --#
+             
+        if ( self.data_set is not None ):
+        
+            string_OUT += " for data set: " + str( self.data_set )
+            
+        #-- END check to see if data set --#
+        
         return string_OUT
+
+    #-- END method to_string() --#
+
+
+    def __str__( self ):
+
+        # return reference
+        string_OUT = ""
         
+        string_OUT = self.to_string()
+        
+        return string_OUT
+
     #-- END method __str__() --#
 
 
-#= End Person_External_UUID Model ======================================================
+#-- END abstract Abstract_Data_Set_Content model --#
 
 
 # AbstractDataSetCitation model
@@ -544,6 +369,279 @@ class AbstractDataSetCitation( models.Model ):
     #-- END method get_unique_mention_list() --#
 
 #= END DataSetCitation Model ======================================================
+
+
+# AbstractScoredTeamTextData model
+@python_2_unicode_compatible
+class AbstractScoredTeamTextData( AbstractSelectedArticleText ):
+
+    #---------------------------------------------------------------------------
+    # model fields and meta
+    #---------------------------------------------------------------------------
+
+    # inherits from context_text.models.AbstractSelectedText:
+    # basics - value, text before and after the value, length and index of value.
+    #value = models.TextField( blank = True, null = True )
+    #value_in_context = models.TextField( blank = True, null = True )
+    #value_index = models.IntegerField( blank = True, null = True, default = 0 )
+    #value_length = models.IntegerField( blank = True, null = True, default = 0 )
+    #canonical_index = models.IntegerField( blank = True, null = True, default = 0 )
+    #value_word_number_start = models.IntegerField( blank = True, null = True, default = 0 )
+    #value_word_number_end = models.IntegerField( blank = True, null = True, default = 0 )
+    #paragraph_number = models.IntegerField( blank = True, null = True, default = 0 )
+    #context_before = models.TextField( blank = True, null = True )
+    #context_after = models.TextField( blank = True, null = True )
+
+    # score of match
+    score = models.FloatField( blank = True, null = True )
+    
+    # team name
+    team_name = models.CharField( max_length = 255, null = True, blank = True )
+
+    # Meta-data for this class.
+    class Meta:
+
+        abstract = True
+        
+    #-- END class Meta --#
+
+    #----------------------------------------------------------------------
+    # instance methods
+    #----------------------------------------------------------------------
+
+
+    def __init__( self, *args, **kwargs ):
+        
+        # call parent __init()__ first.
+        super( AbstractScoredTeamTextData, self ).__init__( *args, **kwargs )
+
+    #-- END method __init__() --#
+
+    # just use the stuff in the parent class.
+    
+#= End WorkResearchMethod Model ================================================
+
+
+#===============================================================================
+# ! ==> Models
+#===============================================================================
+
+
+# Data Set model
+@python_2_unicode_compatible
+class DataSet( Abstract_Context_With_JSON ):
+
+    #----------------------------------------------------------------------
+    # ! --> model fields
+    #----------------------------------------------------------------------
+
+    name = models.CharField( max_length = 255 )
+    unique_identifier = models.CharField( max_length = 255, blank = True, null = True )
+    title = models.TextField( blank = True, null = True )
+    description = models.TextField( blank = True, null = True )
+    date = models.DateTimeField( blank = True, null = True )
+    coverages = models.TextField( blank = True, null = True )
+    subjects = models.TextField( blank = True, null = True )
+    methodology = models.TextField( blank = True, null = True )
+    citation = models.TextField( blank = True, null = True )
+    additional_keywords = models.TextField( blank = True, null = True )
+    family_identifier = models.CharField( max_length = 255, blank = True, null = True )
+    parent_data_set = models.ForeignKey( 'DataSet', blank = True, null = True, on_delete = models.SET_NULL )
+
+    # tags!
+    #tags = TaggableManager( blank = True )
+
+    # time stamps.
+    #create_date = models.DateTimeField( auto_now_add = True )
+    #last_modified = models.DateTimeField( auto_now = True )
+
+    #----------------------------------------------------------------------
+    # methods
+    #----------------------------------------------------------------------
+
+    def __init__( self, *args, **kwargs ):
+        
+        # call parent __init()__ first.
+        super( DataSet, self ).__init__( *args, **kwargs )
+
+    #-- END method __init__() --#
+
+    def __str__( self ):
+        
+        # return reference
+        string_OUT = "";
+
+        # declare variables
+        prefix_string = ""
+        
+        if ( self.id ):
+        
+            # yes. output.
+            string_OUT += str( self.id )
+            prefix_string = " - "
+
+        #-- END check to see if ID --#
+
+        if ( self.title ):
+        
+            string_OUT += prefix_string + self.title
+            prefix_string = " - "
+            
+        #-- END check to see if title. --#
+            
+        if ( self.unique_identifier ):
+        
+            string_OUT += prefix_string + " ( " + self.unique_identifier + " )"
+            prefix_string = " - "
+            
+        #-- END check to see if unique_identifier. --#
+            
+        return string_OUT
+        
+    #-- END method __str__() --#
+    
+    
+    def get_unique_mention_string_list( self, replace_white_space_IN = False, *args, **kwargs ):
+
+        '''
+        Retrieves all DataSetMention-s that relate to this DataSet, across
+            all citations.  Builds and returns a set of the distinct strings
+            used to refer to the dataset.
+        '''
+        
+        # return reference
+        mention_list_OUT = []
+        
+        # declare variables
+        my_id = -1
+        mention_set = set()
+        data_set_citation_data_qs = None
+        citation_data = None
+        mention_qs = None
+        mention = None
+        mention_string = None
+        
+        # get citation data
+        data_set_citation_data_qs = DataSetCitationData.objects.filter( data_set_citation__data_set = self )
+        
+        # for each citation data, get all mentions, and add the value of each
+        #     to set.
+        for citation_data in data_set_citation_data_qs:
+        
+            # get mentions
+            mention_qs = citation_data.datasetmention_set.all()
+            
+            # for each mention, grab value and add to set if not already there.
+            for mention in mention_qs:
+            
+                # get value
+                mention_string = mention.value
+                
+                # is it in set?
+                if ( mention_string not in mention_set ):
+                
+                    # are we replacing white space for javascript?
+                    if ( replace_white_space_IN == True ):
+                    
+                        # replace more than one contiguous white space character
+                        #     with a space.
+                        mention_string = StringHelper.replace_white_space( mention_string )
+                        
+                    #-- END check if we unicode_escape --#
+                
+                    # no - add it.
+                    mention_set.add( mention_string )
+                    
+                #-- END check to see if in set. --#
+                
+            #-- END loop over mentions. --#
+            
+        #-- END loop over citation data related to current data set --#
+        
+        # convert set to list.
+        mention_list_OUT = list( mention_set )
+        mention_list_OUT.sort()
+        
+        return mention_list_OUT
+
+    #-- END method get_unique_mention_list() --#
+
+#= End DataSet Model ======================================================
+
+
+# DataSetIdentifier model
+@python_2_unicode_compatible
+class DataSetIdentifier( models.Model ):
+
+    data_set = models.ForeignKey( 'DataSet', on_delete = models.CASCADE )
+    name = models.CharField( max_length = 255, null = True, blank = True )
+    identifier = models.TextField( blank = True, null = True )
+    source = models.CharField( max_length = 255, null = True, blank = True )
+    notes = models.TextField( blank = True, null = True )
+
+    #----------------------------------------------------------------------
+    # methods
+    #----------------------------------------------------------------------
+
+
+    def __str__( self ):
+        
+        # return reference
+        string_OUT = ""
+        
+        # declare variables
+        prefix_string = ""
+        
+        if ( self.id ):
+        
+            # yes. output.
+            string_OUT += str( self.id )
+            prefix_string = " - "
+
+        #-- END check to see if ID --#
+
+        if ( self.identifier ):
+        
+            string_OUT += prefix_string + self.identifier
+            prefix_string = " - "
+            
+        #-- END check to see if identifier. --#
+            
+        if ( self.source ):
+        
+            string_OUT += prefix_string + " ( " + self.source + " )"
+            prefix_string = " - "
+            
+        #-- END check to see if source. --#
+            
+        return string_OUT
+        
+    #-- END method __str__() --#
+
+
+#= End Person_External_UUID Model ======================================================
+
+
+# DataSetNotes model
+@python_2_unicode_compatible
+class DataSetNote( Abstract_Data_Set_Content ):
+
+    def __str__( self ):
+
+        # return reference
+        string_OUT = ""
+        
+        # set content description
+        self.content_description = "notes"
+        
+        # call string method.
+        string_OUT = super( DataSetNote, self ).to_string()
+                
+        return string_OUT
+
+    #-- END method __str__() --#
+
+#-- END DataSetNote model --#
 
 
 # DataSetCitation model
