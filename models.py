@@ -36,8 +36,8 @@ from python_utilities.strings.string_helper import StringHelper
 
 # context imports
 from context.models import Work_Log
-from context.shared.models import Abstract_Context_With_JSON
-from context.shared.models import Abstract_Related_JSON_Content
+from context.models import Abstract_Context_With_JSON
+from context.shared.entity_models import Abstract_Related_JSON_Content
 
 # context_text imports
 from context_text.models import Article
