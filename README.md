@@ -17,7 +17,9 @@ These scripts are in my "ansible-patterns" repository: [https://github.com/jonat
 
 These ansible scripts can also be used to just setup a server with virtualenvwrapper, postgresql, apache, django, jupyterhub, and R, without context.  See the readme for detailed instructions.
 
-Chances are I'll make dockerfile(s) for this eventually, too, but for now, there's ansible.
+To just make an ubuntu 18.04 server with `context_data` installed from scratch, follow the [Setup Steps](https://github.com/jonathanmorgan/ansible-patterns/blob/master/README.md#setup) and then the ["research" quick start](https://github.com/jonathanmorgan/ansible-patterns/blob/master/README.md#research-quick-start) on the ansible-patterns readme, updating it to match your server or VM's host and DNS name and installing both the "research.yml" playbook and the "only_sourcenet_dev.yml" playbook.
+
+I might make dockerfile(s) for this eventually, too, but for now, there's ansible.
 
 I've left in a few notes below, regarding different package and installation choices, but the best doc is the ansible repo.
 
