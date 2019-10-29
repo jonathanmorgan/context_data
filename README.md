@@ -23,7 +23,7 @@ I've left in a few notes below, regarding different package and installation cho
 
 ## Basic installation
 
-To start with a fresh install of ubuntu 18.04 server and install `context_data` from scratch, in the [ansible-patterns README](https://github.com/jonathanmorgan/ansible-patterns), follow the [Setup Steps](https://github.com/jonathanmorgan/ansible-patterns/blob/master/README.md#setup) and then the ["research" quick start](https://github.com/jonathanmorgan/ansible-patterns/blob/master/README.md#research-quick-start).  You'll use ansible to install both the "research.yml" playbook and the "only_sourcenet_dev.yml" playbook.  If you want to use a server name other than research, there are instructions for that in the quick start.
+To start with a fresh install of ubuntu 18.04 server and install `context_data` from scratch, in the [ansible-patterns README](https://github.com/jonathanmorgan/ansible-patterns), follow the [Setup Steps](https://github.com/jonathanmorgan/ansible-patterns/blob/master/README.md#setup) and then the ["research" quick start](https://github.com/jonathanmorgan/ansible-patterns/blob/master/README.md#research-quick-start).  You'll use ansible to install both the "research.yml" playbook and the "only_sourcenet_dev.yml" playbook.  If you want to use a server name other than "research" and domain name other than "research.local", there are instructions for that in the quick start.
 
 ## Python packages
 
