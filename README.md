@@ -15,13 +15,15 @@ Below, there used to be detailed instructions for installing all the things to g
 
 These scripts are in my "ansible-patterns" repository: [https://github.com/jonathanmorgan/ansible-patterns](https://github.com/jonathanmorgan/ansible-patterns)
 
-These ansible scripts can also be used to just setup a server with virtualenvwrapper, postgresql, apache, django, jupyterhub, and R, without context.  See the readme for detailed instructions.
-
-To just make an ubuntu 18.04 server with `context_data` installed from scratch, follow the [Setup Steps](https://github.com/jonathanmorgan/ansible-patterns/blob/master/README.md#setup) and then the ["research" quick start](https://github.com/jonathanmorgan/ansible-patterns/blob/master/README.md#research-quick-start) on the ansible-patterns readme, updating it to match your server or VM's host and DNS name and installing both the "research.yml" playbook and the "only_sourcenet_dev.yml" playbook.
+These ansible scripts can also be used to setup a server with virtualenvwrapper, postgresql, apache, django, jupyterhub, and R, and the context django applications and databases.  See the readme for detailed instructions.
 
 I might make dockerfile(s) for this eventually, too, but for now, there's ansible.
 
 I've left in a few notes below, regarding different package and installation choices, but the best doc is the ansible repo.
+
+## Basic installation
+
+To start with a fresh install of ubuntu 18.04 server and install `context_data` from scratch, in the [ansible-patterns README](https://github.com/jonathanmorgan/ansible-patterns), follow the [Setup Steps](https://github.com/jonathanmorgan/ansible-patterns/blob/master/README.md#setup) and then the ["research" quick start](https://github.com/jonathanmorgan/ansible-patterns/blob/master/README.md#research-quick-start).  You'll use ansible to install both the "research.yml" playbook and the "only_sourcenet_dev.yml" playbook.  If you want to use a server name other than research, there are instructions for that in the quick start.
 
 ## Python packages
 
@@ -164,7 +166,7 @@ More information:
 
         http://<your_server>/research/admin/
 
-- and then logging in with the django superuser created by ansible scripts.
+- and then logging in with the django superuser created by ansible scripts (this will be the use in the ansible "`ansible_user`" variable, and the password in the "`ansible_become_password`" variable in your host variables file).
 - to test coding pages, test by going to the URL:
 
         http://<your_server>/research/context_data/index
@@ -172,3 +174,6 @@ More information:
 - log in with your django superuser user.
 - You should see a home page for context_data with a welcome message and a header that lists out the pages in the context_data application.
 
+## Other applications
+
+- You should also see on the root index page the other applications installed (jupyterhub, rstudio, etc.).
