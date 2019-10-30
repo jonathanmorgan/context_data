@@ -2,13 +2,11 @@ beautifulsoup4
 bleach
 django
 django-ajax-selects
-django-basic-config
 django-taggit
 ipykernel
 ipython
 nameparser
 psycopg2
-python-utilities-jsm
 regex
 requests
 six
