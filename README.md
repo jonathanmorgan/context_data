@@ -1,5 +1,7 @@
 # context_data
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3523011.svg)](https://doi.org/10.5281/zenodo.3523011)
+
 <!-- TOC -->
 
 context_data is a django application for capturing and analyzing mentions of data in articles.
