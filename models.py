@@ -23,7 +23,6 @@ from django.db import models
 
 # django encoding imports (for supporting 2 and 3).
 import django.utils.encoding
-from django.utils.encoding import python_2_unicode_compatible
 
 # taggit tagging APIs
 from taggit.managers import TaggableManager
@@ -57,7 +56,6 @@ from context_text.models import AbstractSelectedArticleText
 
 
 # Abstract_Data_Set_Content model
-@python_2_unicode_compatible
 class Abstract_Data_Set_Content( Abstract_Related_JSON_Content ):
 
     #----------------------------------------------------------------------
@@ -127,7 +125,6 @@ class Abstract_Data_Set_Content( Abstract_Related_JSON_Content ):
 
 
 # AbstractDataSetCitation model
-@python_2_unicode_compatible
 class AbstractDataSetCitation( models.Model ):
 
 
@@ -372,7 +369,6 @@ class AbstractDataSetCitation( models.Model ):
 
 
 # AbstractScoredTeamTextData model
-@python_2_unicode_compatible
 class AbstractScoredTeamTextData( AbstractSelectedArticleText ):
 
     #---------------------------------------------------------------------------
@@ -428,7 +424,6 @@ class AbstractScoredTeamTextData( AbstractSelectedArticleText ):
 
 
 # Data Set model
-@python_2_unicode_compatible
 class DataSet( Abstract_Context_With_JSON ):
 
     #----------------------------------------------------------------------
@@ -570,7 +565,6 @@ class DataSet( Abstract_Context_With_JSON ):
 
 
 # DataSetIdentifier model
-@python_2_unicode_compatible
 class DataSetIdentifier( models.Model ):
 
     data_set = models.ForeignKey( 'DataSet', on_delete = models.CASCADE )
@@ -623,7 +617,6 @@ class DataSetIdentifier( models.Model ):
 
 
 # DataSetNotes model
-@python_2_unicode_compatible
 class DataSetNote( Abstract_Data_Set_Content ):
 
     def __str__( self ):
@@ -645,7 +638,6 @@ class DataSetNote( Abstract_Data_Set_Content ):
 
 
 # DataSetCitation model
-@python_2_unicode_compatible
 class DataSetCitation( AbstractDataSetCitation ):
     
     def __init__( self, *args, **kwargs ):
@@ -661,7 +653,6 @@ class DataSetCitation( AbstractDataSetCitation ):
 
 
 # DataSetCitationData model
-@python_2_unicode_compatible
 class DataSetCitationData( models.Model ):
 
     # mention types
@@ -734,7 +725,6 @@ class DataSetCitationData( models.Model ):
 
 
 # AbstractDataMention model
-@python_2_unicode_compatible
 class AbstractDataMention( AbstractScoredTeamTextData ):
 
     # mention types
@@ -840,7 +830,6 @@ class AbstractDataMention( AbstractScoredTeamTextData ):
 
 
 # DataSetMention model
-@python_2_unicode_compatible
 class DataSetMention( AbstractDataMention ):
 
     def __init__( self, *args, **kwargs ):
@@ -856,7 +845,6 @@ class DataSetMention( AbstractDataMention ):
 
 
 # WorkDataSetCitation model
-@python_2_unicode_compatible
 class WorkDataSetCitation( AbstractDataSetCitation ):
     
     #----------------------------------------------------------------------------
@@ -883,7 +871,6 @@ class WorkDataSetCitation( AbstractDataSetCitation ):
 
 
 # WorkDataSetMention model
-@python_2_unicode_compatible
 class WorkDataSetCitationMention( AbstractDataMention ):
 
     #----------------------------------------------------------------------------
@@ -916,7 +903,6 @@ class WorkDataSetCitationMention( AbstractDataMention ):
 
 
 # WorkDataSetMention model
-@python_2_unicode_compatible
 class WorkDataSetMention( AbstractDataMention ):
 
     #----------------------------------------------------------------------------
@@ -947,7 +933,6 @@ class WorkDataSetMention( AbstractDataMention ):
 
 
 # WorkResearchField model
-@python_2_unicode_compatible
 class WorkResearchField( AbstractScoredTeamTextData ):
 
     #----------------------------------------------------------------------
@@ -968,7 +953,6 @@ class WorkResearchField( AbstractScoredTeamTextData ):
 
 
 # WorkResearchMethod model
-@python_2_unicode_compatible
 class WorkResearchMethod( AbstractScoredTeamTextData ):
 
     #----------------------------------------------------------------------
@@ -989,7 +973,6 @@ class WorkResearchMethod( AbstractScoredTeamTextData ):
 
 
 # DataReference model
-@python_2_unicode_compatible
 class DataReference( AbstractDataSetCitation ):
 
     #----------------------------------------------------------------------------
@@ -1096,7 +1079,6 @@ class DataReference( AbstractDataSetCitation ):
 
 
 # DataMention model
-@python_2_unicode_compatible
 class DataReferenceMention( AbstractDataMention ):
 
     #----------------------------------------------------------------------------
@@ -1180,7 +1162,6 @@ class DataReferenceMention( AbstractDataMention ):
 
 
 # DataMention model
-@python_2_unicode_compatible
 class DataReferenceContext( AbstractDataMention ):
 
     #----------------------------------------------------------------------------
