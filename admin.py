@@ -6,10 +6,6 @@ from django.contrib.postgres import fields
 import six
 from six.moves import range
 
-# import code for AJAX select
-from ajax_select import make_ajax_form
-from ajax_select.admin import AjaxSelectAdmin
-
 # django_json_widget imports
 from django_json_widget.widgets import JSONEditorWidget
 
@@ -56,13 +52,8 @@ class DataSetIdentifierInline( admin.TabularInline ):
 
 class DataSetAdmin( admin.ModelAdmin ):
 
-    # set up ajax-selects - for make_ajax_form, 1st argument is the model you
-    #    are looking to make ajax selects form fields for; 2nd argument is a
-    #    dict of pairs of field names in the model in argument 1 (with no quotes
-    #    around them) mapped to lookup channels used to service them (lookup
-    #    channels are defined in settings.py, implenented in a separate module -
-    #    in this case, implemented in context_text.lookups.py
-    form = make_ajax_form( DataSet, dict( parent_data_set = 'datasets' ) )
+    # ajax-based autocomplete
+    autocomplete_fields = [ 'parent_data_set' ]
 
     formfield_overrides = {
         fields.JSONField: {'widget': JSONEditorWidget},
@@ -102,13 +93,8 @@ admin.site.register( DataSet, DataSetAdmin )
 
 class DataSetCitationAdmin( admin.ModelAdmin ):
 
-    # set up ajax-selects - for make_ajax_form, 1st argument is the model you
-    #    are looking to make ajax selects form fields for; 2nd argument is a
-    #    dict of pairs of field names in the model in argument 1 (with no quotes
-    #    around them) mapped to lookup channels used to service them (lookup
-    #    channels are defined in settings.py, implenented in a separate module -
-    #    in this case, implemented in context_text.lookups.py
-    form = make_ajax_form( DataSetCitation, dict( article = 'article', data_set = 'datasets', article_data = 'article_data' ) )
+    # ajax-based autocomplete
+    autocomplete_fields = [ 'article', 'data_set', 'article_data' ]
 
     fieldsets = [
         (
@@ -140,13 +126,8 @@ admin.site.register( DataSetCitation, DataSetCitationAdmin )
 
 class DataReferenceAdmin( admin.ModelAdmin ):
 
-    # set up ajax-selects - for make_ajax_form, 1st argument is the model you
-    #    are looking to make ajax selects form fields for; 2nd argument is a
-    #    dict of pairs of field names in the model in argument 1 (with no quotes
-    #    around them) mapped to lookup channels used to service them (lookup
-    #    channels are defined in settings.py, implenented in a separate module -
-    #    in this case, implemented in context_text.lookups.py
-    form = make_ajax_form( DataReference, dict( article = 'article', related_data_sets = 'datasets', data_set = 'datasets', article_data = 'article_data' ) )
+    # ajax-based autocomplete
+    autocomplete_fields = [ 'article', 'related_data_sets', 'data_set', 'article_data' ]
 
     fieldsets = [
         (

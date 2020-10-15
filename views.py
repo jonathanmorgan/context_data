@@ -427,7 +427,6 @@ def article_code_citations( request_IN ):
             response_dictionary[ 'article_lookup_form' ] = article_lookup_form
             response_dictionary[ 'person_lookup_form' ] = person_lookup_form
             response_dictionary[ 'coding_submit_form' ] = coding_submit_form
-            response_dictionary[ 'base_include_django_ajax_selects' ] = True
             
             # !---- get existing DataSetCitations
             
@@ -1018,7 +1017,6 @@ def dataset_code_mentions( request_IN ):
             response_dictionary[ 'data_set_instance' ] = data_set_instance
             response_dictionary[ 'data_set_citation_lookup_form' ] = data_set_citation_lookup_form
             response_dictionary[ 'coding_submit_form' ] = coding_submit_form
-            response_dictionary[ 'base_include_django_ajax_selects' ] = True
 
         else:
 
