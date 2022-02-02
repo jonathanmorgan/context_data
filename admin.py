@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.contrib.postgres import fields
+#from django.contrib.postgres import fields
 
 # Register your models here.
 
@@ -56,7 +56,7 @@ class DataSetAdmin( admin.ModelAdmin ):
     autocomplete_fields = [ 'parent_data_set' ]
 
     formfield_overrides = {
-        fields.JSONField: {'widget': JSONEditorWidget},
+        models.JSONField: {'widget': JSONEditorWidget},
     }
     
     fieldsets = [
