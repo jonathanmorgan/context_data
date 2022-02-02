@@ -14,8 +14,8 @@ You should have received a copy of the GNU Lesser General Public License along w
 
 # import djanfgo.conf.urls.defaults stuff.
 #from django.conf.urls.defaults import *
-from django.conf.urls import include
-from django.conf.urls import url
+from django.urls import include
+from django.urls import re_path
 
 # and import stuff to use the admin's login page for all authentication.
 from django.contrib.auth import views as auth_views
@@ -40,11 +40,11 @@ v1_api.register( ArticleResource() )
 urlpatterns = [
 
     # index page
-    url( r'^index$', context_data.views.index, name = "context_data-index" ),
+    re_path( r'^index$', context_data.views.index, name = "context_data-index" ),
 
     # data set mention coding pages
-    url( r'^dataset/code_mentions/list/', context_data.views.dataset_mention_coding_list, name = "context_data-dataset_mention_coding_list" ),
-    url( r'^dataset/code_mentions/', context_data.views.dataset_code_mentions, name = "context_data-dataset_code_mentions" ),
-    url( r'^dataset/code_citations/', context_data.views.article_code_citations, name = "context_data-article-code_data_set_mentions" ),
+    re_path( r'^dataset/code_mentions/list/', context_data.views.dataset_mention_coding_list, name = "context_data-dataset_mention_coding_list" ),
+    re_path( r'^dataset/code_mentions/', context_data.views.dataset_code_mentions, name = "context_data-dataset_code_mentions" ),
+    re_path( r'^dataset/code_citations/', context_data.views.article_code_citations, name = "context_data-article-code_data_set_mentions" ),
 
 ]
