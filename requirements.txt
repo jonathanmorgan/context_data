@@ -7,7 +7,6 @@ django-taggit
 ipykernel
 ipython
 nameparser
-psycopg2
 python-utilities-jsm
 regex
 requests
